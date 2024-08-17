@@ -33,11 +33,11 @@ The Student Card App is a mobile application designed to replace physical studen
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/your-username/student-card-app.git
+   git clone https://github.com/NdabezinhleDlamini/DSW_DigitalStudentCard.git
    ```
 2. **Navigate to the Project Directory**:
    ```bash
-   cd student-card-app
+   cd DSW_Project
    ```
 3. **Install Dependencies**:
    ```bash
@@ -87,8 +87,12 @@ This project is licensed under the [MIT License](LICENSE).
 
 For any questions or feedback, please contact:
 
-- **Name**: [Your Name]
-- **Email**: [Your Email]
-- **GitHub**: [Your GitHub Profile URL]
+- **____________Ndabezinhle M Dlamini_____________**
+- **Email**: mqhelend@gmail.com
+- **GitHub**: https://github.com/NdabezinhleDlamini
+
+- **_____________Sekati RM Mashishi______________**
+- **Email**: 
+- **GitHub**: https://github.com/MnikeloMashishi
 
 ---
