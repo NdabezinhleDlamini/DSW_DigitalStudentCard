@@ -10,12 +10,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function Homescreen({navigation}) {
     return (
         <SafeAreaView>
-            <View style={styles.container}>
+            <View>
                 <StatusBar translucent backgroundColor={"rgba(0,0,0,0)"} />
                 <Text>Home</Text>
             </View>
             <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-                <View style={styles.btn}>
+                <View>
                     <Text>Log In</Text>
                 </View>
             </TouchableOpacity>
@@ -23,11 +23,4 @@ export default function Homescreen({navigation}) {
     );
 }
 
-const styles = StyleSheet.create({
-    btn: {
-        backgroundColor: "#4CAF50",
-        margin:50,
-        height:60,
-        width:120,
-    }
-});
+const styles = StyleSheet.create({});

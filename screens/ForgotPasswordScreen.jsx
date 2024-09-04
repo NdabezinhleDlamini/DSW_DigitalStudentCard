@@ -13,19 +13,24 @@ import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
 import { Colors } from "@/constants/Colors";
 
-export default function RegisterScreen({ navigation }) {
+export default function ResetPasswordScreen({ navigation }) {
     const [fontsLoaded] = useFonts({
         ThedusWideLight: require("../assets/fonts/ThedusWideLight-Bold.otf"),
     });
 
-    const [name, setName] = useState("");
     const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
 
     if (!fontsLoaded) {
         return null; // or a loading spinner
     }
 
+    const handlePasswordReset = () => {
+        // Handle password reset logic here
+        console.log("Password reset link sent to:", email);
+        // Redirect or provide feedback to the user after password reset
+        alert("Password reset link sent to your email.");
+        navigation.navigate("Login");
+    };
 
     return (
         <>
@@ -41,16 +46,9 @@ export default function RegisterScreen({ navigation }) {
                 <View>
                     <View>
                         <Text style={styles.title}>Verifid</Text>
-                        <Text style={styles.subtitle}>Create Your Account</Text>
+                        <Text style={styles.subtitle}>Reset Your Password</Text>
                     </View>
                     <View style={styles.form}>
-                        <Text style={styles.label}>Name</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Name"
-                            value={name}
-                            onChangeText={setName}
-                        />
                         <Text style={styles.label}>Email</Text>
                         <TextInput
                             style={styles.input}
@@ -59,25 +57,17 @@ export default function RegisterScreen({ navigation }) {
                             value={email}
                             onChangeText={setEmail}
                         />
-                        <Text style={styles.label}>Password</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Password"
-                            secureTextEntry
-                            value={password}
-                            onChangeText={setPassword}
-                        />
                     </View>
                 </View>
                 <TouchableOpacity
                     style={styles.button}
-                    // onPress={handleRegister}
+                    onPress={handlePasswordReset}
                 >
-                    <Text style={styles.buttonText}>Register</Text>
+                    <Text style={styles.buttonText}>Send Reset Link</Text>
                 </TouchableOpacity>
                 <View style={styles.hasAccount}>
                     <Text style={{ marginRight: 4, color: Colors.dark.text }}>
-                        Already have an account?
+                        Remember your password?
                     </Text>
                     <TouchableOpacity
                         onPress={() => {
