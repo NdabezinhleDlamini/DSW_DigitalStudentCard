@@ -8,7 +8,7 @@ import LoginScreen from "../screens/LoginScreen";
 import Homescreen from "../screens/Homescreen";
 import ResetPasswordScreen from "../screens/ForgotPasswordScreen"
 
-const Stack = createStackNavigator(); // This stays the same
+const Stack = createStackNavigator();
 
 export default function Navigation() {
     return (
