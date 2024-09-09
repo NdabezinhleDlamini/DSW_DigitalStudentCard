@@ -6,9 +6,10 @@ import {
     TouchableOpacity,
     Image,
     TextInput,
+    Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import React from "react";
+import React, { useState } from "react";
 
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
@@ -22,6 +23,41 @@ export default function OnBoardingScreen({ navigation }) {
     if (!fontsLoaded) {
         return null; // or a loading spinner
     }
+
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+
+    // hanle login
+    const handleLogin = () => {
+        const trimmedEmail = email.trim();
+        const trimmedPassword = password.trim();
+
+        //validate user input
+        if (trimmedEmail === "") {
+            Alert.alert("Error", "Email field cannot be empty");
+            return;
+        }
+        if (!validateEmail(trimmedEmail)) {
+            Alert.alert("Error", "Please enter a valid email address");
+            return;
+        }
+        if (trimmedPassword === "") {
+            Alert.alert("Error", "Password field cannot be empty");
+            return;
+        }
+        if (trimmedPassword.length < 6) {
+            Alert.alert("Error", "Password must be at least 6 characters long");
+            return;
+        }
+
+        // proceed to home page
+        navigation.navigate("Homescreen");
+    };
+
+    const validateEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
 
     return (
         <>
@@ -45,14 +81,22 @@ export default function OnBoardingScreen({ navigation }) {
                             style={styles.input}
                             placeholder="Email"
                             keyboardType="email-address"
+                            value={email}
+                            onChangeText={setEmail}
                         />
                         <Text style={styles.label}>Password</Text>
                         <TextInput
                             style={styles.input}
                             placeholder="Password"
                             secureTextEntry
+                            value={password}
+                            onChangeText={setPassword}
                         />
-                        <TouchableOpacity onPress={() => {navigation.navigate("ForgotPassword")}}>
+                        <TouchableOpacity
+                            onPress={() => {
+                                navigation.navigate("ForgotPassword");
+                            }}
+                        >
                             <Text style={styles.forgotPassword}>
                                 Forgot Password?
                             </Text>
@@ -62,7 +106,8 @@ export default function OnBoardingScreen({ navigation }) {
                 <TouchableOpacity
                     style={styles.button}
                     onPress={() => {
-                        navigation.navigate("Homescreen");
+                        // navigation.navigate("Homescreen");
+                        handleLogin();
                     }}
                 >
                     <Text style={styles.buttonText}>Log In</Text>
@@ -97,8 +142,7 @@ const styles = StyleSheet.create({
     },
     backgroundImage: {
         flex: 1,
-        // resizeMode: "cover",
-        resizeMode: "contain",
+        resizeMode: "cover",
         justifyContent: "center",
     },
     title: {

@@ -5,6 +5,7 @@ import {
     ImageBackground,
     TouchableOpacity,
     TextInput,
+    Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useState } from "react";
@@ -22,10 +23,53 @@ export default function RegisterScreen({ navigation }) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
+    const handleSignIn = () => {
+        if (name === "" || email === "" || password === "") {
+            Alert.alert("Error", "Please fill in all fields");
+            return;
+        }
+    };
+
     if (!fontsLoaded) {
         return null; // or a loading spinner
     }
 
+    // handle registration
+    const handleRegister = () => {
+        const trimmedName = name.trim();
+        const trimmedEmail = email.trim();
+        const trimmedPassword = password.trim();
+
+        //validate user input
+        if (trimmedName === "") {
+            Alert.alert("Error", "Name field cannot be empty");
+            return;
+        }
+        if (trimmedEmail === "") {
+            Alert.alert("Error", "Email field cannot be empty");
+            return;
+        }
+        if (!validateEmail(trimmedEmail)) {
+            Alert.alert("Error", "Please enter a valid email address");
+            return;
+        }
+        if (trimmedPassword === "") {
+            Alert.alert("Error", "Password field cannot be empty");
+            return;
+        }
+        if (trimmedPassword.length < 6) {
+            Alert.alert("Error", "Password must be at least 6 characters long");
+            return;
+        }
+
+        //proceed to login
+        navigation.navigate("Login");
+    };
+
+    const validateEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
 
     return (
         <>
@@ -71,7 +115,7 @@ export default function RegisterScreen({ navigation }) {
                 </View>
                 <TouchableOpacity
                     style={styles.button}
-                    // onPress={handleRegister}
+                    onPress={handleRegister}
                 >
                     <Text style={styles.buttonText}>Register</Text>
                 </TouchableOpacity>

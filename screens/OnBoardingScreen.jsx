@@ -24,11 +24,11 @@ export default function OnBoardingScreen({ navigation }) {
 
     return (
         <>
-                <StatusBar
-                    style="dark"
-                    translucent={true}
-                    backgroundColor="rgba(0,0,0,0)"
-                />
+            <StatusBar
+                style="dark"
+                translucent={true}
+                backgroundColor="rgba(0,0,0,0)"
+            />
             <ImageBackground
                 style={styles.backgroundImage}
                 source={require("../assets/images/Onboarding_Dark.png")}
