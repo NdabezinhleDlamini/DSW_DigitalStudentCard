@@ -9,135 +9,160 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { Colors } from "@/constants/Colors"; // Now importing Layout and Fonts
-import { Layout } from "@/constants/Layout"; // Now importing Layout and Fonts
-import { Fonts } from "@/constants/Fonts"; // Now importing Layout and Fonts
+import { Colors } from "@/constants/Colors";
+import { Layout } from "@/constants/Layout";
+import { Fonts } from "@/constants/Fonts";
 
 export default function Homescreen() {
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <View style={styles.iconsContainer}>
-                    <TouchableOpacity>
-                        <Ionicons
-                            name="person-circle-outline"
-                            size={24}
-                            color={Colors.light.tint} // Using the tint color
-                        />
-                    </TouchableOpacity>
-                    <View style={styles.notificationContainer}>
-                        <TouchableOpacity style={{ paddingHorizontal: 15 }}>
+            <SafeAreaView style={styles.container}>
+                <View style={styles.header}>
+                    <View style={styles.iconsContainer}>
+                        <TouchableOpacity>
                             <Ionicons
-                                name="notifications-outline"
+                                name="person-circle-outline"
                                 size={24}
                                 color={Colors.light.tint} // Using the tint color
                             />
                         </TouchableOpacity>
-                        <TouchableOpacity style={{ paddingHorizontal: 5 }}>
-                            <Ionicons
-                                name="settings-outline"
-                                size={24}
-                                color={Colors.light.tint} // Using the tint color
-                            />
+                        <View style={styles.notificationContainer}>
+                            <TouchableOpacity style={{ paddingHorizontal: 15 }}>
+                                <Ionicons
+                                    name="notifications-outline"
+                                    size={24}
+                                    color={Colors.light.tint} // Using the tint color
+                                />
+                            </TouchableOpacity>
+                            <TouchableOpacity style={{ paddingHorizontal: 5 }}>
+                                <Ionicons
+                                    name="settings-outline"
+                                    size={24}
+                                    color={Colors.light.tint} // Using the tint color
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                    {/* Current Campus */}
+                    <Text style={styles.headerText}>Current Campus</Text>
+                </View>
+                <View style={styles.card}>
+                    <Text style={styles.sectionTitle}>My ID</Text>
+                    <TouchableOpacity>
+                        <Image
+                            source={{ uri: "https://placehold.co/600x400/png" }}
+                            style={styles.studentCard}
+                        />
+                    </TouchableOpacity>
+                    <Text style={styles.idText}>219110401</Text>
+                </View>
+                {/* Campus Services Quick Link icons */}
+                <View>
+                    <Text style={styles.sectionTitle}>Campus Services</Text>
+                    <View style={styles.iconRow}>
+                        <TouchableOpacity style={styles.campusServiceItem}>
+                            <Text>Access Control</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.campusServiceItem}>
+                            <Text>Access Control</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.campusServiceItem}>
+                            <Text>Access Control</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.campusServiceItem}>
+                            <Text>Access Control</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
-
-                {/* Current Campus */}
-                <Text style={styles.headerText}>Current Campus</Text>
-            </View>
-            <View style={styles.card}>
-                <Text style={styles.sectionTitle}>My ID</Text>
-                <TouchableOpacity>
-                    <Image
-                        source={{ uri: "https://placehold.co/600x400/png" }}
-                        style={styles.studentCard}
-                    />
-                </TouchableOpacity>
-                <Text style={styles.idText}>219110401</Text>
-            </View>
-            {/* Campus Services Quick Link icons */}
-            <View>
-                <Text style={styles.sectionTitle}>Campus Services</Text>
-                <View style={styles.iconRow}>
-                    <TouchableOpacity style={styles.campusServiceItem}>
-                        <Text>Access Control</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.campusServiceItem}>
-                        <Text>Access Control</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.campusServiceItem}>
-                        <Text>Access Control</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.campusServiceItem}>
-                        <Text>Access Control</Text>
-                    </TouchableOpacity>
+                {/* Access History Quick Link icons */}
+                <View>
+                    <Text style={styles.sectionTitle}>Access History</Text>
+                    {/* Access istory Items */}
+                    <ScrollView horizontal={true}>
+                        <TouchableOpacity style={styles.accessHistoryCard}>
+                            <Image
+                                source={require("../../assets/icons/history.png")}
+                                style={styles.accessHistoryCardIcon}
+                            />
+                            <View style={styles.accessHistoryCardDetails}>
+                                <Text
+                                    style={styles.accessHistoryCardDetailsTitle}
+                                >
+                                    Bunting
+                                </Text>
+                                <Text
+                                    style={
+                                        styles.accessHistoryCardDetailsSubTitle
+                                    }
+                                >
+                                    APB
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.accessHistoryCard}>
+                            <Image
+                                source={require("../../assets/icons/history.png")}
+                                style={styles.accessHistoryCardIcon}
+                            />
+                            <View style={styles.accessHistoryCardDetails}>
+                                <Text
+                                    style={styles.accessHistoryCardDetailsTitle}
+                                >
+                                    Kingsway
+                                </Text>
+                                <Text
+                                    style={
+                                        styles.accessHistoryCardDetailsSubTitle
+                                    }
+                                >
+                                    APK
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.accessHistoryCard}>
+                            <Image
+                                source={require("../../assets/icons/history.png")}
+                                style={styles.accessHistoryCardIcon}
+                            />
+                            <View style={styles.accessHistoryCardDetails}>
+                                <Text
+                                    style={styles.accessHistoryCardDetailsTitle}
+                                >
+                                    Doornfontein
+                                </Text>
+                                <Text
+                                    style={
+                                        styles.accessHistoryCardDetailsSubTitle
+                                    }
+                                >
+                                    DFC
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.accessHistoryCard}>
+                            <Image
+                                source={require("../../assets/icons/history.png")}
+                                style={styles.accessHistoryCardIcon}
+                            />
+                            <View style={styles.accessHistoryCardDetails}>
+                                <Text
+                                    style={styles.accessHistoryCardDetailsTitle}
+                                >
+                                    Soweto
+                                </Text>
+                                <Text
+                                    style={
+                                        styles.accessHistoryCardDetailsSubTitle
+                                    }
+                                >
+                                    SWC
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
+                    </ScrollView>
                 </View>
-            </View>
-            {/* Access History Quick Link icons */}
-            <View>
-                <Text style={styles.sectionTitle}>Access History</Text>
-                {/* Access istory Items */}
-                <ScrollView horizontal={true}>
-                    <TouchableOpacity style={styles.accessHistoryCard}>
-                        <Image
-                            source={require("../../assets/icons/history.png")}
-                            style={styles.accessHistoryCardIcon}
-                        />
-                        <View style={styles.accessHistoryCardDetails}>
-                            <Text style={styles.accessHistoryCardDetailsTitle}>
-                                Bunting
-                            </Text>
-                            <Text style={styles.accessHistoryCardDetailsSubTitle}>
-                                APB
-                            </Text>
-                        </View>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.accessHistoryCard}>
-                        <Image
-                            source={require("../../assets/icons/history.png")}
-                            style={styles.accessHistoryCardIcon}
-                        />
-                        <View style={styles.accessHistoryCardDetails}>
-                            <Text style={styles.accessHistoryCardDetailsTitle}>
-                                Kingsway
-                            </Text>
-                            <Text style={styles.accessHistoryCardDetailsSubTitle}>
-                                APK
-                            </Text>
-                        </View>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.accessHistoryCard}>
-                        <Image
-                            source={require("../../assets/icons/history.png")}
-                            style={styles.accessHistoryCardIcon}
-                        />
-                        <View style={styles.accessHistoryCardDetails}>
-                            <Text style={styles.accessHistoryCardDetailsTitle}>
-                                Doornfontein
-                            </Text>
-                            <Text style={styles.accessHistoryCardDetailsSubTitle}>
-                                DFC
-                            </Text>
-                        </View>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.accessHistoryCard}>
-                        <Image
-                            source={require("../../assets/icons/history.png")}
-                            style={styles.accessHistoryCardIcon}
-                        />
-                        <View style={styles.accessHistoryCardDetails}>
-                            <Text style={styles.accessHistoryCardDetailsTitle}>
-                                Soweto
-                            </Text>
-                            <Text style={styles.accessHistoryCardDetailsSubTitle}>
-                                SWC
-                            </Text>
-                        </View>
-                    </TouchableOpacity>
-                </ScrollView>
-            </View>
-        </SafeAreaView>
+            </SafeAreaView>
+
     );
 }
 
@@ -149,7 +174,7 @@ const styles = StyleSheet.create({
     },
     header: {
         flexDirection: "column",
-        alignItems: "flex-start", // Changed to flex-start
+        alignItems: "flex-start",
     },
     iconsContainer: {
         flexDirection: "row",
