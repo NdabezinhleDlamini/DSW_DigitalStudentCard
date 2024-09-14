@@ -8,6 +8,8 @@ import LoginScreen from "../screens/LoginScreen";
 import Homescreen from "../screens/Homescreen";
 import ResetPasswordScreen from "../screens/ForgotPasswordScreen"
 
+import TabNavigator from '../components/TabNavigator'
+
 const Stack = createStackNavigator();
 
 export default function Navigation() {
@@ -21,6 +23,7 @@ export default function Navigation() {
             <Stack.Screen name="Homescreen" component={Homescreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />
             <Stack.Screen name="ForgotPassword" component={ResetPasswordScreen} />
+            <Stack.Screen name="main" component={TabNavigator} />
         </Stack.Navigator>
     );
 }
