@@ -1,8 +1,17 @@
 import React from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from "react-native";
+import {
+    View,
+    Text,
+    StyleSheet,
+    Image,
+    TouchableOpacity,
+    ScrollView,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { Colors, Layout, Fonts } from "@/constants/Colors";  // Now importing Layout and Fonts
+import { Colors } from "@/constants/Colors"; // Now importing Layout and Fonts
+import { Layout } from "@/constants/Layout"; // Now importing Layout and Fonts
+import { Fonts } from "@/constants/Fonts"; // Now importing Layout and Fonts
 
 export default function Homescreen() {
     return (
@@ -13,7 +22,7 @@ export default function Homescreen() {
                         <Ionicons
                             name="person-circle-outline"
                             size={24}
-                            color={Colors.light.tint}  // Using the tint color
+                            color={Colors.light.tint} // Using the tint color
                         />
                     </TouchableOpacity>
                     <View style={styles.notificationContainer}>
@@ -21,14 +30,14 @@ export default function Homescreen() {
                             <Ionicons
                                 name="notifications-outline"
                                 size={24}
-                                color={Colors.light.tint}  // Using the tint color
+                                color={Colors.light.tint} // Using the tint color
                             />
                         </TouchableOpacity>
                         <TouchableOpacity style={{ paddingHorizontal: 5 }}>
                             <Ionicons
                                 name="settings-outline"
                                 size={24}
-                                color={Colors.light.tint}  // Using the tint color
+                                color={Colors.light.tint} // Using the tint color
                             />
                         </TouchableOpacity>
                     </View>
@@ -52,16 +61,16 @@ export default function Homescreen() {
                 <Text style={styles.sectionTitle}>Campus Services</Text>
                 <View style={styles.iconRow}>
                     <TouchableOpacity style={styles.campusServiceItem}>
-                        <Text style={styles.sectionTitle}>Access Control</Text>
+                        <Text>Access Control</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.campusServiceItem}>
-                        <Image source={require("../../assets/icons/history.png")} style={styles.campusServiceItemIcon}/>
+                        <Text>Access Control</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.campusServiceItem}>
-                        <Text style={styles.sectionTitle}>Access Control</Text>
+                        <Text>Access Control</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.campusServiceItem}>
-                        <Text style={styles.sectionTitle}>Access Control</Text>
+                        <Text>Access Control</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -69,11 +78,62 @@ export default function Homescreen() {
             <View>
                 <Text style={styles.sectionTitle}>Access History</Text>
                 {/* Access istory Items */}
-                <ScrollView>
+                <ScrollView horizontal={true}>
                     <TouchableOpacity style={styles.accessHistoryCard}>
-                        <Image source={require("../../assets/icons/history.png")} style={styles.campusServiceItemIcon}/>
-                        <Text style={styles.accessHistoryCardTitle}>Bunting</Text>
-                        <Text style={styles.accessHistoryCardSubTitle}>APB</Text>
+                        <Image
+                            source={require("../../assets/icons/history.png")}
+                            style={styles.accessHistoryCardIcon}
+                        />
+                        <View style={styles.accessHistoryCardDetails}>
+                            <Text style={styles.accessHistoryCardDetailsTitle}>
+                                Bunting
+                            </Text>
+                            <Text style={styles.accessHistoryCardDetailsSubTitle}>
+                                APB
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.accessHistoryCard}>
+                        <Image
+                            source={require("../../assets/icons/history.png")}
+                            style={styles.accessHistoryCardIcon}
+                        />
+                        <View style={styles.accessHistoryCardDetails}>
+                            <Text style={styles.accessHistoryCardDetailsTitle}>
+                                Kingsway
+                            </Text>
+                            <Text style={styles.accessHistoryCardDetailsSubTitle}>
+                                APK
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.accessHistoryCard}>
+                        <Image
+                            source={require("../../assets/icons/history.png")}
+                            style={styles.accessHistoryCardIcon}
+                        />
+                        <View style={styles.accessHistoryCardDetails}>
+                            <Text style={styles.accessHistoryCardDetailsTitle}>
+                                Doornfontein
+                            </Text>
+                            <Text style={styles.accessHistoryCardDetailsSubTitle}>
+                                DFC
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.accessHistoryCard}>
+                        <Image
+                            source={require("../../assets/icons/history.png")}
+                            style={styles.accessHistoryCardIcon}
+                        />
+                        <View style={styles.accessHistoryCardDetails}>
+                            <Text style={styles.accessHistoryCardDetailsTitle}>
+                                Soweto
+                            </Text>
+                            <Text style={styles.accessHistoryCardDetailsSubTitle}>
+                                SWC
+                            </Text>
+                        </View>
                     </TouchableOpacity>
                 </ScrollView>
             </View>
@@ -85,11 +145,11 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: Layout.padding,
-        backgroundColor: Colors.light.background,  // Using the background color from Colors
+        backgroundColor: Colors.light.background, // Using the background color from Colors
     },
     header: {
         flexDirection: "column",
-        alignItems: "flex-start",  // Changed to flex-start
+        alignItems: "flex-start", // Changed to flex-start
     },
     iconsContainer: {
         flexDirection: "row",
@@ -103,27 +163,27 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     headerText: {
-        ...Fonts.subtitle,  // Using the subtitle font size and weight
-        color: Colors.light.text,  // Using the text color
+        ...Fonts.subtitle, // Using the subtitle font size and weight
+        color: Colors.light.text, // Using the text color
     },
     card: {
         marginVertical: Layout.margin,
     },
     sectionTitle: {
-        ...Fonts.body,  // Using the body font size and weight
-        color: Colors.light.text,  // Using the text color
+        ...Fonts.title, // Using the body font size and weight
+        color: Colors.light.text, // Using the text color
         marginBottom: Layout.margin / 2,
     },
     studentCard: {
-        borderWidth: Layout.borderWidth,  // Using the border width
-        borderColor: Colors.light.border,  // Using the border color from Colors
-        borderRadius: Layout.borderRadius,  // Using the border radius constant
+        borderWidth: Layout.borderWidth, // Using the border width
+        borderColor: Colors.light.border, // Using the border color from Colors
+        borderRadius: Layout.borderRadius, // Using the border radius constant
         width: "100%",
         height: 200,
         resizeMode: "cover",
     },
     idText: {
-        ...Fonts.body,  // Using the body font size and weight
+        ...Fonts.body, // Using the body font size and weight
         fontWeight: "bold",
         color: Colors.light.text,
         textAlign: "center",
@@ -132,15 +192,18 @@ const styles = StyleSheet.create({
     iconRow: {
         flexDirection: "row",
         justifyContent: "space-between",
-        margin: Layout.margin / 2,
+        marginVertical: Layout.margin / 2,
+        padding: Layout.padding / 2,
     },
     campusServiceItem: {
-        width: 50,
-        height: 50,
+        width: 75,
+        height: 75,
         resizeMode: "contain",
-        marginBottom: Layout.margin / 2,
+        marginVertical: Layout.margin,
         backgroundColor: Colors.light.border,
         borderRadius: Layout.borderRadius,
+        alignItems: "center",
+        justifyContent: "center",
     },
     campusServiceItemIcon: {
         width: 50,
@@ -148,16 +211,43 @@ const styles = StyleSheet.create({
         resizeMode: "contain",
     },
     accessHistory: {
-        flexDirection: "row",
-        justifyContent: "space-between",
         margin: Layout.margin / 2,
     },
     accessHistoryCard: {
-        flexDirection: "col",
+        flexDirection: "column",
         width: 132,
         height: 179,
-        alignItems: "center",
-        backgroundColor: "gray",
+        backgroundColor: Colors.light.border, // Changed to use the border color from Colors
         borderRadius: Layout.borderRadius,
+        padding: Layout.padding / 2,
+        marginRight: Layout.margin, // Space between cards in horizontal scroll
+        elevation: 3, // Optional shadow for Android
+        shadowColor: Colors.light.shadow, // Shadow color for iOS
+        shadowOffset: { width: 0, height: 2 }, // Shadow offset for iOS
+        shadowOpacity: 0.2, // Shadow opacity for iOS
+        shadowRadius: 4, // Shadow radius for iOS
+    },
+    accessHistoryCardIcon: {
+        width: "80%",
+        height: "50%",
+        marginBottom: Layout.margin / 2,
+        resizeMode: "contain",
+    },
+    accessHistoryCardDetails: {
+        alignItems: "flex-start", // Align text to the left
+        width: "100%",
+        paddingHorizontal: Layout.padding / 2, // Added padding for better spacing
+    },
+    accessHistoryCardDetailsTitle: {
+        ...Fonts.body, // Using the body font size and weight
+        color: Colors.light.text,
+        textAlign: "left",
+        marginVertical: 4,
+        fontWeight: "bold", // Optional for emphasis
+    },
+    accessHistoryCardDetailsSubTitle: {
+        ...Fonts.subtitle, // Using the body font size and weight
+        color: Colors.light.text,
+        textAlign: "left",
     },
 });

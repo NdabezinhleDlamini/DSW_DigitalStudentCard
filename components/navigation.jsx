@@ -18,11 +18,11 @@ export default function Navigation() {
             initialRouteName="Onboarding"
             screenOptions={{ headerShown: false }}
         >
-            <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+            {/* <Stack.Screen name="Onboarding" component={OnboardingScreen} />
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Homescreen" component={Homescreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />
-            <Stack.Screen name="ForgotPassword" component={ResetPasswordScreen} />
+            <Stack.Screen name="ForgotPassword" component={ResetPasswordScreen} /> */}
             <Stack.Screen name="main" component={TabNavigator} />
         </Stack.Navigator>
     );
