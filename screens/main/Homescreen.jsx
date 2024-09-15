@@ -13,12 +13,12 @@ import { Colors } from "@/constants/Colors";
 import { Layout } from "@/constants/Layout";
 import { Fonts } from "@/constants/Fonts";
 
-export default function Homescreen() {
+export default function Homescreen({navigation}) {
     return (
             <SafeAreaView style={styles.container}>
                 <View style={styles.header}>
                     <View style={styles.iconsContainer}>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
                             <Ionicons
                                 name="person-circle-outline"
                                 size={24}

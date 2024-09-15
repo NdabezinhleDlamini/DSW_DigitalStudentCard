@@ -1,121 +1,262 @@
 import React from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import {
+    StyleSheet,
+    Text,
+    View,
+    Image,
+    TouchableOpacity,
+    ScrollView,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Colors } from "@/constants/Colors";
+import { Layout } from "@/constants/Layout";
+import { Fonts } from "@/constants/Fonts";
+import { Ionicons } from "@expo/vector-icons";
 
-export default function ProfileScreen(){
+import { useFonts } from "expo-font";
+
+export default function UserProfileScreen({ navigation }) {
+    const [fontsLoaded] = useFonts({
+        ThedusWideLight: require("../../assets/fonts/ThedusWideLight-Bold.otf"),
+    });
+
     return (
-        <View style={styles.container}>
-            <View style={styles.statusBar}>
-                <Text style={styles.time}>9:30</Text>
-                {/* Add status icons here */}
-            </View>
-            <Text style={styles.header}>Student Home</Text>
-            <View style={styles.profileContainer}>
-                <Image
-                    source={{ uri: "path_to_house_icon" }}
-                    style={styles.profileIcon}
-                />
-                <Text style={styles.idNumber}>****4401</Text>
-                <View style={styles.buttonRow}>
-                    <TouchableOpacity style={styles.button}>
-                        <Text>Call</Text>
+        <SafeAreaView style={styles.container}>
+            <View style={styles.header}>
+                <View style={styles.iconsContainer}>
+                    <TouchableOpacity onPress={() => navigation.navigate("Home")}>
+                        <Text style={{ fontSize: 24, fontFamily: "ThedusWideLight", color: Colors.light.tint }}>VerifID</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.button}>
-                        <Text>More</Text>
+                    <View style={styles.notificationContainer}>
+                        <TouchableOpacity style={{ paddingHorizontal: 15 }}>
+                            <Ionicons
+                                name="notifications-outline"
+                                size={24}
+                                color={Colors.light.tint} // Using the tint color
+                            />
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{ paddingHorizontal: 5 }}>
+                            <Ionicons
+                                name="settings-outline"
+                                size={24}
+                                color={Colors.light.tint} // Using the tint color
+                            />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </View>
+            <ScrollView contentContainerStyle={styles.scrollContainer}>
+                {/* Profile Header Section */}
+                <View style={styles.headerSection}>
+                    <Image
+                        style={styles.headerImage}
+                        source={{ uri: "https://via.placeholder.com/500x150" }} // Placeholder for header background
+                    />
+                    <View style={styles.profileImageWrapper}>
+                        <Image
+                            style={styles.profileImage}
+                            source={{ uri: "https://via.placeholder.com/100" }} // Placeholder for Profile Picture
+                        />
+                    </View>
+                </View>
+
+                {/* User Info Section */}
+                <View style={styles.infoSection}>
+                    <Text style={styles.nameText}>John Doe</Text>
+                    <Text style={styles.idText}>@johndoe</Text>
+                </View>
+
+                {/* Stats Section */}
+                <View style={styles.statsSection}>
+                    <View style={styles.statBox}>
+                        <Text style={styles.statNumber}>5</Text>
+                        <Text style={styles.statLabel}>Permissions</Text>
+                    </View>
+                    <View style={styles.statBox}>
+                        <Text style={styles.statNumber}>3</Text>
+                        <Text style={styles.statLabel}>Services Used</Text>
+                    </View>
+                    <View style={styles.statBox}>
+                        <Text style={styles.statNumber}>1</Text>
+                        <Text style={styles.statLabel}>Digital Card</Text>
+                    </View>
+                </View>
+
+                {/* Personal Info Section */}
+                {/* <View style={styles.bioSection}>
+                    <Text style={styles.bioText}>
+                        “Digital ID cardholder. Accessing campus services with ease.”
+                    </Text>
+                </View> */}
+
+                {/* Report Lost Card Button */}
+                <View style={styles.buttonContainer}>
+                    <TouchableOpacity
+                        style={styles.reportButton}
+                        onPress={() => navigation.navigate("ReportLostCard")}
+                    >
+                        <Text style={styles.buttonText}>Report Lost Card</Text>
                     </TouchableOpacity>
                 </View>
-                <Text style={styles.viewMore}>View More</Text>
-            </View>
-            <View style={styles.detailsContainer}>
-                <Text style={styles.name}>John M Doe</Text>
-                <Text style={styles.address}>Gloria Stakem's Entrance</Text>
-            </View>
-            <View style={styles.accessHistory}>
-                <Text style={styles.historyHeader}>Access History</Text>
-                {/* Map access history items here */}
-                <View style={styles.historyItem}>
-                    <Text>APR</Text>
-                    <Text>10:17</Text>
-                    <Text>In</Text>
+
+                {/* Activity Timeline (Like Twitter's feed) */}
+                <View style={styles.activitySection}>
+                    <Text style={styles.sectionTitle}>Recent Activities</Text>
+                    <View style={styles.activityItem}>
+                        <Text style={styles.activityText}>
+                            Accessed the Library
+                        </Text>
+                        <Text style={styles.timestamp}>2 hours ago</Text>
+                    </View>
+                    <View style={styles.activityItem}>
+                        <Text style={styles.activityText}>
+                            Lost card reported
+                        </Text>
+                        <Text style={styles.timestamp}>1 day ago</Text>
+                    </View>
+                    <View style={styles.activityItem}>
+                        <Text style={styles.activityText}>
+                            Gym Access Granted
+                        </Text>
+                        <Text style={styles.timestamp}>3 days ago</Text>
+                    </View>
                 </View>
-                <View style={styles.historyItem}>
-                    <Text>Gloria Sekwena Entrance</Text>
-                    <Text>16:57</Text>
-                    <Text>Out</Text>
-                </View>
-            </View>
-        </View>
+            </ScrollView>
+        </SafeAreaView>
     );
-};
+}
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#fff",
-        padding: 20,
+        backgroundColor: Colors.light.background, // Using the background color from Colors
     },
-    statusBar: {
+    header: {
+        flexDirection: "column",
+        alignItems: "flex-start",
+        paddingHorizontal: Layout.padding,
+    },
+    iconsContainer: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
+        width: "100%",
+        marginBottom: Layout.margin,
     },
-    time: {
-        fontSize: 18,
-    },
-    header: {
-        fontSize: 24,
-        fontWeight: "bold",
-        marginVertical: 20,
-    },
-    profileContainer: {
+    notificationContainer: {
+        flexDirection: "row",
         alignItems: "center",
-        marginVertical: 20,
     },
-    profileIcon: {
+    headerText: {
+        ...Fonts.subtitle, // Using the subtitle font size and weight
+        color: Colors.light.text, // Using the text color
+    },
+    scrollContainer: {
+        paddingBottom: 20,
+    },
+    headerSection: {
+        width: "100%",
+        position: "relative",
+    },
+    headerImage: {
+        width: "100%",
+        height: 150,
+    },
+    profileImageWrapper: {
+        position: "absolute",
+        bottom: -50,
+        left: 20,
+        borderWidth: 3,
+        borderColor: "#f1faee",
+        borderRadius: 50,
+    },
+    profileImage: {
         width: 100,
         height: 100,
         borderRadius: 50,
     },
-    idNumber: {
-        fontSize: 18,
-        marginVertical: 10,
+    infoSection: {
+        marginTop: 60,
+        paddingHorizontal: 20,
     },
-    buttonRow: {
+    nameText: {
+        fontSize: 22,
+        fontWeight: "bold",
+        color: "#0b132b",
+    },
+    idText: {
+        fontSize: 16,
+        color: "#777",
+    },
+    statsSection: {
         flexDirection: "row",
         justifyContent: "space-around",
-        width: "100%",
-        marginVertical: 10,
-    },
-    button: {
-        padding: 10,
-        backgroundColor: "#ddd",
-        borderRadius: 5,
-    },
-    viewMore: {
-        color: "blue",
-        marginTop: 10,
-    },
-    detailsContainer: {
         marginVertical: 20,
     },
-    name: {
-        fontSize: 20,
-        fontWeight: "bold",
+    statBox: {
+        alignItems: "center",
     },
-    address: {
-        fontSize: 16,
-        color: "#555",
-    },
-    accessHistory: {
-        marginVertical: 20,
-    },
-    historyHeader: {
+    statNumber: {
         fontSize: 18,
         fontWeight: "bold",
+        color: "#0b132b",
+    },
+    statLabel: {
+        fontSize: 14,
+        color: "#777",
+    },
+    bioSection: {
+        paddingHorizontal: 20,
+        marginBottom: 20,
+    },
+    bioText: {
+        fontSize: 16,
+        color: "#0b132b",
+        fontStyle: "italic",
+    },
+    buttonContainer: {
+        paddingHorizontal: 20,
+        marginVertical: 20,
+    },
+    reportButton: {
+        backgroundColor: Colors.light.background, // Amber color from your theme
+        paddingVertical: 15,
+        paddingHorizontal: 25,
+        borderRadius: 8,
+        alignItems: "center",
+        justifyContent: "center",
+        borderWidth: 1,
+        borderColor: "red",
+        width: "100%",
+    },
+    buttonText: {
+        color: "red",
+        fontSize: 18,
+        fontWeight: "600",
+    },
+    activitySection: {
+        paddingHorizontal: 20,
+        marginTop: 10,
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "#0b132b",
         marginBottom: 10,
     },
-    historyItem: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        marginVertical: 5,
+    activityItem: {
+        backgroundColor: "#edf6f9",
+        padding: 15,
+        borderRadius: 8,
+        marginBottom: 10,
+    },
+    activityText: {
+        fontSize: 16,
+        color: "#0b132b",
+    },
+    timestamp: {
+        fontSize: 12,
+        color: "#777",
+        marginTop: 4,
     },
 });
