@@ -66,29 +66,6 @@ export default function UserProfileScreen({ navigation }) {
                     <Text style={styles.idText}>@johndoe</Text>
                 </View>
 
-                {/* Stats Section */}
-                <View style={styles.statsSection}>
-                    <View style={styles.statBox}>
-                        <Text style={styles.statNumber}>5</Text>
-                        <Text style={styles.statLabel}>Permissions</Text>
-                    </View>
-                    <View style={styles.statBox}>
-                        <Text style={styles.statNumber}>3</Text>
-                        <Text style={styles.statLabel}>Services Used</Text>
-                    </View>
-                    <View style={styles.statBox}>
-                        <Text style={styles.statNumber}>1</Text>
-                        <Text style={styles.statLabel}>Digital Card</Text>
-                    </View>
-                </View>
-
-                {/* Personal Info Section */}
-                {/* <View style={styles.bioSection}>
-                    <Text style={styles.bioText}>
-                        “Digital ID cardholder. Accessing campus services with ease.”
-                    </Text>
-                </View> */}
-
                 {/* Report Lost Card Button */}
                 <View style={styles.buttonContainer}>
                     <TouchableOpacity
