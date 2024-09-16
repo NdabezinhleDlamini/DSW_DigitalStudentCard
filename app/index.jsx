@@ -1,20 +1,24 @@
+import React, { useState, useEffect } from 'react';
+import { ThemeProvider } from '../contexts/ThemeContext'; // Update the path based on where you placed your context
+
 import Navigation from '../components/navigation';
 import SplashScreen from '../screens/SplashScreen';
-import { useState, useEffect } from 'react';
 
 export default function App() {
-    const [isShowSplash, setIsShowSplash] = useState(true);
+  const [isShowSplash, setIsShowSplash] = useState(true);
 
-    // show splahs screen for a short period
-    useEffect(() => {
-        setTimeout(() => {
-            setIsShowSplash(false);
-        }, 3000);
-    },);
+  // Show splash screen for a short period
+  useEffect(() => {
+    const splashTimeout = setTimeout(() => {
+      setIsShowSplash(false);
+    }, 3000);
 
-    return (
-        <> 
-            {isShowSplash ? <SplashScreen /> : <Navigation />}
-        </>
-    );
+    return () => clearTimeout(splashTimeout); // Cleanup timeout on unmount
+  }, []);
+
+  return (
+    <ThemeProvider>
+      {isShowSplash ? <SplashScreen /> : <Navigation />}
+    </ThemeProvider>
+  );
 }

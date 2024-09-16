@@ -1,28 +1,29 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
     View,
     Text,
     StyleSheet,
-    Image,
     TouchableOpacity,
     ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { Colors } from "@/constants/Colors";
+import { ThemeContext } from "../../contexts/ThemeContext"; // Access ThemeContext
 import { Layout } from "@/constants/Layout";
 import { Fonts } from "@/constants/Fonts";
 
-export default function AccessHistoryScreen({navigation}) {
+export default function AccessHistoryScreen({ navigation }) {
+    const { currentColors } = useContext(ThemeContext); // Get currentColors from ThemeContext
+
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={[styles.container, { backgroundColor: currentColors.background }]}>
             <View style={styles.header}>
                 <View style={styles.iconsContainer}>
                     <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
                         <Ionicons
                             name="person-circle-outline"
                             size={24}
-                            color={Colors.light.tint} // Using the tint color
+                            color={currentColors.tint} // Using the theme tint color
                         />
                     </TouchableOpacity>
                     <View style={styles.notificationContainer}>
@@ -30,65 +31,48 @@ export default function AccessHistoryScreen({navigation}) {
                             <Ionicons
                                 name="notifications-outline"
                                 size={24}
-                                color={Colors.light.tint} // Using the tint color
+                                color={currentColors.tint} // Using the theme tint color
                             />
                         </TouchableOpacity>
                         <TouchableOpacity style={{ paddingHorizontal: 5 }}>
                             <Ionicons
                                 name="settings-outline"
                                 size={24}
-                                color={Colors.light.tint} // Using the tint color
+                                color={currentColors.tint} // Using the theme tint color
                             />
                         </TouchableOpacity>
                     </View>
                 </View>
 
-                {/* Current Campus */}
-                <Text style={styles.headerText}>Current Campus</Text>
-                <TouchableOpacity style={styles.syncButton}>
-                    <Text style={styles.syncButtonText}>Sync Data</Text>
+                <Text style={[styles.headerText, { color: currentColors.text }]}>Current Campus</Text>
+                <TouchableOpacity style={[styles.syncButton, { backgroundColor: currentColors.primary }]}>
+                    <Text style={[styles.syncButtonText, { color: currentColors.text }]}>Sync Data</Text>
                 </TouchableOpacity>
             </View>
-            {/* Access History */}
             <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Access History</Text>
-                {/* Filters */}
+                <Text style={[styles.sectionTitle, { color: currentColors.text }]}>Access History</Text>
                 <View style={styles.filterSection}>
-                    <TouchableOpacity style={styles.filterChipActive}>
-                        <Text style={styles.filterTextActive}>All</Text>
+                    <TouchableOpacity style={[styles.filterChipActive, { backgroundColor: currentColors.background, borderColor: currentColors.text }]}>
+                        <Text style={[styles.filterTextActive, { color: currentColors.text }]}>All</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.filterChipInactive}>
-                        <Text style={styles.filterTextInactive}>APB</Text>
+                    <TouchableOpacity style={[styles.filterChipInactive, { backgroundColor: currentColors.background, borderColor: currentColors.text }]}>
+                        <Text style={[styles.filterTextInactive, { color: currentColors.text }]}>APB</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.filterChipInactive}>
-                        <Text style={styles.filterTextInactive}>APK</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.filterChipInactive}>
-                        <Text style={styles.filterTextInactive}>DFC</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.filterChipInactive}>
-                        <Text style={styles.filterTextInactive}>SWC</Text>
-                    </TouchableOpacity>
+                    {/* Other filter buttons */}
                 </View>
 
-                {/* Fecth and map History from Firebase */}
                 <ScrollView>
                     <View style={styles.historyContainer}>
                         <View style={styles.historyItem}>
                             <View style={styles.historyItemDetails}>
-                                <Text style={styles.historyItemTime}>
-                                    Today 09:30
-                                </Text>
-                                <Text style={styles.historyItemName}>
-                                    Campus Entrance
-                                </Text>
+                                <Text style={[styles.historyItemTime, { color: currentColors.text }]}>Today 09:30</Text>
+                                <Text style={[styles.historyItemName, { color: currentColors.text }]}>Campus Entrance</Text>
                             </View>
                         </View>
                     </View>
                 </ScrollView>
-                {/* View All button */}
-                <TouchableOpacity style={styles.viewAllButton}>
-                    <Text style={styles.viewAllButtonText}>View All</Text>
+                <TouchableOpacity style={[styles.viewAllButton, { backgroundColor: currentColors.primary }]}>
+                    <Text style={[styles.viewAllButtonText, { color: currentColors.text }]}>View All</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
@@ -99,7 +83,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: Layout.padding,
-        backgroundColor: Colors.light.background, // Using the background color from Colors
     },
     header: {
         flexDirection: "column",
@@ -117,11 +100,9 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     headerText: {
-        ...Fonts.subtitle, // Using the subtitle font size and weight
-        color: Colors.light.text, // Using the text color
+        ...Fonts.subtitle,
     },
     syncButton: {
-        backgroundColor: Colors.light.primary,
         padding: 10,
         borderRadius: 10,
         marginTop: 10,
@@ -132,23 +113,19 @@ const styles = StyleSheet.create({
     },
     syncButtonText: {
         ...Fonts.body,
-        color: Colors.light.text,
     },
     section: {
         marginVertical: Layout.margin,
     },
     sectionTitle: {
-        ...Fonts.title, // Using the body font size and weight
-        color: Colors.light.text, // Using the text color
+        ...Fonts.title,
         marginBottom: Layout.margin / 2,
     },
     filterSection: {
-        height: "fit-content",
-        flexDirection: "row", // Ensure horizontal layout
+        flexDirection: "row",
         width: "100%",
     },
     filterChipActive: {
-        backgroundColor: Colors.dark.background,
         width: "15%",
         padding: 10,
         borderRadius: 10,
@@ -158,7 +135,6 @@ const styles = StyleSheet.create({
         borderWidth: 1,
     },
     filterChipInactive: {
-        backgroundColor: Colors.light.background,
         padding: 10,
         width: "20%",
         borderRadius: 10,
@@ -169,11 +145,9 @@ const styles = StyleSheet.create({
     },
     filterTextActive: {
         ...Fonts.body,
-        color: Colors.dark.text,
     },
     filterTextInactive: {
         ...Fonts.body,
-        color: Colors.light.text,
     },
     historyContainer: {
         marginTop: 30,
@@ -190,14 +164,11 @@ const styles = StyleSheet.create({
     historyItemName: {
         ...Fonts.body,
         fontWeight: "bold",
-        color: Colors.light.text,
     },
     historyItemTime: {
         ...Fonts.body,
-        color: Colors.light.text,
     },
     viewAllButton: {
-        backgroundColor: Colors.light.primary,
         padding: 10,
         borderRadius: 10,
         alignItems: "center",
@@ -208,6 +179,5 @@ const styles = StyleSheet.create({
     },
     viewAllButtonText: {
         ...Fonts.body,
-        color: Colors.light.text,
     },
 });

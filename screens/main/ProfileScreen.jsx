@@ -1,112 +1,101 @@
-import React from "react";
-import {
-    StyleSheet,
-    Text,
-    View,
-    Image,
-    TouchableOpacity,
-    ScrollView,
-} from "react-native";
+import React, { useContext } from "react";
+import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, Switch } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Colors } from "@/constants/Colors";
-import { Layout } from "@/constants/Layout";
-import { Fonts } from "@/constants/Fonts";
 import { Ionicons } from "@expo/vector-icons";
-
 import { useFonts } from "expo-font";
+import { ThemeContext } from "../../contexts/ThemeContext"; // Import ThemeContext
+
+import {Colors} from '../../constants/Colors';
+import {Layout} from '../../constants/Layout';
+import {Fonts} from '../../constants/Fonts';
 
 export default function UserProfileScreen({ navigation }) {
-    const [fontsLoaded] = useFonts({
-        ThedusWideLight: require("../../assets/fonts/ThedusWideLight-Bold.otf"),
-    });
+  const { isDarkMode, toggleTheme, currentColors } = useContext(ThemeContext); // Get theme state from context
 
-    return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <View style={styles.iconsContainer}>
-                    <TouchableOpacity onPress={() => navigation.navigate("Home")}>
-                        <Text style={{ fontSize: 24, fontFamily: "ThedusWideLight", color: Colors.light.tint }}>VerifID</Text>
-                    </TouchableOpacity>
-                    <View style={styles.notificationContainer}>
-                        <TouchableOpacity style={{ paddingHorizontal: 15 }}>
-                            <Ionicons
-                                name="notifications-outline"
-                                size={24}
-                                color={Colors.light.tint} // Using the tint color
-                            />
-                        </TouchableOpacity>
-                        <TouchableOpacity style={{ paddingHorizontal: 5 }}>
-                            <Ionicons
-                                name="settings-outline"
-                                size={24}
-                                color={Colors.light.tint} // Using the tint color
-                            />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </View>
-            <ScrollView contentContainerStyle={styles.scrollContainer}>
-                {/* Profile Header Section */}
-                <View style={styles.headerSection}>
-                    <Image
-                        style={styles.headerImage}
-                        source={{ uri: "https://via.placeholder.com/500x150" }} // Placeholder for header background
-                    />
-                    <View style={styles.profileImageWrapper}>
-                        <Image
-                            style={styles.profileImage}
-                            source={{ uri: "https://via.placeholder.com/100" }} // Placeholder for Profile Picture
-                        />
-                    </View>
-                </View>
+  const [fontsLoaded] = useFonts({
+    ThedusWideLight: require("../../assets/fonts/ThedusWideLight-Bold.otf"),
+  });
 
-                {/* User Info Section */}
-                <View style={styles.infoSection}>
-                    <Text style={styles.nameText}>John Doe</Text>
-                    <Text style={styles.idText}>@johndoe</Text>
-                </View>
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor: currentColors.background }]}>
+      <View style={styles.header}>
+        <View style={styles.iconsContainer}>
+          <TouchableOpacity onPress={() => navigation.navigate("Home")}>
+            <Text style={[styles.headerText, { color: currentColors.text, fontFamily: "ThedusWideLight" }]}>
+              VerifID
+            </Text>
+          </TouchableOpacity>
+          <View style={styles.notificationContainer}>
+            <TouchableOpacity style={{ paddingHorizontal: 15 }}>
+              <Ionicons name="notifications-outline" size={24} color={currentColors.tint} />
+            </TouchableOpacity>
+            <TouchableOpacity style={{ paddingHorizontal: 5 }}>
+              <Ionicons name="settings-outline" size={24} color={currentColors.tint} />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        {/* Profile Header Section */}
+        <View style={styles.headerSection}>
+          <Image
+            style={styles.headerImage}
+            source={{ uri: "https://via.placeholder.com/500x150" }} // Placeholder for header background
+          />
+          <View style={[styles.profileImageWrapper, { borderColor: currentColors.tint }]}>
+            <Image
+              style={styles.profileImage}
+              source={{ uri: "https://via.placeholder.com/100" }} // Placeholder for Profile Picture
+            />
+          </View>
+        </View>
 
-                {/* Report Lost Card Button */}
-                <View style={styles.buttonContainer}>
-                    <TouchableOpacity
-                        style={styles.reportButton}
-                        onPress={() => navigation.navigate("ReportLostCard")}
-                    >
-                        <Text style={styles.buttonText}>Report Lost Card</Text>
-                    </TouchableOpacity>
-                </View>
+        {/* User Info Section */}
+        <View style={styles.infoSection}>
+          <Text style={[styles.nameText, { color: currentColors.text }]}>John Doe</Text>
+          <Text style={[styles.idText, { color: "#777" }]}>@johndoe</Text>
+        </View>
 
-                {/* Activity Timeline (Like Twitter's feed) */}
-                <View style={styles.activitySection}>
-                    <Text style={styles.sectionTitle}>Recent Activities</Text>
-                    <View style={styles.activityItem}>
-                        <Text style={styles.activityText}>
-                            Accessed the Library
-                        </Text>
-                        <Text style={styles.timestamp}>2 hours ago</Text>
-                    </View>
-                    <View style={styles.activityItem}>
-                        <Text style={styles.activityText}>
-                            Lost card reported
-                        </Text>
-                        <Text style={styles.timestamp}>1 day ago</Text>
-                    </View>
-                    <View style={styles.activityItem}>
-                        <Text style={styles.activityText}>
-                            Gym Access Granted
-                        </Text>
-                        <Text style={styles.timestamp}>3 days ago</Text>
-                    </View>
-                </View>
-            </ScrollView>
-        </SafeAreaView>
-    );
+        {/* Switch for Dark Mode */}
+        <View style={styles.switchContainer}>
+          <Text style={[styles.switchLabel, { color: currentColors.text }]}>Dark Mode</Text>
+          <Switch
+            trackColor={{ false: "#767577", true: "#81b0ff" }}
+            thumbColor={isDarkMode ? currentColors.tint : Colors.light.tint}
+            onValueChange={toggleTheme} // Use the toggleTheme from context
+            value={isDarkMode}
+          />
+        </View>
+
+        {/* Report Lost Card Button */}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={[styles.reportButton, { backgroundColor: currentColors.tint }]}
+            onPress={() => navigation.navigate("ReportLostCard")}
+          >
+            <Text style={[styles.buttonText, { color: currentColors.text }]}>Report Lost Card</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Activity Timeline */}
+        <View style={styles.activitySection}>
+          <Text style={[styles.sectionTitle, { color: currentColors.text }]}>Recent Activities</Text>
+          <View style={[styles.activityItem, { backgroundColor: isDarkMode ? "#1d3557" : "#edf6f9" }]}>
+            <Text style={[styles.activityText, { color: currentColors.text }]}>
+              Accessed the Library
+            </Text>
+            <Text style={[styles.timestamp, { color: "#777" }]}>2 hours ago</Text>
+          </View>
+          {/* Add more activities here */}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.light.background, // Using the background color from Colors
     },
     header: {
         flexDirection: "column",
@@ -125,8 +114,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     headerText: {
-        ...Fonts.subtitle, // Using the subtitle font size and weight
-        color: Colors.light.text, // Using the text color
+        ...Fonts.subtitle,
     },
     scrollContainer: {
         paddingBottom: 20,
@@ -144,7 +132,6 @@ const styles = StyleSheet.create({
         bottom: -50,
         left: 20,
         borderWidth: 3,
-        borderColor: "#f1faee",
         borderRadius: 50,
     },
     profileImage: {
@@ -159,55 +146,33 @@ const styles = StyleSheet.create({
     nameText: {
         fontSize: 22,
         fontWeight: "bold",
-        color: "#0b132b",
     },
     idText: {
         fontSize: 16,
-        color: "#777",
     },
-    statsSection: {
+    switchContainer: {
         flexDirection: "row",
-        justifyContent: "space-around",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingHorizontal: 20,
         marginVertical: 20,
     },
-    statBox: {
-        alignItems: "center",
-    },
-    statNumber: {
+    switchLabel: {
         fontSize: 18,
-        fontWeight: "bold",
-        color: "#0b132b",
-    },
-    statLabel: {
-        fontSize: 14,
-        color: "#777",
-    },
-    bioSection: {
-        paddingHorizontal: 20,
-        marginBottom: 20,
-    },
-    bioText: {
-        fontSize: 16,
-        color: "#0b132b",
-        fontStyle: "italic",
     },
     buttonContainer: {
         paddingHorizontal: 20,
         marginVertical: 20,
     },
     reportButton: {
-        backgroundColor: Colors.light.background, // Amber color from your theme
         paddingVertical: 15,
         paddingHorizontal: 25,
         borderRadius: 8,
         alignItems: "center",
         justifyContent: "center",
-        borderWidth: 1,
-        borderColor: "red",
         width: "100%",
     },
     buttonText: {
-        color: "red",
         fontSize: 18,
         fontWeight: "600",
     },
@@ -218,18 +183,14 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: 18,
         fontWeight: "bold",
-        color: "#0b132b",
-        marginBottom: 10,
     },
     activityItem: {
-        backgroundColor: "#edf6f9",
         padding: 15,
         borderRadius: 8,
         marginBottom: 10,
     },
     activityText: {
         fontSize: 16,
-        color: "#0b132b",
     },
     timestamp: {
         fontSize: 12,
