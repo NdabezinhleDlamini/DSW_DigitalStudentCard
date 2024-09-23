@@ -24,20 +24,21 @@ export default function RegisterScreen({ navigation }) {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [studentNumber, setStudentNumber] = useState(""); // Add state for student number
 
     if (!fontsLoaded) {
         return null; // or a loading spinner
     }
 
     const handleSignIn = () => {
-            createUserWithEmailAndPassword(auth, email, password)
-            .then(userCredentials => {
+        createUserWithEmailAndPassword(auth, email, password)
+            .then((userCredentials) => {
                 const user = userCredentials.user;
                 console.log(user.email);
-                //proceed to login
+                // proceed to login
                 navigation.navigate("Login");
             })
-            .catch(error => alert(error.message));
+            .catch((error) => alert(error.message));
     };
 
     // handle registration
@@ -45,8 +46,9 @@ export default function RegisterScreen({ navigation }) {
         const trimmedName = name.trim();
         const trimmedEmail = email.trim();
         const trimmedPassword = password.trim();
+        const trimmedStudentNumber = studentNumber.trim(); // Trim student number
 
-        //validate user input
+        // Validate user input
         if (trimmedName === "") {
             Alert.alert("Error", "Name field cannot be empty");
             return;
@@ -67,13 +69,23 @@ export default function RegisterScreen({ navigation }) {
             Alert.alert("Error", "Password must be at least 6 characters long");
             return;
         }
-        
+        if (!validateStudentNumber(trimmedStudentNumber)) {
+            Alert.alert("Error", "Student number must be 9 digits and start with '2'");
+            return;
+        }
+
         handleSignIn();
     };
 
     const validateEmail = (email) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
+    };
+
+    const validateStudentNumber = (studentNumber) => {
+        // Ensure student number is 9 digits long and starts with '2'
+        const studentNumberRegex = /^2\d{8}$/;
+        return studentNumberRegex.test(studentNumber);
     };
 
     return (
@@ -116,12 +128,17 @@ export default function RegisterScreen({ navigation }) {
                             value={password}
                             onChangeText={setPassword}
                         />
+                        <Text style={styles.label}>Student Number</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Student Number"
+                            keyboardType="numeric"
+                            value={studentNumber}
+                            onChangeText={setStudentNumber}
+                        />
                     </View>
                 </View>
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={handleRegister}
-                >
+                <TouchableOpacity style={styles.button} onPress={handleRegister}>
                     <Text style={styles.buttonText}>Register</Text>
                 </TouchableOpacity>
                 <View style={styles.hasAccount}>
