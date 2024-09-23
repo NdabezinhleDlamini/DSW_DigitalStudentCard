@@ -13,6 +13,8 @@ import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
 import { Colors } from "@/constants/Colors";
+import { auth } from '../Firebase-config';
+import { createUserWithEmailAndPassword } from "firebase/auth";
 
 export default function RegisterScreen({ navigation }) {
     const [fontsLoaded] = useFonts({
@@ -23,16 +25,20 @@ export default function RegisterScreen({ navigation }) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    const handleSignIn = () => {
-        if (name === "" || email === "" || password === "") {
-            Alert.alert("Error", "Please fill in all fields");
-            return;
-        }
-    };
-
     if (!fontsLoaded) {
         return null; // or a loading spinner
     }
+
+    const handleSignIn = () => {
+            createUserWithEmailAndPassword(auth, email, password)
+            .then(userCredentials => {
+                const user = userCredentials.user;
+                console.log(user.email);
+                //proceed to login
+                navigation.navigate("Login");
+            })
+            .catch(error => alert(error.message));
+    };
 
     // handle registration
     const handleRegister = () => {
@@ -61,9 +67,8 @@ export default function RegisterScreen({ navigation }) {
             Alert.alert("Error", "Password must be at least 6 characters long");
             return;
         }
-
-        //proceed to login
-        navigation.navigate("Login");
+        
+        handleSignIn();
     };
 
     const validateEmail = (email) => {

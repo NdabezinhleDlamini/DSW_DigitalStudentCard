@@ -14,6 +14,8 @@ import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
 import { Colors } from "@/constants/Colors";
+import { auth } from '../Firebase-config';
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 export default function OnBoardingScreen({ navigation }) {
     const [fontsLoaded] = useFonts({
@@ -26,6 +28,22 @@ export default function OnBoardingScreen({ navigation }) {
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+
+    const login = () => {
+        signInWithEmailAndPassword(auth, email, password)
+            .then(userCredential => {
+                // Signed in
+                const user = userCredential.user;
+                console.log("User logged in:", user.email);
+                // go to home page
+                navigation.navigate("main");
+            })
+            .catch(error => {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                Alert.alert("Login Error", errorMessage);
+            });
+    }
 
     // hanle login
     const handleLogin = () => {
@@ -50,8 +68,8 @@ export default function OnBoardingScreen({ navigation }) {
             return;
         }
 
-        // proceed to home page
-        navigation.navigate("Homescreen");
+        login();
+        // navigation.navigate("main");
     };
 
     const validateEmail = (email) => {
