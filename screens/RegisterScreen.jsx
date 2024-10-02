@@ -24,6 +24,7 @@ export default function RegisterScreen({ navigation }) {
     const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [studentNumber, setStudentNumber] = useState(""); 
 
     if (!fontsLoaded) {
@@ -47,6 +48,7 @@ export default function RegisterScreen({ navigation }) {
         const trimmedLastName = lastName.trim();
         const trimmedEmail = email.trim();
         const trimmedPassword = password.trim();
+        const trimmedConfirmPassword = confirmPassword.trim();
         const trimmedStudentNumber = studentNumber.trim(); // Trim student number
 
         // Validate user input
@@ -56,6 +58,10 @@ export default function RegisterScreen({ navigation }) {
         }
         if (trimmedEmail === "") {
             Alert.alert("Error", "Email field cannot be empty");
+            return;
+        }
+        if (!validateStudentNumber(trimmedStudentNumber)) {
+            Alert.alert("Error", "Student number must be 9 digits and start with '2'");
             return;
         }
         if (!validateEmail(trimmedEmail)) {
@@ -70,10 +76,15 @@ export default function RegisterScreen({ navigation }) {
             Alert.alert("Error", "Password must be at least 6 characters long");
             return;
         }
-        if (!validateStudentNumber(trimmedStudentNumber)) {
-            Alert.alert("Error", "Student number must be 9 digits and start with '2'");
+        if (trimmedConfirmPassword.length < 6) {
+            Alert.alert("Error", "Password must be at least 6 characters long");
             return;
         }
+        if (trimmedPassword !== trimmedConfirmPassword) {
+            Alert.alert("Error", "Passwords do not match");
+            return;
+        }
+
 
         handleSignIn();
     };
@@ -141,6 +152,13 @@ export default function RegisterScreen({ navigation }) {
                             secureTextEntry
                             value={password}
                             onChangeText={setPassword}
+                        />
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Confirm Password"
+                            secureTextEntry
+                            value={confirmPassword}
+                            onChangeText={setConfirmPassword}
                         />
                     </View>
                 </View>
