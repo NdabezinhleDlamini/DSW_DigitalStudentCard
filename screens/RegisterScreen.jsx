@@ -7,7 +7,6 @@ import {
     TextInput,
     Alert,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useState } from "react";
 
 import { StatusBar } from "expo-status-bar";
@@ -21,10 +20,11 @@ export default function RegisterScreen({ navigation }) {
         ThedusWideLight: require("../assets/fonts/ThedusWideLight-Bold.otf"),
     });
 
-    const [name, setName] = useState("");
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [studentNumber, setStudentNumber] = useState(""); // Add state for student number
+    const [studentNumber, setStudentNumber] = useState(""); 
 
     if (!fontsLoaded) {
         return null; // or a loading spinner
@@ -43,14 +43,15 @@ export default function RegisterScreen({ navigation }) {
 
     // handle registration
     const handleRegister = () => {
-        const trimmedName = name.trim();
+        const trimmedFirstName = firstName.trim();
+        const trimmedLastName = lastName.trim();
         const trimmedEmail = email.trim();
         const trimmedPassword = password.trim();
         const trimmedStudentNumber = studentNumber.trim(); // Trim student number
 
         // Validate user input
-        if (trimmedName === "") {
-            Alert.alert("Error", "Name field cannot be empty");
+        if (trimmedFirstName === "" || trimmedLastName === "") {
+            Alert.alert("Error", "Name fields cannot be empty");
             return;
         }
         if (trimmedEmail === "") {
@@ -90,6 +91,7 @@ export default function RegisterScreen({ navigation }) {
 
     return (
         <>
+
             <StatusBar
                 style="dark"
                 translucent={true}
@@ -105,14 +107,27 @@ export default function RegisterScreen({ navigation }) {
                         <Text style={styles.subtitle}>Create Your Account</Text>
                     </View>
                     <View style={styles.form}>
-                        <Text style={styles.label}>Name</Text>
+                        <View style={styles.namesContainer}>
+                        <TextInput
+                            style={styles.nameInput}
+                            placeholder="First Name"
+                            value={firstName}
+                            onChangeText={setFirstName}
+                        />
+                        <TextInput
+                            style={styles.nameInput}
+                            placeholder="Last Name"
+                            value={lastName}
+                            onChangeText={setLastName}
+                        />
+                        </View>
                         <TextInput
                             style={styles.input}
-                            placeholder="Name"
-                            value={name}
-                            onChangeText={setName}
+                            placeholder="Student Number"
+                            keyboardType="numeric"
+                            value={studentNumber}
+                            onChangeText={setStudentNumber}
                         />
-                        <Text style={styles.label}>Email</Text>
                         <TextInput
                             style={styles.input}
                             placeholder="Email"
@@ -120,21 +135,12 @@ export default function RegisterScreen({ navigation }) {
                             value={email}
                             onChangeText={setEmail}
                         />
-                        <Text style={styles.label}>Password</Text>
                         <TextInput
                             style={styles.input}
                             placeholder="Password"
                             secureTextEntry
                             value={password}
                             onChangeText={setPassword}
-                        />
-                        <Text style={styles.label}>Student Number</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Student Number"
-                            keyboardType="numeric"
-                            value={studentNumber}
-                            onChangeText={setStudentNumber}
                         />
                     </View>
                 </View>
@@ -190,14 +196,23 @@ const styles = StyleSheet.create({
     },
     form: {
         marginTop: 20,
-        width: "75%",
+        width: "90%",
         alignSelf: "center",
+        flexDirection: "column",
+        justifyContent: "space-between",
     },
-    label: {
-        fontSize: 15,
-        fontWeight: "500",
-        color: Colors.dark.text,
-        marginTop: 20,
+    namesContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+    },
+    nameInput: {
+        height: 50,
+        width: "47.5%",
+        backgroundColor: "white",
+        borderRadius: 10,
+        paddingLeft: 20,
+        alignSelf: "center",
+        marginTop: 10,
     },
     input: {
         height: 50,
@@ -206,16 +221,16 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         paddingLeft: 20,
         alignSelf: "center",
-        marginTop: 10,
+        marginTop: 15,
     },
     button: {
         backgroundColor: "transparent",
         height: 50,
-        width: "75%",
+        width: "90%",
         justifyContent: "center",
         alignItems: "center",
         borderRadius: 10,
-        marginTop: 10,
+        marginTop: "5%",
         alignSelf: "center",
         borderWidth: 1.5,
         borderColor: Colors.dark.highlight,
