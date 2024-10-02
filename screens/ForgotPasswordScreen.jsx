@@ -49,7 +49,6 @@ export default function ResetPasswordScreen({ navigation }) {
                         <Text style={styles.subtitle}>Reset Your Password</Text>
                     </View>
                     <View style={styles.form}>
-                        <Text style={styles.label}>Email</Text>
                         <TextInput
                             style={styles.input}
                             placeholder="Email"
@@ -114,7 +113,7 @@ const styles = StyleSheet.create({
     },
     form: {
         marginTop: 20,
-        width: "75%",
+        width: "90%",
         alignSelf: "center",
     },
     label: {
@@ -130,16 +129,16 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         paddingLeft: 20,
         alignSelf: "center",
-        marginTop: 10,
+        marginTop: 20,
     },
     button: {
         backgroundColor: "transparent",
         height: 50,
-        width: "75%",
+        width: "90%",
         justifyContent: "center",
         alignItems: "center",
         borderRadius: 10,
-        marginTop: 10,
+        marginTop: 20,
         alignSelf: "center",
         borderWidth: 1.5,
         borderColor: Colors.dark.highlight,
