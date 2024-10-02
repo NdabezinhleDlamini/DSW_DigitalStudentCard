@@ -94,7 +94,6 @@ export default function OnBoardingScreen({ navigation }) {
                         <Text style={styles.subtitle}>Welcome Back!</Text>
                     </View>
                     <View style={styles.form}>
-                        <Text style={styles.label}>Email</Text>
                         <TextInput
                             style={styles.input}
                             placeholder="Email"
@@ -102,7 +101,6 @@ export default function OnBoardingScreen({ navigation }) {
                             value={email}
                             onChangeText={setEmail}
                         />
-                        <Text style={styles.label}>Password</Text>
                         <TextInput
                             style={styles.input}
                             placeholder="Password"
@@ -180,14 +178,8 @@ const styles = StyleSheet.create({
     form: {
         marginTop: 20,
         alignItems: "left",
-        width: "75%",
+        width: "90%",
         alignSelf: "center",
-    },
-    label: {
-        fontSize: 15,
-        fontWeight: "500",
-        color: Colors.dark.text,
-        marginTop: 20,
     },
     input: {
         height: 50,
@@ -196,22 +188,22 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         paddingLeft: 20,
         alignSelf: "center",
-        marginTop: 10,
+        marginTop: 20,
     },
     forgotPassword: {
         alignSelf: "flex-end",
-        marginTop: 10,
+        marginTop: 20,
         color: Colors.dark.highlight,
         textDecorationLine: "underline",
     },
     button: {
         backgroundColor: "transparent",
         height: 50,
-        width: "75%",
+        width: "90%",
         justifyContent: "center",
         alignItems: "center",
         borderRadius: 10,
-        marginTop: 10,
+        marginTop: 20,
         alignSelf: "center",
         borderWidth: 1.5,
         borderColor: Colors.dark.highlight,
