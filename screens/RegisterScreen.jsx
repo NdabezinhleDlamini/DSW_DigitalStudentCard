@@ -12,8 +12,14 @@ import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
 import { Colors } from "@/constants/Colors";
+
+//Import Firebase Authentication 
 import { auth } from '../Firebase-config';
 import { createUserWithEmailAndPassword } from "firebase/auth";
+
+// Import Firebase Firestore
+import { db } from '../Firebase-config';
+import { addDoc, collection } from "firebase/firestore";
 
 export default function RegisterScreen({ navigation }) {
     const [fontsLoaded] = useFonts({
@@ -36,6 +42,29 @@ export default function RegisterScreen({ navigation }) {
             .then((userCredentials) => {
                 const user = userCredentials.user;
                 console.log(user.email);
+                // Add user data to Firestore database
+                const userData = {
+                    FirstName: firstName,
+                    LastName: lastName,
+                    Email: email,
+                    StudentNumber: studentNumber,
+                    DisplayName: "",
+                    CreatedAt: new Date().toISOString(),
+                    LastLogin: new Date().toISOString(),
+                    LastLoginIP: "",    // Add last login IP
+                    LastLoginLocation: "", // Add last login location
+                    LastLoginPlatform: "", // Add last login platform
+                    ProfilePictureURL: "" // Add Firebase Cloud Storage profile picture URL
+                }
+
+                addDoc(collection(db, 'Users'), userData)
+                    .then(() => {
+                        console.log('User data added to Firestore');
+                    })
+                    .catch((error) => {
+                        console.error('Error adding user data to Firestore:', error);
+                    });
+
                 // proceed to login
                 navigation.navigate("Login");
             })
