@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, Switch } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -9,12 +9,34 @@ import {Colors} from '../../constants/Colors';
 import {Layout} from '../../constants/Layout';
 import {Fonts} from '../../constants/Fonts';
 
+import { auth } from '../../Firebase-config';
+import { doc, getDoc } from "firebase/firestore"; 
+import { db } from '../../Firebase-config'; 
+
 export default function UserProfileScreen({ navigation }) {
   const { isDarkMode, toggleTheme, currentColors } = useContext(ThemeContext); // Get theme state from context
 
   const [fontsLoaded] = useFonts({
     ThedusWideLight: require("../../assets/fonts/ThedusWideLight-Bold.otf"),
   });
+
+  const [user, setUser] = useState(null);
+  const [lastLoginTime, setLastLoginTime] = useState("");
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+        const userId = auth.currentUser.uid;
+        const userDoc = doc(db, "Users", userId); // Replace "users" with your collection name
+        const userSnapshot = await getDoc(userDoc);
+        if (userSnapshot.exists()) {
+            setUser(userSnapshot.data());
+        } else {
+            console.log("No such document!");
+        }
+    };
+
+    fetchUserData();
+}, []);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: currentColors.background }]}>
@@ -52,8 +74,14 @@ export default function UserProfileScreen({ navigation }) {
 
         {/* User Info Section */}
         <View style={styles.infoSection}>
-          <Text style={[styles.nameText, { color: currentColors.text }]}>John Doe</Text>
-          <Text style={[styles.idText, { color: "#777" }]}>@johndoe</Text>
+          {/* <Text style={[styles.nameText, { color: currentColors.text }]}>John Doe</Text>
+          <Text style={[styles.idText, { color: "#777" }]}>@johndoe</Text> */}
+          <Text style={[styles.nameText, { color: currentColors.text }]}>
+            {user ? `${user.FirstName} ${user.LastName}` : "Loading..."}
+          </Text>
+          <Text style={[styles.idText, { color: "#777" }]}>
+            @{user ? `${user.DisplayName}`  : "Loading..."}
+          </Text> 
         </View>
 
         {/* Switch for Dark Mode */}
@@ -85,6 +113,12 @@ export default function UserProfileScreen({ navigation }) {
               Accessed the Library
             </Text>
             <Text style={[styles.timestamp, { color: "#777" }]}>2 hours ago</Text>
+          </View>
+
+          <View style={[styles.activityItem, { backgroundColor: isDarkMode ? "#1d3557" : "#edf6f9" }]}>
+            <Text style={[styles.activityText, { color: currentColors.text }]}>
+              Last Login Time: {lastLoginTime ? new Date(lastLoginTime).toLocaleString() : "Loading..."}
+            </Text>
           </View>
           {/* Add more activities here */}
         </View>

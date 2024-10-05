@@ -19,7 +19,9 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 
 // Import Firebase Firestore
 import { db } from '../Firebase-config';
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, setDoc, doc } from "firebase/firestore";
+
+import { Platform } from "react-native";
 
 export default function RegisterScreen({ navigation }) {
     const [fontsLoaded] = useFonts({
@@ -32,43 +34,43 @@ export default function RegisterScreen({ navigation }) {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [studentNumber, setStudentNumber] = useState(""); 
+    const platform = Platform.OS;
 
     if (!fontsLoaded) {
         return null; // or a loading spinner
     }
 
-    const handleSignIn = () => {
-        createUserWithEmailAndPassword(auth, email, password)
-            .then((userCredentials) => {
-                const user = userCredentials.user;
-                console.log(user.email);
-                // Add user data to Firestore database
-                const userData = {
-                    FirstName: firstName,
-                    LastName: lastName,
-                    Email: email,
-                    StudentNumber: studentNumber,
-                    DisplayName: "",
-                    CreatedAt: new Date().toISOString(),
-                    LastLogin: new Date().toISOString(),
-                    LastLoginIP: "",    // Add last login IP
-                    LastLoginLocation: "", // Add last login location
-                    LastLoginPlatform: "", // Add last login platform
-                    ProfilePictureURL: "" // Add Firebase Cloud Storage profile picture URL
-                }
-
-                addDoc(collection(db, 'Users'), userData)
-                    .then(() => {
-                        console.log('User data added to Firestore');
-                    })
-                    .catch((error) => {
-                        console.error('Error adding user data to Firestore:', error);
-                    });
-
-                // proceed to login
-                navigation.navigate("Login");
-            })
-            .catch((error) => alert(error.message));
+    const handleSignUp = async () => { 
+        try {
+            const userCredentials = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredentials.user;
+    
+            console.log(user.email);
+            
+            // Add user data to Firestore database using UID
+            const userData = {
+                FirstName: firstName,
+                LastName: lastName,
+                Email: email,
+                StudentNumber: studentNumber,
+                DisplayName: "",
+                CreatedAt: new Date().toISOString(),
+                LastLogin: new Date().toISOString(),
+                LastLoginIP: "",
+                LastLoginLocation: "",
+                LastLoginPlatform: platform,
+                ProfilePictureURL: ""
+            };
+    
+            // Set document with the user's UID as the ID
+            await setDoc(doc(db, "Users", user.uid), userData);
+            console.log('User data added to Firestore');
+    
+            // Proceed to login
+            navigation.navigate("Login");
+        } catch (error) {
+            alert(error.message);
+        }
     };
 
     // handle registration
@@ -115,7 +117,7 @@ export default function RegisterScreen({ navigation }) {
         }
 
 
-        handleSignIn();
+        handleSignUp();
     };
 
     const validateEmail = (email) => {

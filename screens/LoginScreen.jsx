@@ -11,11 +11,15 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useState } from "react";
 
+import { Platform } from "react-native";
+
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
 import { Colors } from "@/constants/Colors";
 import { auth } from '../Firebase-config';
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { db } from '../Firebase-config'; // Import Firestore instance
+import { doc, updateDoc } from "firebase/firestore"; // Import Firestore functions
 
 export default function OnBoardingScreen({ navigation }) {
     const [fontsLoaded] = useFonts({
@@ -29,21 +33,81 @@ export default function OnBoardingScreen({ navigation }) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    const login = () => {
-        signInWithEmailAndPassword(auth, email, password)
-            .then(userCredential => {
-                // Signed in
-                const user = userCredential.user;
-                console.log("User logged in:", user.email);
-                // go to home page
-                navigation.navigate("main");
-            })
-            .catch(error => {
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                Alert.alert("Login Error", errorMessage);
+    // const login = () => {
+    //     signInWithEmailAndPassword(auth, email, password)
+    //         .then(userCredential => {
+    //             // Signed in
+    //             const user = userCredential.user;
+    //             console.log("User logged in:", user.email);
+    //             // go to home page
+    //             navigation.navigate("main");
+    //         })
+    //         .catch(error => {
+    //             const errorCode = error.code;
+    //             const errorMessage = error.message;
+    //             Alert.alert("Login Error", errorMessage);
+    //         });
+    // }
+
+    //last login
+    const getLastLoginDetails = async () => {
+        // Get current time
+        const lastLoginTime = new Date().toISOString();
+        
+        // Fetch IP address
+        let ipAddress;
+        try {
+            const response = await fetch('https://api.ipify.org?format=json');
+            const data = await response.json();
+            ipAddress = data.ip;
+        } catch (error) {
+            console.error("Failed to fetch IP address:", error);
+            ipAddress = "Unavailable";
+        }
+
+        // Fetch location from IP address
+        let lastLoginLocation = "Location unavailable";
+        try {
+            const response = await fetch(`https://ipapi.co/${ipAddress}/json/`);
+            const locationData = await response.json();
+            if (locationData.city && locationData.region) {
+                lastLoginLocation = `${locationData.city}, ${locationData.region}, ${locationData.country_name}`;
+            } else {
+                lastLoginLocation = "Unable to determine location";
+            }
+        } catch (error) {
+            console.error("Location fetching error:", error);
+        }
+
+        return { lastLoginTime, ipAddress, lastLoginLocation };
+    };
+
+    const login = async () => {
+        try {
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            const platform = Platform.OS;
+
+            console.log("User logged in:", user.email);
+
+            // Get last login details
+            const { lastLoginTime, ipAddress, lastLoginLocation } = await getLastLoginDetails();
+
+            // Update user document with last login details
+            await updateDoc(doc(db, "Users", user.uid), {
+                LastLoginTime: lastLoginTime,
+                LastLoginIP: ipAddress,
+                LastLoginLocation: lastLoginLocation,
+                LastLoginPlatform: platform,
             });
-    }
+
+            navigation.navigate("main"); // Go to home page
+        } catch (error) {
+            const errorMessage = error.message;
+            Alert.alert("Login Error", errorMessage);
+        }
+    };
 
     // hanle login
     const handleLogin = () => {
