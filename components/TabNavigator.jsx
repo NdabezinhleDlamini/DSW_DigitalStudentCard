@@ -4,7 +4,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Homescreen from "../screens/main/Homescreen";
 import HomescreenAlt from "../screens/main/Homescreen-alt";
 import CampusServicesScreen from "../screens/main/CampusServicesScreen";
-import AccessHistoryScreen from "../screens/main/AccessHistoryScreen";
+import AccessHistoryScreen from "../screens/campus services/AccessHistoryScreen";
 import ProfileScreen from "../screens/main/ProfileScreen";
 
 import { Colors } from "../constants/Colors";

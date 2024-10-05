@@ -1,10 +1,10 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 
-export default function AppSettings({ navigation }) {
+export default function ScanCard() {
     return (
         <View>
-            <Text>AppSettings</Text>
+            <Text>ScanCard</Text>
         </View>
     );
 }

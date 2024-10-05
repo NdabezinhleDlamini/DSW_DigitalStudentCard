@@ -15,8 +15,11 @@ import { Colors } from "../../constants/Colors";
 import { Layout } from "../../constants/Layout";
 import { Fonts } from "../../constants/Fonts";
 
+import { useRouter } from "expo-router";
+
 export default function HomescreenAlt({ navigation }) {
     const { currentColors } = useContext(ThemeContext);
+    const router = useRouter();
 
     const [location, setLocation] = useState(null);
     const [weather, setWeather] = useState({
@@ -168,7 +171,7 @@ export default function HomescreenAlt({ navigation }) {
                 >
                     Campus Services
                 </Text>
-                <View style={styles.iconRow}>
+                {/* <View style={styles.iconRow}>
                     {[
                         "Access Control",
                         "Lost & Found",
@@ -185,7 +188,27 @@ export default function HomescreenAlt({ navigation }) {
                             <Text>{service}</Text>
                         </TouchableOpacity>
                     ))}
+                </View> */}
+                {/* Campus Services Quick Link icons */}
+            <View>
+                <Text style={[styles.sectionTitle, { color: currentColors.text }]}>
+                    Campus Services
+                </Text>
+                <View style={styles.iconRow}>
+                    <TouchableOpacity style={[styles.campusServiceItem, { backgroundColor: currentColors.border }]} onPress={() => navigation.navigate('Services', { screen: 'LostAndFound' })}>
+                        <Text>Lost & Found</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.campusServiceItem, { backgroundColor: currentColors.border }]} onPress={() => navigation.navigate('Services', { screen: 'AccessHistory' })}>
+                        <Text>Access Control</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.campusServiceItem, { backgroundColor: currentColors.border }]} onPress={() => navigation.navigate('Services', { screen: 'CardCollection' })} >
+                        <Text>Collect</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.campusServiceItem, { backgroundColor: currentColors.border }]} onPress={() => navigation.navigate('Services', { screen: 'RequestNewCard' })}>
+                        <Text>Request</Text>
+                    </TouchableOpacity>
                 </View>
+            </View>
             </View>
         </SafeAreaView>
     );
