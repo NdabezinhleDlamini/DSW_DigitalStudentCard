@@ -20,16 +20,16 @@ export default function UserProfileScreen({ navigation }) {
     <SafeAreaView style={[styles.container, { backgroundColor: currentColors.background }]}>
       <View style={styles.header}>
         <View style={styles.iconsContainer}>
-          <TouchableOpacity onPress={() => navigation.navigate("Home")}>
+          <TouchableOpacity onPress={() => navigation.navigate("Home Alt")}>
             <Text style={[styles.headerText, { color: currentColors.text, fontFamily: "ThedusWideLight" }]}>
               VerifID
             </Text>
           </TouchableOpacity>
           <View style={styles.notificationContainer}>
-            <TouchableOpacity style={{ paddingHorizontal: 15 }}>
+            <TouchableOpacity style={{ paddingHorizontal: 15 }} onPress={() => navigation.navigate("Utils", { screen: "Notifications" })}>
               <Ionicons name="notifications-outline" size={24} color={currentColors.tint} />
             </TouchableOpacity>
-            <TouchableOpacity style={{ paddingHorizontal: 5 }}>
+            <TouchableOpacity style={{ paddingHorizontal: 5 }} onPress={() => navigation.navigate("Utils", { screen: "AppSettings" })}>
               <Ionicons name="settings-outline" size={24} color={currentColors.tint} />
             </TouchableOpacity>
           </View>

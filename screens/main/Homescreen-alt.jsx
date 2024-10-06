@@ -96,14 +96,28 @@ export default function HomescreenAlt({ navigation }) {
                         />
                     </TouchableOpacity>
                     <View style={styles.notificationContainer}>
-                        <TouchableOpacity style={{ paddingHorizontal: 15 }}>
+                        <TouchableOpacity
+                            style={{ paddingHorizontal: 15 }}
+                            onPress={() =>
+                                navigation.navigate("Utils", {
+                                    screen: "Notifications",
+                                })
+                            }
+                        >
                             <Ionicons
                                 name="notifications-outline"
                                 size={24}
                                 color={currentColors.tint}
                             />
                         </TouchableOpacity>
-                        <TouchableOpacity style={{ paddingHorizontal: 5 }}>
+                        <TouchableOpacity
+                            style={{ paddingHorizontal: 5 }}
+                            onPress={() =>
+                                navigation.navigate("Utils", {
+                                    screen: "AppSettings",
+                                })
+                            }
+                        >
                             <Ionicons
                                 name="settings-outline"
                                 size={24}
@@ -120,7 +134,7 @@ export default function HomescreenAlt({ navigation }) {
                         <Text style={styles.weatherWidgetTitleText}>
                             {weather.locationName
                                 ? weather.locationName
-                                : "Loading location..."}
+                                : "Loading..."}
                         </Text>
                         <Text
                             style={[
@@ -166,49 +180,71 @@ export default function HomescreenAlt({ navigation }) {
             </View>
 
             <View>
-                <Text
-                    style={[styles.sectionTitle, { color: currentColors.text }]}
-                >
-                    Campus Services
-                </Text>
-                {/* <View style={styles.iconRow}>
-                    {[
-                        "Access Control",
-                        "Lost & Found",
-                        "Book Room",
-                        "Help Desk",
-                    ].map((service, index) => (
+                {/* Campus Services Quick Link icons */}
+                <View>
+                    <Text
+                        style={[
+                            styles.sectionTitle,
+                            { color: currentColors.text },
+                        ]}
+                    >
+                        Campus Services
+                    </Text>
+                    <View style={styles.iconRow}>
                         <TouchableOpacity
-                            key={index}
                             style={[
                                 styles.campusServiceItem,
                                 { backgroundColor: currentColors.border },
                             ]}
+                            onPress={() =>
+                                navigation.navigate("Services", {
+                                    screen: "LostAndFound",
+                                })
+                            }
                         >
-                            <Text>{service}</Text>
+                            <Text>Lost & Found</Text>
                         </TouchableOpacity>
-                    ))}
-                </View> */}
-                {/* Campus Services Quick Link icons */}
-            <View>
-                <Text style={[styles.sectionTitle, { color: currentColors.text }]}>
-                    Campus Services
-                </Text>
-                <View style={styles.iconRow}>
-                    <TouchableOpacity style={[styles.campusServiceItem, { backgroundColor: currentColors.border }]} onPress={() => navigation.navigate('Services', { screen: 'LostAndFound' })}>
-                        <Text>Lost & Found</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={[styles.campusServiceItem, { backgroundColor: currentColors.border }]} onPress={() => navigation.navigate('Services', { screen: 'AccessHistory' })}>
-                        <Text>Access Control</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={[styles.campusServiceItem, { backgroundColor: currentColors.border }]} onPress={() => navigation.navigate('Services', { screen: 'CardCollection' })} >
-                        <Text>Collect</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={[styles.campusServiceItem, { backgroundColor: currentColors.border }]} onPress={() => navigation.navigate('Services', { screen: 'RequestNewCard' })}>
-                        <Text>Request</Text>
-                    </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[
+                                styles.campusServiceItem,
+                                { backgroundColor: currentColors.border },
+                            ]}
+                            onPress={() =>
+                                navigation.navigate("Services", {
+                                    screen: "AccessHistory",
+                                })
+                            }
+                        >
+                            <Text>Access Control</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[
+                                styles.campusServiceItem,
+                                { backgroundColor: currentColors.border },
+                            ]}
+                            onPress={() =>
+                                navigation.navigate("Services", {
+                                    screen: "CardCollection",
+                                })
+                            }
+                        >
+                            <Text>Collect</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[
+                                styles.campusServiceItem,
+                                { backgroundColor: currentColors.border },
+                            ]}
+                            onPress={() =>
+                                navigation.navigate("Services", {
+                                    screen: "RequestNewCard",
+                                })
+                            }
+                        >
+                            <Text>Request</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
-            </View>
             </View>
         </SafeAreaView>
     );
