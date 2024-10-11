@@ -5,6 +5,7 @@ import {
     ImageBackground,
     TouchableOpacity,
     TextInput,
+    Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useState } from "react";
@@ -12,6 +13,9 @@ import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
 import { Colors } from "@/constants/Colors";
+import { auth } from '../Firebase-config'
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { firebase } from "../Firebase-config"
 
 export default function ResetPasswordScreen({ navigation }) {
     const [fontsLoaded] = useFonts({
@@ -24,13 +28,25 @@ export default function ResetPasswordScreen({ navigation }) {
         return null; // or a loading spinner
     }
 
-    const handlePasswordReset = () => {
-        // Handle password reset logic here
-        console.log("Password reset link sent to:", email);
-        // Redirect or provide feedback to the user after password reset
-        alert("Password reset link sent to your email.");
-        navigation.navigate("Login");
+    const handlePasswordReset = async () => {
+        try {
+            await sendPasswordResetEmail(auth, email);
+            Alert.alert("Success", "Password reset email sent! Please check your inbox.");
+            navigation.navigate("Login");
+        } catch (error) {
+            Alert.alert("Error", error.message);
+            console.error("Error sending password reset email: ", error);
+        }
     };
+
+    // const handlePasswordReset = () => {
+    //     firebase.auth().sendPasswordResetEmail(firebase.auth().currentUser.email)
+    //     .then(()=> {
+    //         alert("passwords reset email sent")
+    //     }).catch((error) => {
+    //         alert(error)
+    //     })
+    // }
 
     return (
         <>
@@ -49,11 +65,13 @@ export default function ResetPasswordScreen({ navigation }) {
                         <Text style={styles.subtitle}>Reset Your Password</Text>
                     </View>
                     <View style={styles.form}>
+                        <Text style={styles.label}>Email</Text>
                         <TextInput
                             style={styles.input}
                             placeholder="Email"
                             keyboardType="email-address"
                             value={email}
+                            autoCapitalize="none"
                             onChangeText={setEmail}
                         />
                     </View>
@@ -113,7 +131,7 @@ const styles = StyleSheet.create({
     },
     form: {
         marginTop: 20,
-        width: "90%",
+        width: "75%",
         alignSelf: "center",
     },
     label: {
@@ -129,16 +147,16 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         paddingLeft: 20,
         alignSelf: "center",
-        marginTop: 20,
+        marginTop: 10,
     },
     button: {
         backgroundColor: "transparent",
         height: 50,
-        width: "90%",
+        width: "75%",
         justifyContent: "center",
         alignItems: "center",
         borderRadius: 10,
-        marginTop: 20,
+        marginTop: 10,
         alignSelf: "center",
         borderWidth: 1.5,
         borderColor: Colors.dark.highlight,
