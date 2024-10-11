@@ -6,22 +6,17 @@ import {
     TouchableOpacity,
     TextInput,
     Alert,
+    ActivityIndicator,
 } from "react-native";
 import React, { useState } from "react";
 
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
 import { Colors } from "@/constants/Colors";
-
-//Import Firebase Authentication 
 import { auth } from '../Firebase-config';
 import { createUserWithEmailAndPassword } from "firebase/auth";
-
-// Import Firebase Firestore
 import { db } from '../Firebase-config';
-import { addDoc, collection, setDoc, doc } from "firebase/firestore";
-
-import { Platform } from "react-native";
+import { doc, setDoc } from "firebase/firestore";
 
 export default function RegisterScreen({ navigation }) {
     const [fontsLoaded] = useFonts({
@@ -34,42 +29,47 @@ export default function RegisterScreen({ navigation }) {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [studentNumber, setStudentNumber] = useState(""); 
-    const platform = Platform.OS;
+    const [loading, setLoading] = useState(false);
 
     if (!fontsLoaded) {
         return null; // or a loading spinner
     }
 
-    const handleSignUp = async () => { 
+    const handleSignIn = async () => {
+        setLoading(true); // Start loading
         try {
             const userCredentials = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredentials.user;
-    
-            console.log(user.email);
-            
-            // Add user data to Firestore database using UID
-            const userData = {
-                FirstName: firstName,
-                LastName: lastName,
-                Email: email,
-                StudentNumber: studentNumber,
-                DisplayName: "",
-                CreatedAt: new Date().toISOString(),
-                LastLogin: new Date().toISOString(),
-                LastLoginIP: "",
-                LastLoginLocation: "",
-                LastLoginPlatform: platform,
-                ProfilePictureURL: ""
-            };
-    
-            // Set document with the user's UID as the ID
-            await setDoc(doc(db, "Users", user.uid), userData);
-            console.log('User data added to Firestore');
-    
-            // Proceed to login
-            navigation.navigate("Login");
+
+            await setDoc(doc(db, "Users", user.uid), {
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                studentNumber: studentNumber,
+            });
+
+            console.log("User registered:", user.email);
+            navigation.navigate("Login"); // go to login
         } catch (error) {
-            alert(error.message);
+            const errorCode = error.code;
+            let errorMessage = error.message;
+
+            if (errorCode === 'auth/email-already-in-use') {
+                errorMessage = "This email is already in use. Please use another email.";
+            } else if (errorCode === 'auth/weak-password') {
+                errorMessage = "Password is too weak. Please choose a stronger password.";
+            } else if (errorCode === 'auth/invalid-email') {
+                errorMessage = "Invalid email format.";
+            } else if (errorCode === 'auth/missing-email') {
+                errorMessage = "Email is required.";
+            } else if (errorCode === 'auth/operation-not-allowed') {
+                errorMessage = "Email/Password accounts are not enabled.";
+            } else {
+                errorMessage = "An unexpected error occurred. Please try again.";
+            }
+            Alert.alert("Registration Error", errorMessage);
+        } finally {
+            setLoading(false); // Stop loading
         }
     };
 
@@ -80,7 +80,7 @@ export default function RegisterScreen({ navigation }) {
         const trimmedEmail = email.trim();
         const trimmedPassword = password.trim();
         const trimmedConfirmPassword = confirmPassword.trim();
-        const trimmedStudentNumber = studentNumber.trim(); // Trim student number
+        const trimmedStudentNumber = studentNumber.trim(); 
 
         // Validate user input
         if (trimmedFirstName === "" || trimmedLastName === "") {
@@ -115,9 +115,7 @@ export default function RegisterScreen({ navigation }) {
             Alert.alert("Error", "Passwords do not match");
             return;
         }
-
-
-        handleSignUp();
+        handleSignIn();
     };
 
     const validateEmail = (email) => {
@@ -133,7 +131,6 @@ export default function RegisterScreen({ navigation }) {
 
     return (
         <>
-
             <StatusBar
                 style="dark"
                 translucent={true}
@@ -175,6 +172,7 @@ export default function RegisterScreen({ navigation }) {
                             placeholder="Email"
                             keyboardType="email-address"
                             value={email}
+                            autoCapitalize="none"
                             onChangeText={setEmail}
                         />
                         <TextInput
@@ -182,6 +180,7 @@ export default function RegisterScreen({ navigation }) {
                             placeholder="Password"
                             secureTextEntry
                             value={password}
+                            autoCapitalize="none"
                             onChangeText={setPassword}
                         />
                         <TextInput
@@ -189,6 +188,7 @@ export default function RegisterScreen({ navigation }) {
                             placeholder="Confirm Password"
                             secureTextEntry
                             value={confirmPassword}
+                            autoCapitalize="none"
                             onChangeText={setConfirmPassword}
                         />
                     </View>
@@ -196,6 +196,11 @@ export default function RegisterScreen({ navigation }) {
                 <TouchableOpacity style={styles.button} onPress={handleRegister}>
                     <Text style={styles.buttonText}>Register</Text>
                 </TouchableOpacity>
+
+                {loading && (
+                    <ActivityIndicator size="large" color={Colors.dark.highlight} style={styles.loadingIndicator} />
+                )}
+
                 <View style={styles.hasAccount}>
                     <Text style={{ marginRight: 4, color: Colors.dark.text }}>
                         Already have an account?
@@ -293,5 +298,9 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "center",
         marginTop: 20,
+    },
+    loadingIndicator: {
+        marginTop: 20,
+        alignSelf: "center",
     },
 });
