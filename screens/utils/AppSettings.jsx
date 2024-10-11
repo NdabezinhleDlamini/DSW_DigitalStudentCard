@@ -62,14 +62,18 @@ export default function AppSettings({ navigation }) {
                                 onChangeText={setDisplayName}
                                 placeholder="Display Name"
                             />
-                            <Button title="Save" onPress={() => setIsEditing(false)} />
+                            <TouchableOpacity style={styles.saveButton} onPress={() => setIsEditing(false)}>
+                                <Text style={styles.buttonText}>Save</Text>
+                            </TouchableOpacity>
                         </>
                     ) : (
                         <>
                             <Text style={styles.infoText}>First Name: {firstName}</Text>
                             <Text style={styles.infoText}>Last Name: {lastName}</Text>
                             <Text style={styles.infoText}>Display Name: {displayName}</Text>
-                            <Button title="Edit" onPress={() => setIsEditing(true)} />
+                            <TouchableOpacity style={styles.editButton} onPress={() => setIsEditing(true)}>
+                                <Text style={styles.buttonText}>Edit</Text>
+                            </TouchableOpacity>
                         </>
                     )}
                 </View>
@@ -117,7 +121,8 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "#fff",
         alignItems: "center",
-        justifyContent: "center",
+        justifyContent: "flex-start",
+        paddingVertical: 20,
     },
     settingGroupContainer: {
         width: "90%",
@@ -125,7 +130,7 @@ const styles = StyleSheet.create({
         padding: 20,
         borderRadius: 10,
         flexDirection: "column",
-        alignItems: "center",
+        alignItems: "flex-start",
         marginVertical: 10,
     },
     settingTitleContainer: {
@@ -153,7 +158,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.light.background,
         padding: 20,
         borderRadius: 10,
-        marginTop: 'auto',
+        marginTop: 20,
         marginBottom: 30,
     },
     dangerOption: {
@@ -162,6 +167,7 @@ const styles = StyleSheet.create({
     dangerText: {
         color: Colors.light.text,
         fontWeight: "bold",
+        textAlign: "center",
     },
     userInfo: {
         alignItems: "center",
@@ -189,5 +195,27 @@ const styles = StyleSheet.create({
         padding: 10,
         marginVertical: 5,
         borderRadius: 5,
+        backgroundColor: '#f9f9f9', // Light background for inputs
+    },
+    saveButton: {
+        backgroundColor: Colors.light.tint,
+        borderRadius: 5,
+        padding: 10,
+        alignItems: "center",
+        marginTop: 10,
+        width: "100%",
+    },
+    editButton: {
+        backgroundColor: Colors.light.tint,
+        borderRadius: 5,
+        padding: 10,
+        alignItems: "center",
+        marginTop: 10,
+        width: "100%",
+    },
+    buttonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        textAlign: 'center',
     },
 });
