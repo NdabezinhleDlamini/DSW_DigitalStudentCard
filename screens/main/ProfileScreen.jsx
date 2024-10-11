@@ -23,35 +23,52 @@ export default function UserProfileScreen({ navigation }) {
   const [user, setUser] = useState(null);
   const [lastLoginTime, setLastLoginTime] = useState("");
 
+  //get user data
   useEffect(() => {
     const fetchUserData = async () => {
         const userId = auth.currentUser.uid;
-        const userDoc = doc(db, "Users", userId); // Replace "users" with your collection name
+        const userDoc = doc(db, "Users", userId);
         const userSnapshot = await getDoc(userDoc);
         if (userSnapshot.exists()) {
-            setUser(userSnapshot.data());
+            const userData = userSnapshot.data();
+            setUser(userData);
+            setLastLoginTime(userData.lastLoginTime);
         } else {
             console.log("No such document!");
         }
     };
-
     fetchUserData();
 }, []);
+
+//comparing time
+const timeAgo = (lastLogin) => {
+  const now = new Date();
+  const then = new Date(lastLogin);
+  const diff = Math.abs(now - then);
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
+  if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+  if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+  return "Just now";
+};
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: currentColors.background }]}>
       <View style={styles.header}>
         <View style={styles.iconsContainer}>
-          <TouchableOpacity onPress={() => navigation.navigate("Home")}>
+          <TouchableOpacity onPress={() => navigation.navigate("Home Alt")}>
             <Text style={[styles.headerText, { color: currentColors.text, fontFamily: "ThedusWideLight" }]}>
               VerifID
             </Text>
           </TouchableOpacity>
           <View style={styles.notificationContainer}>
-            <TouchableOpacity style={{ paddingHorizontal: 15 }}>
+            <TouchableOpacity style={{ paddingHorizontal: 15 }} onPress={() => navigation.navigate("Utils", { screen: "Notifications" })}>
               <Ionicons name="notifications-outline" size={24} color={currentColors.tint} />
             </TouchableOpacity>
-            <TouchableOpacity style={{ paddingHorizontal: 5 }}>
+            <TouchableOpacity style={{ paddingHorizontal: 5 }} onPress={() => navigation.navigate("Utils", { screen: "AppSettings" })}>
               <Ionicons name="settings-outline" size={24} color={currentColors.tint} />
             </TouchableOpacity>
           </View>
@@ -74,13 +91,11 @@ export default function UserProfileScreen({ navigation }) {
 
         {/* User Info Section */}
         <View style={styles.infoSection}>
-          {/* <Text style={[styles.nameText, { color: currentColors.text }]}>John Doe</Text>
-          <Text style={[styles.idText, { color: "#777" }]}>@johndoe</Text> */}
           <Text style={[styles.nameText, { color: currentColors.text }]}>
-            {user ? `${user.FirstName} ${user.LastName}` : "Loading..."}
+            {user ? `${user.firstName} ${user.lastName}` : "Loading..."}
           </Text>
           <Text style={[styles.idText, { color: "#777" }]}>
-            @{user ? `${user.DisplayName}`  : "Loading..."}
+            @{user ? `${user.firstName} ${user.lastName}`  : "Loading..."}
           </Text> 
         </View>
 
@@ -114,10 +129,12 @@ export default function UserProfileScreen({ navigation }) {
             </Text>
             <Text style={[styles.timestamp, { color: "#777" }]}>2 hours ago</Text>
           </View>
-
           <View style={[styles.activityItem, { backgroundColor: isDarkMode ? "#1d3557" : "#edf6f9" }]}>
             <Text style={[styles.activityText, { color: currentColors.text }]}>
-              Last Login Time: {lastLoginTime ? new Date(lastLoginTime).toLocaleString() : "Loading..."}
+              Logged In
+            </Text>
+            <Text style={[styles.timestamp, { color: "#777" }]}>
+              {lastLoginTime ? timeAgo(lastLoginTime) : "Loading..."}
             </Text>
           </View>
           {/* Add more activities here */}
