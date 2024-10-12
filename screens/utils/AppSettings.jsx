@@ -4,21 +4,29 @@ import { StyleSheet, Text, View, TouchableOpacity, Image, Button, TextInput } fr
 import { MaterialIcons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { useState } from "react";
+import * as ImagePicker from "expo-image-picker";
 
 export default function AppSettings({ navigation }) {
     const [firstName, setFirstName] = useState("John");
     const [lastName, setLastName] = useState("Doe");
     const [displayName, setDisplayName] = useState("johndoe123");
     const [profilePic, setProfilePic] = useState(null);
-    const [bannerImg, setBannerImg] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
 
-    const pickBannerImage = async () => {
-        // TODO: Implement banner image picker
-    };
 
     const pickProfilePicture = async () => {
-        // TODO: Implement profile picture picker
+        // TODO: Implement profile picture picker with expo image picker
+
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 1,
+        });
+
+        if (!result.canceled) {
+            setProfilePic(result.assets[0].uri);
+        }
     };
 
     return (
@@ -33,12 +41,6 @@ export default function AppSettings({ navigation }) {
                         <Image
                             source={profilePic ? { uri: profilePic } : { uri: "https://via.placeholder.com/500x150" }}
                             style={styles.profilePicture}
-                        />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={pickBannerImage}>
-                        <Image
-                            source={bannerImg ? { uri: bannerImg } : { uri: "https://via.placeholder.com/500x150" }}
-                            style={styles.bannerImage}
                         />
                     </TouchableOpacity>
 
@@ -156,6 +158,8 @@ const styles = StyleSheet.create({
     dangerZoneContainer: {
         width: "90%",
         backgroundColor: Colors.light.background,
+        borderWidth: 1.5,
+        borderColor: "red",
         padding: 20,
         borderRadius: 10,
         marginTop: 20,
@@ -165,12 +169,11 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
     },
     dangerText: {
-        color: Colors.light.text,
+        color: "red",
         fontWeight: "bold",
         textAlign: "center",
     },
     userInfo: {
-        alignItems: "center",
         justifyContent: "center",
     },
     profilePicture: {
@@ -178,11 +181,6 @@ const styles = StyleSheet.create({
         height: 100,
         borderRadius: 50,
         marginBottom: 10,
-    },
-    bannerImage: {
-        width: "100%",
-        height: 150,
-        marginBottom: 20,
     },
     infoText: {
         fontSize: 16,
@@ -207,6 +205,7 @@ const styles = StyleSheet.create({
     },
     editButton: {
         backgroundColor: Colors.light.tint,
+        borderWidth: 1,
         borderRadius: 5,
         padding: 10,
         alignItems: "center",
