@@ -15,9 +15,9 @@ import CardCollection from "../screens/campus services/CardCollection";
 
 //Utils Screens
 
-import AppSettings from "../screens/utils/AppSettings";
-import EditProfile from "../screens/utils/EditProfile";
-import ScanCard from "../screens/utils/ScanCard";
+// import AppSettings from "../screens/utils/AppSettings";
+// import EditProfile from "../screens/utils/EditProfile";
+// import ScanCard from "../screens/utils/ScanCard";
 
 import TabNavigator from "../components/TabNavigator";
 import ServicesNavigator from "./ServicesNavigator";

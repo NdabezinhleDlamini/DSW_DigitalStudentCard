@@ -15,8 +15,8 @@ export const Colors = {
     shadowColor: '#000',      // Standard black shadow
   },
   dark: {
-    text: '#edf6f9',          // Light cyan for readability in dark mode
-    background: '#1d3557',    // Deep navy blue for the background
+    text: '#f1faee',          // Light cyan for readability in dark mode
+    background: '#202020',    // Deep navy blue for the background
     tint: tintColorDark,
     icon: '#a8dadc',          // Soft cyan for subtlety in dark mode
     tabIconDefault: '#a8dadc',
