@@ -8,25 +8,25 @@ const campuses = [
     label: 'University of Johannesburg APK',
     value: 'uj_apk',
     location: '\nC/of Kingsway and University Road\nAuckland Park\nLibrary Bridge Cellar\nGround floor',
-    image: require("../../assets/images/UJ_APK.jpg"), // Update the path to your image
+    // image: require("../../assets/images/UJ_APK.jpg"), // Update the path to your image
   },
   {
     label: 'University of Johannesburg APB',
     value: 'uj_apb',
     location: '\n15 Bunting Road\nCottesloe\nProtection Services Building\n1st Floor\nOffice 102',
-    image: require("../../assets/images/UJ_APB.jpg"), // Update the path to your image
+    // image: require("../../assets/images/UJ_APB.jpg"), // Update the path to your image
   },
   {
     label: 'University of Johannesburg DFC',
     value: 'uj_dfc',
     location: '\n37 Nind Street\nDoornfontein',
-    image: require("../../assets/images/UJ_DFC.jpg"), // Update the path to your image
+    // image: require("../../assets/images/UJ_DFC.jpg"), // Update the path to your image
   },
   {
     label: 'University of Johannesburg SWC',
     value: 'uj_swc',
     location: '\nChris Hani Road\nSoweto\nAdministration Building Block D (uKhamba)\nGround floor\nOffice ADD 1192028\nGround floor\nOffice G01',
-    image: require("../../assets/images/UJ_SWC.jpg"), // Update the path to your image
+    // image: require("../../assets/images/UJ_SWC.jpg"), // Update the path to your image
   },
 ];
 

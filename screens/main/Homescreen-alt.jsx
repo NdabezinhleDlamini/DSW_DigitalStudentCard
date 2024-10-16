@@ -231,7 +231,6 @@ export default function HomescreenAlt({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-<<<<<<< HEAD
   container: {
     flex: 1,
     padding: Layout.padding,
@@ -326,7 +325,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4, // Shadow radius
     elevation: 5,
   },
-=======
     container: {
         flex: 1,
         padding: Layout.padding,
@@ -412,5 +410,4 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
     },
->>>>>>> 493f6a47b88a17d287f1d9fdf00bfb3cf428b621
 });
