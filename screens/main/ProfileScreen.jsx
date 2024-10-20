@@ -27,10 +27,10 @@ export default function UserProfileScreen({ navigation }) {
           </TouchableOpacity>
           <View style={styles.notificationContainer}>
             <TouchableOpacity style={{ paddingHorizontal: 15 }} onPress={() => navigation.navigate("Utils", { screen: "Notifications" })}>
-              <Ionicons name="notifications-outline" size={24} color={currentColors.tint} />
+              <Ionicons name="notifications-outline" size={24} color={currentColors.text} />
             </TouchableOpacity>
             <TouchableOpacity style={{ paddingHorizontal: 5 }} onPress={() => navigation.navigate("Utils", { screen: "AppSettings" })}>
-              <Ionicons name="settings-outline" size={24} color={currentColors.tint} />
+              <Ionicons name="settings-outline" size={24} color={currentColors.text} />
             </TouchableOpacity>
           </View>
         </View>
@@ -60,8 +60,8 @@ export default function UserProfileScreen({ navigation }) {
         <View style={styles.switchContainer}>
           <Text style={[styles.switchLabel, { color: currentColors.text }]}>Dark Mode</Text>
           <Switch
-            trackColor={{ false: "#767577", true: "#81b0ff" }}
-            thumbColor={isDarkMode ? currentColors.tint : Colors.light.tint}
+            trackColor={{ false: "#81b0ff", true: "#81b0ff" }}
+            thumbColor={isDarkMode ? currentColors.primaryButtonBackground : Colors.light.primaryButtonBackground}
             onValueChange={toggleTheme} // Use the toggleTheme from context
             value={isDarkMode}
           />
@@ -70,10 +70,10 @@ export default function UserProfileScreen({ navigation }) {
         {/* Report Lost Card Button */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity
-            style={[styles.reportButton, { backgroundColor: currentColors.tint }]}
+            style={[styles.reportButton, { backgroundColor: currentColors.primaryButtonBackground }]}
             onPress={() => navigation.navigate("ReportLostCard")}
           >
-            <Text style={[styles.buttonText, { color: currentColors.text }]}>Report Lost Card</Text>
+            <Text style={[styles.buttonText, { color: currentColors.primaryButtonText }]}>Report Lost Card</Text>
           </TouchableOpacity>
         </View>
 
@@ -115,6 +115,7 @@ const styles = StyleSheet.create({
     },
     headerText: {
         ...Fonts.subtitle,
+        fontSize: 24,
     },
     scrollContainer: {
         paddingBottom: 20,
@@ -126,6 +127,7 @@ const styles = StyleSheet.create({
     headerImage: {
         width: "100%",
         height: 150,
+        opacity: 0.8,
     },
     profileImageWrapper: {
         position: "absolute",

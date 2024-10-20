@@ -15,13 +15,13 @@ import { Layout } from "@/constants/Layout";
 import { Fonts } from "@/constants/Fonts";
 
 export default function CampusServicesScreen({ navigation }) {
-    const { currentColors } = useContext(ThemeContext); // Access dynamic colors from the context
+    const { currentColors } = useContext(ThemeContext); 
 
     return (
         <SafeAreaView
             style={[
                 styles.container,
-                { backgroundColor: currentColors.background }, // Apply dynamic background color
+                { backgroundColor: currentColors.background }, 
             ]}
         >
             <View style={styles.header}>
@@ -30,7 +30,7 @@ export default function CampusServicesScreen({ navigation }) {
                         <Ionicons
                             name="person-circle-outline"
                             size={24}
-                            color={currentColors.tint} // Apply dynamic tint color
+                            color={currentColors.text} 
                         />
                     </TouchableOpacity>
                     <View style={styles.notificationContainer}>
@@ -38,25 +38,24 @@ export default function CampusServicesScreen({ navigation }) {
                             <Ionicons
                                 name="notifications-outline"
                                 size={24}
-                                color={currentColors.tint} // Apply dynamic tint color
+                                color={currentColors.text} 
                             />
                         </TouchableOpacity>
                         <TouchableOpacity style={{ paddingHorizontal: 5 }}>
                             <Ionicons
                                 name="settings-outline"
                                 size={24}
-                                color={currentColors.tint} // Apply dynamic tint color
+                                color={currentColors.text} 
                             />
                         </TouchableOpacity>
                     </View>
                 </View>
             </View>
 
-            {/* Search and Filter Section */}
             <TextInput
-                style={[styles.input, { borderColor: currentColors.border }]} // Dynamic border color
+                style={[styles.input, { borderColor: currentColors.border }]} 
                 placeholder="Search..."
-                placeholderTextColor={currentColors.text} // Dynamic placeholder color
+                placeholderTextColor={currentColors.text} 
             />
             <ScrollView
                 horizontal={true}
@@ -64,21 +63,21 @@ export default function CampusServicesScreen({ navigation }) {
                 contentContainerStyle={styles.filterSection}
             >
                 <TouchableOpacity
-                    style={[styles.filterChipActive, { backgroundColor: currentColors.tint }]} // Dynamic active chip background
+                    style={[styles.filterChipActive, { backgroundColor: currentColors.tint }]} 
                 >
                     <Text style={[styles.filterTextActive, { color: currentColors.background }]}>
                         General
                     </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                    style={[styles.filterChipInactive, { backgroundColor: currentColors.primary }]} // Dynamic inactive chip background
+                    style={[styles.filterChipInactive, { backgroundColor: currentColors.primary }]} 
                 >
                     <Text style={[styles.filterTextInactive, { color: currentColors.text }]}>
                         Card Management
                     </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                    style={[styles.filterChipInactive, { backgroundColor: currentColors.primary }]} // Dynamic inactive chip background
+                    style={[styles.filterChipInactive, { backgroundColor: currentColors.primary }]} 
                 >
                     <Text style={[styles.filterTextInactive, { color: currentColors.text }]}>
                         Support Services
@@ -86,9 +85,8 @@ export default function CampusServicesScreen({ navigation }) {
                 </TouchableOpacity>
             </ScrollView>
 
-            {/* Main Section */}
             <View style={[styles.mainSection, { backgroundColor: currentColors.card }]}>
-                {/* Other content */}
+
             </View>
         </SafeAreaView>
     );
@@ -97,6 +95,7 @@ export default function CampusServicesScreen({ navigation }) {
 const styles = StyleSheet.create({
     container: {
         padding: Layout.padding,
+        flex: 1,
     },
     header: {
         flexDirection: "column",

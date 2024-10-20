@@ -102,7 +102,7 @@ useEffect(() => {
                 </Text>
 
                 <View>
-                  <Image source={{ uri: item.imageURL }} style={styles.image} />
+                  {/* <Image source={{ uri: item.imageURL }} style={styles.image} /> */}
                 </View>
               </View>
             )}
@@ -135,11 +135,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 25, // Horizontal padding
     borderRadius: 25, // Rounded corners
     alignItems: "center", // Center the text
-    shadowColor: "#000", // Shadow color
-    shadowOffset: { width: 0, height: 2 }, // Shadow offset
-    shadowOpacity: 0.3, // Shadow opacity
-    shadowRadius: 4, // Shadow radius
-    elevation: 5,
+
   },
   card: {
     backgroundColor: "#fff",

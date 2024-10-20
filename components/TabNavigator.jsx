@@ -1,26 +1,45 @@
-import React from "react";
+import React, { useContext } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
-import Homescreen from "../screens/main/Homescreen";
 import HomescreenAlt from "../screens/main/Homescreen-alt";
 import CampusServicesScreen from "../screens/main/CampusServicesScreen";
-import AccessHistoryScreen from "../screens/campus services/AccessHistoryScreen";
 import ProfileScreen from "../screens/main/ProfileScreen";
 
+import { ThemeContext } from "../contexts/ThemeContext";
 import { Colors } from "../constants/Colors";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, Octicons } from "@expo/vector-icons";
 
 const Tab = createBottomTabNavigator();
 
 export default function TabNavigator() {
+    const { currentColors } = useContext(ThemeContext);
     return (
-        <Tab.Navigator screenOptions={{ headerShown: false }}>
-            {/* <Tab.Screen name="Home" component={Homescreen} /> */}
-            <Tab.Screen name="Home Alt" component={HomescreenAlt} />
-            {/* <Tab.Screen name="Access History" component={AccessHistoryScreen} /> */}
+        <Tab.Navigator
+            screenOptions={{
+                tabBarStyle: {
+                    backgroundColor: currentColors.background,
+                    borderTopColor: currentColors.background,
+                    height: 60,
+                    borderTopWidth: 0.5,
+                    paddingBottom: 10,
+                    borderTopColor: currentColors.text,
+                },
+                tabBarActiveTintColor: currentColors.text,
+                headerShown: false,
+            }}
+        >
+            <Tab.Screen 
+                name="Home" 
+                component={HomescreenAlt} 
+                options={{
+                    tabBarIcon: ({ color, size }) => (
+                        <Octicons name="home" size={size} color={color} />
+                    ),
+                }}/>
             <Tab.Screen
                 name="Campus Services"
                 component={CampusServicesScreen}
+
             />
             <Tab.Screen name="Profile" component={ProfileScreen} />
         </Tab.Navigator>
