@@ -9,11 +9,13 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import React from "react";
 
+
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
 import { Colors } from "@/constants/Colors";
 
 export default function OnBoardingScreen({ navigation }) {
+    
     const [fontsLoaded] = useFonts({
         ThedusWideLight: require("../assets/fonts/ThedusWideLight-Bold.otf"),
     });
@@ -23,53 +25,60 @@ export default function OnBoardingScreen({ navigation }) {
     }
 
     return (
-        <>
-            <StatusBar
-                style="dark"
-                translucent={true}
-                backgroundColor="rgba(0,0,0,0)"
+      <>
+        <StatusBar
+          style="dark"
+          translucent={true}
+          backgroundColor="rgba(0,0,0,0)"
+        />
+        <ImageBackground
+          style={styles.backgroundImage}
+          source={require("../assets/images/Onboarding_Dark.png")}
+        >
+          <View>
+            <Image
+              style={styles.logo}
+              source={require("../assets/images/Logo_White.png")}
             />
-            <ImageBackground
-                style={styles.backgroundImage}
-                source={require("../assets/images/Onboarding_Dark.png")}
+            <Text style={styles.title}>Verifid</Text>
+            <Text style={styles.subtitle}>Tap Into Convenience</Text>
+          </View>
+          <TouchableOpacity
+            style={[styles.button, { borderColor: "#1e90ff" }]}
+            onPress={() => {
+              navigation.navigate("Register");
+            }}
+          >
+            <Text style={styles.buttonText}>Get Started</Text>
+          </TouchableOpacity>
+          <View style={styles.hasAccount}>
+            <Text
+              style={{
+                marginRight: 4,
+                color: Colors.dark.text,
+                fontWeight: "bold",
+              }}
             >
-                <View>
-                    <Image
-                        style={styles.logo}
-                        source={require("../assets/images/Logo_White.png")}
-                    />
-                    <Text style={styles.title}>Verifid</Text>
-                    <Text style={styles.subtitle}>Tap Into Convenience</Text>
-                </View>
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => {
-                        navigation.navigate("Register");
-                    }}
-                >
-                    <Text style={styles.buttonText}>Get Started</Text>
-                </TouchableOpacity>
-                <View style={styles.hasAccount}>
-                    <Text style={{ marginRight: 4, color: Colors.dark.text }}>
-                        Already have an account?
-                    </Text>
-                    <TouchableOpacity
-                        onPress={() => {
-                            navigation.navigate("Login");
-                        }}
-                    >
-                        <Text
-                            style={{
-                                textDecorationLine: "underline",
-                                color: Colors.dark.highlight,
-                            }}
-                        >
-                            Log In
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-            </ImageBackground>
-        </>
+              Already have an account?
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("Login");
+              }}
+            >
+              <Text
+                style={{
+                  textDecorationLine: "underline",
+                  color: "#1e90ff",
+                  fontWeight: "bold",
+                }}
+              >
+                Log In
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ImageBackground>
+      </>
     );
 }
 
@@ -112,11 +121,10 @@ const styles = StyleSheet.create({
         marginTop: 10,
         alignSelf: "center",
         borderWidth: 1.5,
-        borderColor: Colors.dark.highlight,
     },
     buttonText: {
-        fontSize: 15,
-        fontWeight: "500",
+        fontSize: 18,
+        fontWeight: "bold",
         color: "white",
     },
     hasAccount: {

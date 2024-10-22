@@ -60,79 +60,86 @@ export default function OnBoardingScreen({ navigation }) {
     };
 
     return (
-        <>
-            <StatusBar
-                style="dark"
-                translucent={true}
-                backgroundColor="rgba(0,0,0,0)"
-            />
-            <ImageBackground
-                style={styles.backgroundImage}
-                source={require("../assets/images/Onboarding_Dark.png")}
+      <>
+        <StatusBar
+          style="dark"
+          translucent={true}
+          backgroundColor="rgba(0,0,0,0)"
+        />
+        <ImageBackground
+          style={styles.backgroundImage}
+          source={require("../assets/images/Onboarding_Dark.png")}
+        >
+          <View>
+            <View>
+              <Text style={styles.title}>Verifid</Text>
+              <Text style={styles.subtitle}>Welcome Back!</Text>
+            </View>
+            <View style={styles.form}>
+              <Text style={styles.label}>Email</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Email"
+                keyboardType="email-address"
+                value={email}
+                onChangeText={setEmail}
+              />
+              <Text style={styles.label}>Password</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Password"
+                secureTextEntry
+                value={password}
+                onChangeText={setPassword}
+              />
+              <TouchableOpacity
+                onPress={() => {
+                  navigation.navigate("ForgotPassword");
+                }}
+              >
+                <Text style={[styles.forgotPassword, { color: "#1e90ff" }]}>
+                  Forgot Password?
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          <TouchableOpacity
+            style={[styles.button, { borderColor: "#1e90ff" }]}
+            onPress={() => {
+              // navigation.navigate("Homescreen");
+              handleLogin();
+            }}
+          >
+            <Text style={styles.buttonText}>Log In</Text>
+          </TouchableOpacity>
+          <View style={styles.hasAccount}>
+            <Text
+              style={{
+                marginRight: 4,
+                color: Colors.dark.text,
+                fontWeight: "bold",
+              }}
             >
-                <View>
-                    <View>
-                        <Text style={styles.title}>Verifid</Text>
-                        <Text style={styles.subtitle}>Welcome Back!</Text>
-                    </View>
-                    <View style={styles.form}>
-                        <Text style={styles.label}>Email</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Email"
-                            keyboardType="email-address"
-                            value={email}
-                            onChangeText={setEmail}
-                        />
-                        <Text style={styles.label}>Password</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Password"
-                            secureTextEntry
-                            value={password}
-                            onChangeText={setPassword}
-                        />
-                        <TouchableOpacity
-                            onPress={() => {
-                                navigation.navigate("ForgotPassword");
-                            }}
-                        >
-                            <Text style={styles.forgotPassword}>
-                                Forgot Password?
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => {
-                        // navigation.navigate("Homescreen");
-                        handleLogin();
-                    }}
-                >
-                    <Text style={styles.buttonText}>Log In</Text>
-                </TouchableOpacity>
-                <View style={styles.hasAccount}>
-                    <Text style={{ marginRight: 4, color: Colors.dark.text }}>
-                        Don't have an account?
-                    </Text>
-                    <TouchableOpacity
-                        onPress={() => {
-                            navigation.navigate("Register");
-                        }}
-                    >
-                        <Text
-                            style={{
-                                textDecorationLine: "underline",
-                                color: Colors.dark.highlight,
-                            }}
-                        >
-                            Register
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-            </ImageBackground>
-        </>
+              Don't have an account?
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("Register");
+              }}
+            >
+              <Text
+                style={{
+                  textDecorationLine: "underline",
+                  color: "#1e90ff",
+                  fontWeight: "bold",
+                }}
+              >
+                Register
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ImageBackground>
+      </>
     );
 }
 
@@ -199,8 +206,8 @@ const styles = StyleSheet.create({
         borderColor: Colors.dark.highlight,
     },
     buttonText: {
-        fontSize: 15,
-        fontWeight: "500",
+        fontSize: 18,
+        fontWeight: "bold",
         color: "white",
     },
     hasAccount: {

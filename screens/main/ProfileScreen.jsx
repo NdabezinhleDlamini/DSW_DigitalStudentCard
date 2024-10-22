@@ -1,13 +1,21 @@
 import React, { useContext } from "react";
-import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, Switch } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  Switch,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
 import { ThemeContext } from "../../contexts/ThemeContext"; // Import ThemeContext
 
-import {Colors} from '../../constants/Colors';
-import {Layout} from '../../constants/Layout';
-import {Fonts} from '../../constants/Fonts';
+import { Colors } from "../../constants/Colors";
+import { Layout } from "../../constants/Layout";
+import { Fonts } from "../../constants/Fonts";
 
 export default function UserProfileScreen({ navigation }) {
   const { isDarkMode, toggleTheme, currentColors } = useContext(ThemeContext); // Get theme state from context
@@ -17,20 +25,45 @@ export default function UserProfileScreen({ navigation }) {
   });
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: currentColors.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: currentColors.background }]}
+    >
       <View style={styles.header}>
         <View style={styles.iconsContainer}>
           <TouchableOpacity onPress={() => navigation.navigate("Home Alt")}>
-            <Text style={[styles.headerText, { color: currentColors.text, fontFamily: "ThedusWideLight" }]}>
+            <Text
+              style={[
+                styles.headerText,
+                { color: currentColors.text, fontFamily: "ThedusWideLight" },
+              ]}
+            >
               VerifID
             </Text>
           </TouchableOpacity>
           <View style={styles.notificationContainer}>
-            <TouchableOpacity style={{ paddingHorizontal: 15 }} onPress={() => navigation.navigate("Utils", { screen: "Notifications" })}>
-              <Ionicons name="notifications-outline" size={24} color={currentColors.text} />
+            <TouchableOpacity
+              style={{ paddingHorizontal: 15 }}
+              onPress={() =>
+                navigation.navigate("Utils", { screen: "Notifications" })
+              }
+            >
+              <Ionicons
+                name="notifications-outline"
+                size={24}
+                color={currentColors.text}
+              />
             </TouchableOpacity>
-            <TouchableOpacity style={{ paddingHorizontal: 5 }} onPress={() => navigation.navigate("Utils", { screen: "AppSettings" })}>
-              <Ionicons name="settings-outline" size={24} color={currentColors.text} />
+            <TouchableOpacity
+              style={{ paddingHorizontal: 5 }}
+              onPress={() =>
+                navigation.navigate("Utils", { screen: "AppSettings" })
+              }
+            >
+              <Ionicons
+                name="settings-outline"
+                size={24}
+                color={currentColors.text}
+              />
             </TouchableOpacity>
           </View>
         </View>
@@ -42,7 +75,12 @@ export default function UserProfileScreen({ navigation }) {
             style={styles.headerImage}
             source={{ uri: "https://via.placeholder.com/500x150" }} // Placeholder for header background
           />
-          <View style={[styles.profileImageWrapper, { borderColor: currentColors.primaryButtonBackground }]}>
+          <View
+            style={[
+              styles.profileImageWrapper,
+              { borderColor: currentColors.primaryButtonBackground },
+            ]}
+          >
             <Image
               style={styles.profileImage}
               source={{ uri: "https://via.placeholder.com/100" }} // Placeholder for Profile Picture
@@ -52,28 +90,53 @@ export default function UserProfileScreen({ navigation }) {
 
         {/* User Info Section */}
         <View style={styles.infoSection}>
-          <Text style={[styles.nameText, { color: currentColors.text }]}>John Doe</Text>
+          <Text style={[styles.nameText, { color: currentColors.text }]}>
+            John Doe
+          </Text>
           <Text style={[styles.idText, { color: "#777" }]}>@johndoe</Text>
         </View>
 
         {/* Report Lost Card Button */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity
-            style={[styles.reportButton, { backgroundColor: currentColors.primaryButtonBackground }]}
-            onPress={() => navigation.navigate("ReportLostCard")}
+            style={[
+              styles.reportButton,
+              { backgroundColor: currentColors.primaryButtonBackground },
+            ]}
+            onPress={() =>
+                    navigation.navigate("Services", {
+                      screen: "PostItemScreen",
+                    })
+                  }
           >
-            <Text style={[styles.buttonText, { color: currentColors.primaryButtonText }]}>Report Lost Card</Text>
+            <Text
+              style={[
+                styles.buttonText,
+                { color: currentColors.primaryButtonText },
+              ]}
+            >
+              Report Lost Card
+            </Text>
           </TouchableOpacity>
         </View>
 
         {/* Activity Timeline */}
         <View style={styles.activitySection}>
-          <Text style={[styles.sectionTitle, { color: currentColors.text }]}>Recent Activities</Text>
-          <View style={[styles.activityItem, { backgroundColor: currentColors.settingGroupBackground }]}>
+          <Text style={[styles.sectionTitle, { color: currentColors.text }]}>
+            Recent Activities
+          </Text>
+          <View
+            style={[
+              styles.activityItem,
+              { backgroundColor: currentColors.settingGroupBackground },
+            ]}
+          >
             <Text style={[styles.activityText, { color: currentColors.text }]}>
               Accessed the Library
             </Text>
-            <Text style={[styles.timestamp, { color: "#777" }]}>2 hours ago</Text>
+            <Text style={[styles.timestamp, { color: "#777" }]}>
+              2 hours ago
+            </Text>
           </View>
           {/* Add more activities here */}
         </View>
@@ -83,110 +146,110 @@ export default function UserProfileScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    header: {
-        flexDirection: "column",
-        alignItems: "flex-start",
-        paddingHorizontal: Layout.padding,
-    },
-    iconsContainer: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        width: "100%",
-        marginBottom: Layout.margin,
-    },
-    notificationContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-    },
-    headerText: {
-        ...Fonts.subtitle,
-        fontSize: 24,
-    },
-    scrollContainer: {
-        paddingBottom: 20,
-    },
-    headerSection: {
-        width: "100%",
-        position: "relative",
-    },
-    headerImage: {
-        width: "100%",
-        height: 150,
-        opacity: 0.8,
-    },
-    profileImageWrapper: {
-        position: "absolute",
-        bottom: -50,
-        left: 20,
-        borderWidth: 3,
-        borderRadius: 50,
-    },
-    profileImage: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
-    },
-    infoSection: {
-        marginTop: 60,
-        paddingHorizontal: 20,
-    },
-    nameText: {
-        fontSize: 22,
-        fontWeight: "bold",
-    },
-    idText: {
-        fontSize: 16,
-    },
-    switchContainer: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        paddingHorizontal: 20,
-        marginVertical: 20,
-    },
-    switchLabel: {
-        fontSize: 18,
-    },
-    buttonContainer: {
-        paddingHorizontal: 20,
-        marginVertical: 20,
-    },
-    reportButton: {
-        paddingVertical: 15,
-        paddingHorizontal: 25,
-        borderRadius: 8,
-        alignItems: "center",
-        justifyContent: "center",
-        width: "100%",
-    },
-    buttonText: {
-        fontSize: 18,
-        fontWeight: "600",
-    },
-    activitySection: {
-        paddingHorizontal: 20,
-        marginTop: 10,
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: "bold",
-        marginBottom: 10,
-    },
-    activityItem: {
-        padding: 15,
-        borderRadius: 8,
-        marginBottom: 10,
-    },
-    activityText: {
-        fontSize: 16,
-    },
-    timestamp: {
-        fontSize: 12,
-        color: "#777",
-        marginTop: 4,
-    },
+  container: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: "column",
+    alignItems: "flex-start",
+    paddingHorizontal: Layout.padding,
+  },
+  iconsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+    marginBottom: Layout.margin,
+  },
+  notificationContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  headerText: {
+    ...Fonts.subtitle,
+    fontSize: 24,
+  },
+  scrollContainer: {
+    paddingBottom: 20,
+  },
+  headerSection: {
+    width: "100%",
+    position: "relative",
+  },
+  headerImage: {
+    width: "100%",
+    height: 150,
+    opacity: 0.8,
+  },
+  profileImageWrapper: {
+    position: "absolute",
+    bottom: -50,
+    left: 20,
+    borderWidth: 3,
+    borderRadius: 50,
+  },
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+  },
+  infoSection: {
+    marginTop: 60,
+    paddingHorizontal: 20,
+  },
+  nameText: {
+    fontSize: 22,
+    fontWeight: "bold",
+  },
+  idText: {
+    fontSize: 16,
+  },
+  switchContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    marginVertical: 20,
+  },
+  switchLabel: {
+    fontSize: 18,
+  },
+  buttonContainer: {
+    paddingHorizontal: 20,
+    marginVertical: 20,
+  },
+  reportButton: {
+    paddingVertical: 15,
+    paddingHorizontal: 25,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+  },
+  buttonText: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  activitySection: {
+    paddingHorizontal: 20,
+    marginTop: 10,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  activityItem: {
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  activityText: {
+    fontSize: 16,
+  },
+  timestamp: {
+    fontSize: 12,
+    color: "#777",
+    marginTop: 4,
+  },
 });
