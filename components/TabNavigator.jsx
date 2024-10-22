@@ -13,35 +13,62 @@ const Tab = createBottomTabNavigator();
 
 export default function TabNavigator() {
     const { currentColors } = useContext(ThemeContext);
+
     return (
         <Tab.Navigator
             screenOptions={{
                 tabBarStyle: {
                     backgroundColor: currentColors.background,
                     borderTopColor: currentColors.background,
-                    height: 60,
-                    borderTopWidth: 0.5,
-                    paddingBottom: 10,
-                    borderTopColor: currentColors.text,
+                    position: "absolute",
+                    bottom: 20,
+                    marginHorizontal: 25,
+                    paddingVertical: 0,
+                    borderRadius: 25,
+                    borderCurve: "continuous",
+                    shadowColor: "black",
+                    shadowOffset: { width: 0, height: 10 },
+                    shadowRadius: 10,
+                    shadowOpacity: 0.1,
                 },
-                tabBarActiveTintColor: currentColors.text,
                 headerShown: false,
             }}
         >
-            <Tab.Screen 
-                name="Home" 
-                component={HomescreenAlt} 
+            <Tab.Screen
+                name="Home"
+                component={HomescreenAlt}
                 options={{
                     tabBarIcon: ({ color, size }) => (
-                        <Octicons name="home" size={size} color={color} />
+                        <Octicons name="home" size={26} color={color} />
                     ),
-                }}/>
+                }}
+            />
             <Tab.Screen
                 name="Campus Services"
                 component={CampusServicesScreen}
-
+                options={{
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons
+                            name="school-outline"
+                            size={26}
+                            color={color}
+                        />
+                    ),
+                }}
             />
-            <Tab.Screen name="Profile" component={ProfileScreen} />
+            <Tab.Screen
+                name="Profile"
+                component={ProfileScreen}
+                options={{
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons
+                            name="person-outline"
+                            size={26}
+                            color={color}
+                        />
+                    ),
+                }}
+            />
         </Tab.Navigator>
     );
 }

@@ -19,26 +19,34 @@ export default function AccessHistoryScreen({ navigation }) {
         <SafeAreaView style={[styles.container, { backgroundColor: currentColors.background }]}>
             <View style={styles.header}>
                 <View style={styles.iconsContainer}>
-                    <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
-                        <Ionicons
-                            name="person-circle-outline"
-                            size={24}
-                            color={currentColors.tint} // Using the theme tint color
-                        />
+                <TouchableOpacity
+                        onPress={() => navigation.navigate("Home Alt")}
+                    >
+                        <Text
+                            style={[
+                                styles.headerText,
+                                {
+                                    color: currentColors.text,
+                                    fontFamily: "ThedusWideLight",
+                                },
+                            ]}
+                        >
+                            VerifID
+                        </Text>
                     </TouchableOpacity>
                     <View style={styles.notificationContainer}>
                         <TouchableOpacity style={{ paddingHorizontal: 15 }}>
                             <Ionicons
                                 name="notifications-outline"
                                 size={24}
-                                color={currentColors.tint} // Using the theme tint color
+                                color={currentColors.text} 
                             />
                         </TouchableOpacity>
                         <TouchableOpacity style={{ paddingHorizontal: 5 }}>
                             <Ionicons
                                 name="settings-outline"
                                 size={24}
-                                color={currentColors.tint} // Using the theme tint color
+                                color={currentColors.text}
                             />
                         </TouchableOpacity>
                     </View>
@@ -58,16 +66,20 @@ export default function AccessHistoryScreen({ navigation }) {
                     <TouchableOpacity style={[styles.filterChipInactive, { backgroundColor: currentColors.background, borderColor: currentColors.text }]}>
                         <Text style={[styles.filterTextInactive, { color: currentColors.text }]}>APB</Text>
                     </TouchableOpacity>
-                    {/* Other filter buttons */}
+                    <TouchableOpacity style={[styles.filterChipInactive, { backgroundColor: currentColors.background, borderColor: currentColors.text }]}>
+                        <Text style={[styles.filterTextInactive, { color: currentColors.text }]}>APK</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.filterChipInactive, { backgroundColor: currentColors.background, borderColor: currentColors.text }]}>
+                        <Text style={[styles.filterTextInactive, { color: currentColors.text }]}>DFC</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.filterChipInactive, { backgroundColor: currentColors.background, borderColor: currentColors.text }]}>
+                        <Text style={[styles.filterTextInactive, { color: currentColors.text }]}>SWC</Text>
+                    </TouchableOpacity>
                 </View>
 
                 <ScrollView>
                     <View style={styles.historyContainer}>
                         <View style={styles.historyItem}>
-                            <View style={styles.historyItemDetails}>
-                                <Text style={[styles.historyItemTime, { color: currentColors.text }]}>Today 09:30</Text>
-                                <Text style={[styles.historyItemName, { color: currentColors.text }]}>Campus Entrance</Text>
-                            </View>
                         </View>
                     </View>
                 </ScrollView>

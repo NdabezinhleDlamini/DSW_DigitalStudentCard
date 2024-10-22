@@ -1,10 +1,21 @@
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StyleSheet, Text, View, TouchableOpacity, Image, Button, TextInput } from "react-native";
+import {
+    StyleSheet,
+    Text,
+    View,
+    TouchableOpacity,
+    Image,
+    Button,
+    TextInput,
+    Switch,
+} from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import * as ImagePicker from "expo-image-picker";
+
+import { ThemeContext } from "@/contexts/ThemeContext";
 
 export default function AppSettings({ navigation }) {
     const [firstName, setFirstName] = useState("John");
@@ -13,6 +24,8 @@ export default function AppSettings({ navigation }) {
     const [profilePic, setProfilePic] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
 
+    const { isDarkMode, toggleTheme, currentColors, setTheme } =
+        useContext(ThemeContext);
 
     const pickProfilePicture = async () => {
         // TODO: Implement profile picture picker with expo image picker
@@ -30,16 +43,36 @@ export default function AppSettings({ navigation }) {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView
+            style={[
+                styles.container,
+                { backgroundColor: currentColors.background },
+            ]}
+        >
             <StatusBar style="auto" />
 
             {/* User Information Section */}
-            <View style={styles.settingGroupContainer}>
-                <Text style={styles.label}>User Information</Text>
+            <View
+                style={[
+                    styles.settingGroupContainer,
+                    {
+                        backgroundColor: currentColors.settingGroupBackground,
+                    },
+                ]}
+            >
+                <Text style={[styles.label, { color: currentColors.text }]}>
+                    User Information
+                </Text>
                 <View style={styles.userInfo}>
                     <TouchableOpacity onPress={pickProfilePicture}>
                         <Image
-                            source={profilePic ? { uri: profilePic } : { uri: "https://via.placeholder.com/500x150" }}
+                            source={
+                                profilePic
+                                    ? { uri: profilePic }
+                                    : {
+                                          uri: "https://via.placeholder.com/500x150",
+                                      }
+                            }
                             style={styles.profilePicture}
                         />
                     </TouchableOpacity>
@@ -47,33 +80,96 @@ export default function AppSettings({ navigation }) {
                     {isEditing ? (
                         <>
                             <TextInput
-                                style={styles.input}
+                                style={[
+                                    styles.input,
+                                    {
+                                        backgroundColor:
+                                            currentColors.background,
+                                        color: currentColors.text,
+                                    },
+                                ]}
+                                placeholderTextColor={currentColors.text}
                                 value={firstName}
                                 onChangeText={setFirstName}
                                 placeholder="First Name"
                             />
                             <TextInput
-                                style={styles.input}
+                                style={[
+                                    styles.input,
+                                    {
+                                        backgroundColor:
+                                            currentColors.background,
+                                        color: currentColors.text,
+                                    },
+                                ]}
+                                placeholderTextColor={currentColors.text}
                                 value={lastName}
                                 onChangeText={setLastName}
                                 placeholder="Last Name"
                             />
                             <TextInput
-                                style={styles.input}
+                                style={[
+                                    styles.input,
+                                    {
+                                        backgroundColor:
+                                            currentColors.background,
+                                        color: currentColors.text,
+                                    },
+                                ]}
+                                placeholderTextColor={currentColors.text}
                                 value={displayName}
                                 onChangeText={setDisplayName}
                                 placeholder="Display Name"
                             />
-                            <TouchableOpacity style={styles.saveButton} onPress={() => setIsEditing(false)}>
+                            <TouchableOpacity
+                                style={[
+                                    styles.saveButton,
+                                    {
+                                        backgroundColor:
+                                            currentColors.primaryButtonBackground,
+                                    },
+                                ]}
+                                onPress={() => setIsEditing(false)}
+                            >
                                 <Text style={styles.buttonText}>Save</Text>
                             </TouchableOpacity>
                         </>
                     ) : (
                         <>
-                            <Text style={styles.infoText}>First Name: {firstName}</Text>
-                            <Text style={styles.infoText}>Last Name: {lastName}</Text>
-                            <Text style={styles.infoText}>Display Name: {displayName}</Text>
-                            <TouchableOpacity style={styles.editButton} onPress={() => setIsEditing(true)}>
+                            <Text
+                                style={[
+                                    styles.infoText,
+                                    { color: currentColors.text },
+                                ]}
+                            >
+                                First Name: {firstName}
+                            </Text>
+                            <Text
+                                style={[
+                                    styles.infoText,
+                                    { color: currentColors.text },
+                                ]}
+                            >
+                                Last Name: {lastName}
+                            </Text>
+                            <Text
+                                style={[
+                                    styles.infoText,
+                                    { color: currentColors.text },
+                                ]}
+                            >
+                                Display Name: {displayName}
+                            </Text>
+                            <TouchableOpacity
+                                style={[
+                                    styles.editButton,
+                                    {
+                                        backgroundColor:
+                                            currentColors.primaryButtonBackground,
+                                    },
+                                ]}
+                                onPress={() => setIsEditing(true)}
+                            >
                                 <Text style={styles.buttonText}>Edit</Text>
                             </TouchableOpacity>
                         </>
@@ -82,35 +178,50 @@ export default function AppSettings({ navigation }) {
             </View>
 
             {/* Theme Settings */}
-            <View style={styles.settingGroupContainer}>
-                <Text style={styles.label}>Theme</Text>
-                <View style={styles.themeSettings}>
-                    <View style={styles.settingTitleContainer}>
-                        <MaterialIcons name="brightness-medium" size={24} color="black" />
-                        <Text style={styles.settingText}>Automatic</Text>
-                    </View>
-                </View>
-                <View style={styles.themeSettings}>
-                    <View style={styles.settingTitleContainer}>
-                        <MaterialIcons name="light-mode" size={24} color="black" />
-                        <Text style={styles.settingText}>Light</Text>
-                    </View>
-                </View>
-                <View style={styles.themeSettings}>
-                    <View style={styles.settingTitleContainer}>
-                        <MaterialIcons name="dark-mode" size={24} color="black" />
-                        <Text style={styles.settingText}>Dark</Text>
-                    </View>
-                </View>
+            <View
+                style={[
+                    styles.settingGroupContainer,
+                    {
+                        backgroundColor: currentColors.settingGroupBackground,
+                    },
+                ]}
+            >
+                <Text style={[styles.label, { color: currentColors.text }]}>
+                    Theme
+                </Text>
+
+                <Switch
+                    trackColor={{ false: "#81b0ff", true: "#81b0ff" }}
+                    thumbColor={
+                        isDarkMode
+                            ? currentColors.primaryButtonBackground
+                            : Colors.light.primaryButtonBackground
+                    }
+                    onValueChange={toggleTheme}
+                    value={isDarkMode}
+                />
             </View>
 
             {/* Danger Zone */}
-            <View style={styles.dangerZoneContainer}>
-                <Text style={styles.label}>Danger Zone</Text>
-                <TouchableOpacity style={styles.dangerOption} onPress={() => console.log('Sign Out')}>
+            <View
+                style={[
+                    styles.dangerZoneContainer,
+                    { backgroundColor: currentColors.dangerZoneBackground },
+                ]}
+            >
+                <Text style={[styles.label, { color: currentColors.text }]}>
+                    Danger Zone
+                </Text>
+                <TouchableOpacity
+                    style={styles.dangerOption}
+                    onPress={() => console.log("Sign Out")}
+                >
                     <Text style={styles.dangerText}>Sign Out</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.dangerOption} onPress={() => console.log('Delete Account')}>
+                <TouchableOpacity
+                    style={styles.dangerOption}
+                    onPress={() => console.log("Delete Account")}
+                >
                     <Text style={styles.dangerText}>Delete Account</Text>
                 </TouchableOpacity>
             </View>
@@ -128,11 +239,9 @@ const styles = StyleSheet.create({
     },
     settingGroupContainer: {
         width: "90%",
-        backgroundColor: Colors.light.tint,
         padding: 20,
         borderRadius: 10,
         flexDirection: "column",
-        alignItems: "flex-start",
         marginVertical: 10,
     },
     settingTitleContainer: {
@@ -157,7 +266,6 @@ const styles = StyleSheet.create({
     },
     dangerZoneContainer: {
         width: "90%",
-        backgroundColor: Colors.light.background,
         borderWidth: 1.5,
         borderColor: "red",
         padding: 20,
@@ -193,7 +301,6 @@ const styles = StyleSheet.create({
         padding: 10,
         marginVertical: 5,
         borderRadius: 5,
-        backgroundColor: '#f9f9f9', // Light background for inputs
     },
     saveButton: {
         backgroundColor: Colors.light.tint,
@@ -204,8 +311,6 @@ const styles = StyleSheet.create({
         width: "100%",
     },
     editButton: {
-        backgroundColor: Colors.light.tint,
-        borderWidth: 1,
         borderRadius: 5,
         padding: 10,
         alignItems: "center",
@@ -213,8 +318,8 @@ const styles = StyleSheet.create({
         width: "100%",
     },
     buttonText: {
-        color: '#fff',
-        fontWeight: 'bold',
-        textAlign: 'center',
+        color: "#fff",
+        fontWeight: "bold",
+        textAlign: "center",
     },
 });

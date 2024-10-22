@@ -87,13 +87,19 @@ export default function HomescreenAlt({ navigation }) {
             <View style={styles.header}>
                 <View style={styles.iconsContainer}>
                     <TouchableOpacity
-                        onPress={() => navigation.navigate("Profile")}
+                        onPress={() => navigation.navigate("Home Alt")}
                     >
-                        <Ionicons
-                            name="person-circle-outline"
-                            size={24}
-                            color={currentColors.text}
-                        />
+                        <Text
+                            style={[
+                                styles.headerText,
+                                {
+                                    color: currentColors.text,
+                                    fontFamily: "ThedusWideLight",
+                                },
+                            ]}
+                        >
+                            VerifID
+                        </Text>
                     </TouchableOpacity>
                     <View style={styles.notificationContainer}>
                         <TouchableOpacity
@@ -129,7 +135,15 @@ export default function HomescreenAlt({ navigation }) {
             </View>
 
             <View style={styles.card}>
-                <View style={[styles.weatherWidget, { borderColor: currentColors.primaryButtonBackground }]}>
+                <View
+                    style={[
+                        styles.weatherWidget,
+                        {
+                            backgroundColor:
+                                currentColors.primaryButtonBackground,
+                        },
+                    ]}
+                >
                     <View style={styles.weatherWidgetDetails}>
                         <Text
                             style={[
@@ -175,7 +189,10 @@ export default function HomescreenAlt({ navigation }) {
                         source={{ uri: "https://placehold.co/600x400/png" }}
                         style={[
                             styles.studentCard,
-                            { borderColor: currentColors.border },
+                            {
+                                borderColor:
+                                    currentColors.primaryButtonBackground,
+                            },
                         ]}
                     />
                 </TouchableOpacity>
@@ -201,23 +218,23 @@ export default function HomescreenAlt({ navigation }) {
                                 styles.campusServiceItem,
                                 {
                                     backgroundColor:
-                                        currentColors.secondaryButtonBackground,
+                                        currentColors.primaryButtonBackground,
                                 },
                             ]}
                             onPress={() =>
                                 navigation.navigate("Services", {
-                                    screen: "LostAndFound",
+                                    screen: "PostItemScreen",
                                 })
                             }
                         >
-                            <Text>Lost & Found</Text>
+                            <Text>Lost</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={[
                                 styles.campusServiceItem,
                                 {
                                     backgroundColor:
-                                        currentColors.secondaryButtonBackground,
+                                        currentColors.primaryButtonBackground,
                                 },
                             ]}
                             onPress={() =>
@@ -233,7 +250,7 @@ export default function HomescreenAlt({ navigation }) {
                                 styles.campusServiceItem,
                                 {
                                     backgroundColor:
-                                        currentColors.secondaryButtonBackground,
+                                        currentColors.primaryButtonBackground,
                                 },
                             ]}
                             onPress={() =>
@@ -249,7 +266,7 @@ export default function HomescreenAlt({ navigation }) {
                                 styles.campusServiceItem,
                                 {
                                     backgroundColor:
-                                        currentColors.secondaryButtonBackground,
+                                        currentColors.primaryButtonBackground,
                                 },
                             ]}
                             onPress={() =>
@@ -290,6 +307,7 @@ const styles = StyleSheet.create({
     },
     headerText: {
         ...Fonts.subtitle,
+        fontSize: 24,
     },
     card: {
         marginVertical: Layout.margin,
@@ -311,100 +329,6 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         padding: Layout.padding,
         borderRadius: Layout.borderRadius,
-        marginBottom: Layout.margin,
-    },
-    weatherWidgetDetails: {
-        flexDirection: "column",
-        marginLeft: Layout.margin,
-    },
-    weatherWidgetTitleText: {
-        ...Fonts.body,
-        fontWeight: "bold",
-        fontSize: 20,
-        color: "white",
-    },
-    weatherWidgetSubtitleText: {
-        ...Fonts.body,
-        color: "white",
-    },
-    weatherWidgetTempText: {
-        ...Fonts.body,
-        fontWeight: "bold",
-        fontSize: 40,
-        color: "white",
-    },
-    idText: {
-        ...Fonts.body,
-        fontWeight: "bold",
-        textAlign: "center",
-        paddingVertical: Layout.padding / 2,
-    },
-    iconRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        marginVertical: Layout.margin / 2,
-        padding: Layout.padding / 2,
-    },
-    campusServiceItem: {
-        width: 75,
-        height: 75,
-        borderRadius: Layout.borderRadius,
-        // alignItems: "center",
-        // justifyContent: "center",
-        backgroundColor: "#1e90ff", // Button background color (blue)
-        paddingVertical: 12, // Vertical padding
-        paddingHorizontal: 25, // Horizontal padding
-        borderRadius: 25, // Rounded corners
-        alignItems: "center", // Center the text
-        shadowColor: "#000", // Shadow color
-        shadowOffset: { width: 0, height: 2 }, // Shadow offset
-        shadowOpacity: 0.3, // Shadow opacity
-        shadowRadius: 4, // Shadow radius
-        elevation: 5,
-    },
-    container: {
-        flex: 1,
-        padding: Layout.padding,
-    },
-    header: {
-        flexDirection: "column",
-        alignItems: "flex-start",
-    },
-    iconsContainer: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        width: "100%",
-        marginBottom: Layout.margin,
-    },
-    notificationContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-    },
-    headerText: {
-        ...Fonts.subtitle,
-    },
-    card: {
-        marginVertical: Layout.margin,
-    },
-    sectionTitle: {
-        ...Fonts.title,
-        marginBottom: Layout.margin / 2,
-    },
-    studentCard: {
-        borderWidth: Layout.borderWidth,
-        borderRadius: Layout.borderRadius,
-        width: "100%",
-        height: 200,
-        resizeMode: "cover",
-    },
-    weatherWidget: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: Layout.padding,
-        borderRadius: Layout.borderRadius,
-        backgroundColor: "lightblue",
         marginBottom: Layout.margin,
     },
     weatherWidgetDetails: {

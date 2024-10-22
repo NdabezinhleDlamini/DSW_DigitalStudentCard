@@ -4,8 +4,7 @@ import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-nati
 import { MaterialIcons } from "@expo/vector-icons";
 import { useState, useContext } from "react";
 
-import { Colors } from "@/constants/Colors"; // Assuming you have color sets here
-import { ThemeContext } from "../../contexts/ThemeContext"; // Assuming your ThemeContext is set up correctly
+import { ThemeContext } from "../../contexts/ThemeContext"; 
 
 const initialNotificationsData = [
     { id: "1", type: "like", message: "User123 liked your post.", timestamp: "5 minutes ago" },
@@ -15,10 +14,10 @@ const initialNotificationsData = [
 
 export default function Notifications() {
     const [notificationsData, setNotificationsData] = useState(initialNotificationsData);
-    const { currentColors } = useContext(ThemeContext); // Access current theme colors
+    const { currentColors } = useContext(ThemeContext); 
 
     const clearNotifications = () => {
-        setNotificationsData([]); // Clear the notifications
+        setNotificationsData([]);
     };
 
     return (
@@ -28,9 +27,9 @@ export default function Notifications() {
                 <Text style={[styles.title, { color: currentColors.text }]}>Notifications</Text>
                 {notificationsData.length === 0 ? (
                     <View style={styles.emptyContainer}>
-                        <MaterialIcons name="notifications-off" size={50} color={currentColors.icon} />
+                        <MaterialIcons name="notifications-off" size={50} color={currentColors.text} />
                         <Text style={[styles.emptyText, { color: currentColors.text }]}>No notifications yet!</Text>
-                        <Text style={[styles.emptyDescription, { color: currentColors.secondaryText }]}>
+                        <Text style={[styles.emptyDescription, { color: currentColors.text }]}>
                             You will see notifications here when you have any.
                         </Text>
                     </View>
@@ -42,13 +41,13 @@ export default function Notifications() {
                                     <MaterialIcons name="favorite" size={30} color="red" />
                                 )}
                                 {notification.type === "follow" && (
-                                    <MaterialIcons name="person-add" size={30} color={currentColors.icon} />
+                                    <MaterialIcons name="person-add" size={30} color={currentColors.text} />
                                 )}
                                 {notification.type === "comment" && (
-                                    <MaterialIcons name="comment" size={30} color={currentColors.icon} />
+                                    <MaterialIcons name="comment" size={30} color={currentColors.text} />
                                 )}
                                 {notification.type === "message" && (
-                                    <MaterialIcons name="message" size={30} color={currentColors.icon} />
+                                    <MaterialIcons name="message" size={30} color={currentColors.text} />
                                 )}
                             </View>
                             <View style={styles.notificationContent}>

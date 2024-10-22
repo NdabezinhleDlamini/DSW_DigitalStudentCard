@@ -1,11 +1,15 @@
 import { StyleSheet, Text, View, TextInput, Alert, TouchableOpacity } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { db } from '../../Firebase-config'; 
 import { addDoc, collection } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth'; 
 import { useNavigation } from '@react-navigation/native';
 
+import { ThemeContext } from "@/contexts/ThemeContext";
+
 export default function RequestNewCard() {
+
+  const {currentColors} = useContext(ThemeContext);
   const navigation = useNavigation();
   const [name, setName] = useState('');
   const [surname, setSurname] = useState('');
@@ -50,33 +54,36 @@ export default function RequestNewCard() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Request For Student Card</Text>
+    <View style={[styles.container, { backgroundColor: currentColors.background }]}>
+      <Text style={[styles.title, { color: currentColors.text }]}>Request For Student Card</Text>
 
       <TextInput 
-        style={styles.input} 
+        style={[styles.input, { borderColor: currentColors.primaryButtonBackground, backgroundColor: currentColors.background }]} 
         placeholder="Name:" 
+        placeholderTextColor={currentColors.text}
         value={name} 
         onChangeText={setName} 
       />
 
       <TextInput 
-        style={styles.input} 
-        placeholder="Surname:" 
+        style={[styles.input, { borderColor: currentColors.primaryButtonBackground, backgroundColor: currentColors.background }]} 
+        placeholder="Surname:"
+        placeholderTextColor={currentColors.text} 
         value={surname} 
         onChangeText={setSurname} 
       />
 
       <TextInput 
-        style={styles.input} 
+        style={[styles.input, { borderColor: currentColors.primaryButtonBackground, backgroundColor: currentColors.background }]} 
         placeholder="Student number:" 
+        placeholderTextColor={currentColors.text}
         keyboardType="numeric" 
         value={student} 
         onChangeText={setStudent} 
       />
 
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>Submit Request</Text>
+      <TouchableOpacity style={[styles.button, { backgroundColor: currentColors.primaryButtonBackground }]} onPress={handleSubmit}>
+        <Text style={[styles.buttonText, { color: currentColors.primaryButtonText }]}>Submit Request</Text>
       </TouchableOpacity>
     </View>
   );
@@ -84,6 +91,7 @@ export default function RequestNewCard() {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     height: '100%',
     padding: 20,
     alignItems: 'center',
@@ -93,8 +101,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     borderRadius: 8,
-    width: '50%',
-    backgroundColor: '#B9D9EB',
+    width: '80%',
     marginBottom: 80,
     textAlign: 'center',
   },

@@ -42,7 +42,7 @@ export default function UserProfileScreen({ navigation }) {
             style={styles.headerImage}
             source={{ uri: "https://via.placeholder.com/500x150" }} // Placeholder for header background
           />
-          <View style={[styles.profileImageWrapper, { borderColor: currentColors.tint }]}>
+          <View style={[styles.profileImageWrapper, { borderColor: currentColors.primaryButtonBackground }]}>
             <Image
               style={styles.profileImage}
               source={{ uri: "https://via.placeholder.com/100" }} // Placeholder for Profile Picture
@@ -54,17 +54,6 @@ export default function UserProfileScreen({ navigation }) {
         <View style={styles.infoSection}>
           <Text style={[styles.nameText, { color: currentColors.text }]}>John Doe</Text>
           <Text style={[styles.idText, { color: "#777" }]}>@johndoe</Text>
-        </View>
-
-        {/* Switch for Dark Mode */}
-        <View style={styles.switchContainer}>
-          <Text style={[styles.switchLabel, { color: currentColors.text }]}>Dark Mode</Text>
-          <Switch
-            trackColor={{ false: "#81b0ff", true: "#81b0ff" }}
-            thumbColor={isDarkMode ? currentColors.primaryButtonBackground : Colors.light.primaryButtonBackground}
-            onValueChange={toggleTheme} // Use the toggleTheme from context
-            value={isDarkMode}
-          />
         </View>
 
         {/* Report Lost Card Button */}
@@ -80,7 +69,7 @@ export default function UserProfileScreen({ navigation }) {
         {/* Activity Timeline */}
         <View style={styles.activitySection}>
           <Text style={[styles.sectionTitle, { color: currentColors.text }]}>Recent Activities</Text>
-          <View style={[styles.activityItem, { backgroundColor: isDarkMode ? "#1d3557" : "#edf6f9" }]}>
+          <View style={[styles.activityItem, { backgroundColor: currentColors.settingGroupBackground }]}>
             <Text style={[styles.activityText, { color: currentColors.text }]}>
               Accessed the Library
             </Text>
@@ -185,6 +174,7 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: 18,
         fontWeight: "bold",
+        marginBottom: 10,
     },
     activityItem: {
         padding: 15,

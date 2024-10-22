@@ -1,124 +1,107 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  ScrollView,
-  TouchableOpacity,
-  FlatList,
-  Image
-} from "react-native";
-import React from "react";
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl  } from "react-native";
+import React, { useState, useEffect, useContext } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { db } from "../../Firebase-config";
-import {
-  collection,
-  getDocs,
-  getDoc,
-  doc,
-  deleteDoc,
-  updateDoc,
-} from "firebase/firestore";
-import {useState, useEffect} from "react";
+import { collection, getDocs, deleteDoc } from "firebase/firestore";
 import { Ionicons } from "@expo/vector-icons";
 
+import { ThemeContext } from "../../contexts/ThemeContext";
+
 export default function LostAndFoundScreen({ navigation }) {
+  const { currentColors } = useContext(ThemeContext);
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState([]);
+  
+  const [refreshing, setRefreshing] = useState(false);
 
-useEffect(() => {
-        const fetchPosts = async () => {
-            setLoading(true); // Start loading
+  useEffect(() => {
+    const fetchPosts = async () => {
+      setLoading(true); // Start loading
+      try {
+        // Fetching all lost reports
+        const querySnapshot = await getDocs(collection(db, "lost-Reports"));
+        const postList = querySnapshot.docs.map((doc) => ({
+          ...doc.data(),
+          key: doc.id,
+        }));
+        setPosts(postList);
+      } catch (error) {
+        console.error("Error fetching posts: ", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPosts();
+  }, []);
 
-            try {
-                // Fetching all lost reports
-                const querySnapshot = await getDocs(collection(db, "lost-Reports"));
-                const postList = querySnapshot.docs.map((doc) => ({
-                    ...doc.data(),
-                    key: doc.id,
-                }));
-
-                setPosts(postList);
-            } catch (error) {
-                console.error("Error fetching posts: ", error);
-            } finally {
-                setLoading(false); // Stop loading
-            }
-        };
-
-        fetchPosts();
-
-        // Optional cleanup if needed
-        return () => {
-            setPosts([]); // Clear posts on unmount (if necessary)
-        };
-    }, []);
-
-  console.log(posts);
-
+  const deleteData = async (id) => {
+    try {
+      await deleteDoc(doc(db, "lost-Reports", id));
+      setPosts(posts.filter(post => post.key !== id));
+    } catch (error) {
+      console.error("Error deleting post: ", error);
+    }
+  };
 
   return (
-    <SafeAreaView>
-      <View>
-        <Text style={styles.topic}>Lost And Found</Text>
-        <TextInput
-          style={styles.search}
-          placeholder="Search"
-          placeholderTextColor={"grey"}
-        />
+    <SafeAreaView style={[styles.container, { backgroundColor: currentColors.background }]}>
+      <Text style={[styles.topic, { color: currentColors.text }]}>Lost And Found</Text>
+      <TextInput
+        style={[styles.search, { borderColor: currentColors.text }]}
 
-        <View>
+        placeholder="Search"
+        placeholderTextColor={"grey"}
+      />
+      <View>
         {loading ? (
-          <Text>Loading...</Text>
+          <ActivityIndicator size="large" color="#0000ff" />
         ) : (
           <FlatList
             data={posts}
             keyExtractor={(item) => item.key}
             renderItem={({ item }) => (
-              <View style={styles.card}>
-                <View style={styles.cardHeader}>
-            
-                  <Text style={styles.title}>{item["Item name"]}</Text>
-
+              <View style={[styles.card, { backgroundColor: currentColors.settingGroupBackground }]}>
+                <View style={[styles.cardHeader]}>
+                  <Text style={[styles.title, { color: currentColors.text }]}>{item["Item name"]}</Text>
                   <View style={styles.cardControls}>
                     <TouchableOpacity>
-                      <Ionicons name="create-outline" size="24" />
+                      <Ionicons name="create-outline" size={24} color={currentColors.text}/>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => deleteData(item.key)}>
-                      <Ionicons name="trash-outline" size="24" />
+                      <Ionicons name="trash-outline" size={24} color={currentColors.text}/>
                     </TouchableOpacity>
                   </View>
-
                 </View>
-                <Text style={styles.details}>
+                <Text style={[styles.details, { color: currentColors.text }]}>
                   Description: {item["Description"]}
                 </Text>
-                <Text style={styles.description}>
-                  Location:
-                  {item["Location"]}
+                <Text style={[styles.description, { color: currentColors.text }]}>
+                  Location: {item["Location"]}
                 </Text>
-                <Text style={styles.details}>
+                <Text style={[styles.details, { color: currentColors.text }]}>
                   Status: {item["Status"]}
                 </Text>
-
                 <View>
                   {/* <Image source={{ uri: item.imageURL }} style={styles.image} /> */}
                 </View>
               </View>
             )}
           />
-        )}  
-        </View>   
-
-        <TouchableOpacity style={styles.button}onPress={() => navigation.navigate("PostItemScreen")}>
-          <Text style={styles.buttonText}>Post</Text>
-        </TouchableOpacity>
+        )}
       </View>
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("PostItemScreen")}>
+        <Text style={styles.buttonText}>Post</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: "#f8f8f8",
+  },
   search: {
     borderWidth: 1,
     padding: 7,
@@ -135,7 +118,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 25, // Horizontal padding
     borderRadius: 25, // Rounded corners
     alignItems: "center", // Center the text
-
   },
   card: {
     backgroundColor: "#fff",

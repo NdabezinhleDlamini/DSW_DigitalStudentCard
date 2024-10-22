@@ -19,7 +19,7 @@ const ThemeProvider = ({ children }) => {
         loadTheme();
     }, []);
 
-    // Save theme preference to AsyncStorage whenever it changes
+
     const toggleTheme = () => {
         setIsDarkMode(prevMode => {
             const newMode = !prevMode;
