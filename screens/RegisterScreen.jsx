@@ -202,7 +202,7 @@ export default function RegisterScreen({ navigation }) {
                 )}
 
                 <View style={styles.hasAccount}>
-                    <Text style={{ marginRight: 4, color: Colors.dark.text }}>
+                    <Text style={{ marginRight: 4, color: Colors.dark.text, fontWeight: "bold" }}>
                         Already have an account?
                     </Text>
                     <TouchableOpacity
@@ -213,7 +213,8 @@ export default function RegisterScreen({ navigation }) {
                         <Text
                             style={{
                                 textDecorationLine: "underline",
-                                color: Colors.dark.highlight,
+                                color: "#1e90ff",
+                                fontWeight: "bold",
                             }}
                         >
                             Log In
@@ -287,12 +288,13 @@ const styles = StyleSheet.create({
         marginTop: "5%",
         alignSelf: "center",
         borderWidth: 1.5,
-        borderColor: Colors.dark.highlight,
+        borderColor: "#1e90ff",
     },
     buttonText: {
-        fontSize: 15,
+        fontSize: 18,
         fontWeight: "500",
         color: "white",
+        fontWeight: "bold",
     },
     hasAccount: {
         flexDirection: "row",
