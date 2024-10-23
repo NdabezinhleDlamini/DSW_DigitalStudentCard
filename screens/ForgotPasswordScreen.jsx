@@ -5,6 +5,7 @@ import {
     ImageBackground,
     TouchableOpacity,
     TextInput,
+    Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useState } from "react";
@@ -12,6 +13,9 @@ import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
 import { Colors } from "@/constants/Colors";
+import { auth } from "../Firebase-config";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { firebase } from "../Firebase-config";
 
 export default function ResetPasswordScreen({ navigation }) {
     const [fontsLoaded] = useFonts({
@@ -24,13 +28,28 @@ export default function ResetPasswordScreen({ navigation }) {
         return null; // or a loading spinner
     }
 
-    const handlePasswordReset = () => {
-        // Handle password reset logic here
-        console.log("Password reset link sent to:", email);
-        // Redirect or provide feedback to the user after password reset
-        alert("Password reset link sent to your email.");
-        navigation.navigate("Login");
+    const handlePasswordReset = async () => {
+        try {
+            await sendPasswordResetEmail(auth, email);
+            Alert.alert(
+                "Success",
+                "Password reset email sent! Please check your inbox."
+            );
+            navigation.navigate("Login");
+        } catch (error) {
+            Alert.alert("Error", error.message);
+            console.error("Error sending password reset email: ", error);
+        }
     };
+
+    // const handlePasswordReset = () => {
+    //     firebase.auth().sendPasswordResetEmail(firebase.auth().currentUser.email)
+    //     .then(()=> {
+    //         alert("passwords reset email sent")
+    //     }).catch((error) => {
+    //         alert(error)
+    //     })
+    // }
 
     return (
         <>
@@ -55,6 +74,7 @@ export default function ResetPasswordScreen({ navigation }) {
                             placeholder="Email"
                             keyboardType="email-address"
                             value={email}
+                            autoCapitalize="none"
                             onChangeText={setEmail}
                         />
                     </View>
@@ -77,7 +97,7 @@ export default function ResetPasswordScreen({ navigation }) {
                         <Text
                             style={{
                                 textDecorationLine: "underline",
-                                color: Colors.dark.highlight,
+                                color: "#1e90ff",
                             }}
                         >
                             Log In
@@ -142,7 +162,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
         alignSelf: "center",
         borderWidth: 1.5,
-        borderColor: Colors.dark.highlight,
+        borderColor: "#1e90ff",
     },
     buttonText: {
         fontSize: 15,
