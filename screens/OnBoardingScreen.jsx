@@ -7,7 +7,8 @@ import {
     Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import React from "react";
+import React, { useContext } from "react";
+import { AuthContext } from "@/contexts/AuthContext";
 
 
 import { StatusBar } from "expo-status-bar";
@@ -23,6 +24,8 @@ export default function OnBoardingScreen({ navigation }) {
     if (!fontsLoaded) {
         return null; // or a loading spinner
     }
+
+    const {auth, login, logout} = useContext(AuthContext);
 
     return (
       <>

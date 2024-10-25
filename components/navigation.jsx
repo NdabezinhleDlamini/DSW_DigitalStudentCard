@@ -1,6 +1,7 @@
 import "react-native-gesture-handler";
+
 import { NavigationContainer } from "@react-navigation/native";
-import { createStackNavigator } from "@react-navigation/stack"; // Update the import
+import { createStackNavigator } from "@react-navigation/stack";
 
 import OnboardingScreen from "../screens/OnBoardingScreen";
 import RegisterScreen from "../screens/RegisterScreen";
@@ -34,7 +35,10 @@ export default function Navigation() {
             <Stack.Screen name="Onboarding" component={OnboardingScreen} />
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />
-            <Stack.Screen name="ForgotPassword" component={ResetPasswordScreen} />
+            <Stack.Screen
+                name="ForgotPassword"
+                component={ResetPasswordScreen}
+            />
             <Stack.Screen name="main" component={TabNavigator} />
             <Stack.Screen name="Services" component={ServicesNavigator} />
             <Stack.Screen name="Utils" component={UtillsNavigator} />

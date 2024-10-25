@@ -85,14 +85,28 @@ export default function CampusServicesScreen({ navigation }) {
                         </Text>
                     </TouchableOpacity>
                     <View style={styles.notificationContainer}>
-                        <TouchableOpacity style={{ paddingHorizontal: 15 }}>
+                        <TouchableOpacity
+                            onPress={() =>
+                                navigation.navigate("Utils", {
+                                    screen: "Notifications",
+                                })
+                            }
+                            style={{ paddingHorizontal: 15 }}
+                        >
                             <Ionicons
                                 name="notifications-outline"
                                 size={24}
                                 color={currentColors.text}
                             />
                         </TouchableOpacity>
-                        <TouchableOpacity style={{ paddingHorizontal: 5 }}>
+                        <TouchableOpacity
+                            onPress={() =>
+                                navigation.navigate("Utils", {
+                                    screen: "AppSettings",
+                                })
+                            }
+                            style={{ paddingHorizontal: 5 }}
+                        >
                             <Ionicons
                                 name="settings-outline"
                                 size={24}
@@ -112,7 +126,10 @@ export default function CampusServicesScreen({ navigation }) {
                 placeholderTextColor={currentColors.text}
             />
             <View
-                style={[styles.filterContainer, { borderColor: currentColors.primaryButtonBackground }]}
+                style={[
+                    styles.filterContainer,
+                    { borderColor: currentColors.primaryButtonBackground },
+                ]}
             >
                 <TouchableOpacity
                     style={[
@@ -348,7 +365,7 @@ const styles = StyleSheet.create({
         borderRadius: Layout.borderRadius,
     },
     mainSection: {
-        marginTop: Layout.margin / 2, 
+        marginTop: Layout.margin / 2,
     },
     card: {
         backgroundColor: "#fff",
@@ -393,4 +410,3 @@ const styles = StyleSheet.create({
         margin: 2,
     },
 });
-

@@ -11,7 +11,7 @@ const ThemeProvider = ({ children }) => {
     // Load the saved theme preference from AsyncStorage when the app loads
     useEffect(() => {
         const loadTheme = async () => {
-            const savedTheme = await AsyncStorage.getItem('theme');
+            const savedTheme = await ReactNativeAsyncStorage.getItem('theme');
             if (savedTheme !== null) {
                 setIsDarkMode(savedTheme === 'dark');
             }

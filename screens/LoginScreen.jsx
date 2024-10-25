@@ -1,25 +1,24 @@
+import React, { useState, useContext } from "react";
 import {
     StyleSheet,
     Text,
     View,
     ImageBackground,
     TouchableOpacity,
-    Image,
     TextInput,
     Alert,
+    ActivityIndicator,
+    Button,
+    Platform,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import React, { useState } from "react";
-
-import { Platform } from "react-native";
-
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
 import { Colors } from "@/constants/Colors";
 import { auth } from "../Firebase-config";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { db } from "../Firebase-config"; // Import Firestore instance
-import { doc, updateDoc } from "firebase/firestore"; // Import Firestore functions
+import { db } from "../Firebase-config";
+import { doc, updateDoc } from "firebase/firestore";
+import { AuthContext } from '../contexts/AuthContext'; // Import AuthContext
 
 export default function OnBoardingScreen({ navigation }) {
     const [fontsLoaded] = useFonts({
@@ -30,31 +29,15 @@ export default function OnBoardingScreen({ navigation }) {
         return null; // or a loading spinner
     }
 
+    const { login } = useContext(AuthContext); // Use login from context
+
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
 
-    // const login = () => {
-    //     signInWithEmailAndPassword(auth, email, password)
-    //         .then(userCredential => {
-    //             // Signed in
-    //             const user = userCredential.user;
-    //             console.log("User logged in:", user.email);
-    //             // go to home page
-    //             navigation.navigate("main");
-    //         })
-    //         .catch(error => {
-    //             const errorCode = error.code;
-    //             const errorMessage = error.message;
-    //             Alert.alert("Login Error", errorMessage);
-    //         });
-    // }
-
-    //last login
     const getLastLoginDetails = async () => {
-        // Get current time
         const lastLoginTime = new Date().toISOString();
 
-        // Fetch IP address
         let ipAddress;
         try {
             const response = await fetch("https://api.ipify.org?format=json");
@@ -65,7 +48,6 @@ export default function OnBoardingScreen({ navigation }) {
             ipAddress = "Unavailable";
         }
 
-        // Fetch location from IP address
         let lastLoginLocation = "Location unavailable";
         try {
             const response = await fetch(`https://ipapi.co/${ipAddress}/json/`);
@@ -82,7 +64,8 @@ export default function OnBoardingScreen({ navigation }) {
         return { lastLoginTime, ipAddress, lastLoginLocation };
     };
 
-    const login = async () => {
+    const handleLogin = async () => {
+        setLoading(true);
         try {
             const userCredential = await signInWithEmailAndPassword(
                 auth,
@@ -92,14 +75,9 @@ export default function OnBoardingScreen({ navigation }) {
             const user = userCredential.user;
 
             const platform = Platform.OS;
-
-            console.log("User logged in:", user.email);
-
-            // Get last login details
             const { lastLoginTime, ipAddress, lastLoginLocation } =
                 await getLastLoginDetails();
 
-            // Update user document with last login details
             await updateDoc(doc(db, "Users", user.uid), {
                 LastLoginTime: lastLoginTime,
                 LastLoginIP: ipAddress,
@@ -107,38 +85,15 @@ export default function OnBoardingScreen({ navigation }) {
                 LastLoginPlatform: platform,
             });
 
-            navigation.navigate("main"); // Go to home page
+            // Save login details to context and AsyncStorage
+            login({ email, uid: user.uid }); // Use login from context to store auth data
+
+            navigation.navigate("main");
         } catch (error) {
-            const errorMessage = error.message;
-            Alert.alert("Login Error", errorMessage);
+            Alert.alert("Login Error", error.message);
+        } finally {
+            setLoading(false);
         }
-    };
-
-    // hanle login
-    const handleLogin = () => {
-        const trimmedEmail = email.trim();
-        const trimmedPassword = password.trim();
-
-        //validate user input
-        if (trimmedEmail === "") {
-            Alert.alert("Error", "Email field cannot be empty");
-            return;
-        }
-        if (!validateEmail(trimmedEmail)) {
-            Alert.alert("Error", "Please enter a valid email address");
-            return;
-        }
-        if (trimmedPassword === "") {
-            Alert.alert("Error", "Password field cannot be empty");
-            return;
-        }
-        if (trimmedPassword.length < 6) {
-            Alert.alert("Error", "Password must be at least 6 characters long");
-            return;
-        }
-
-        login();
-        // navigation.navigate("main");
     };
 
     const validateEmail = (email) => {
@@ -189,13 +144,15 @@ export default function OnBoardingScreen({ navigation }) {
                     </View>
                 </View>
                 <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => {
-                        // navigation.navigate("Homescreen");
-                        handleLogin();
-                    }}
+                    style={[styles.button, loading && { backgroundColor: "#ccc" }]}
+                    onPress={handleLogin}
+                    disabled={loading}
                 >
-                    <Text style={styles.buttonText}>Log In</Text>
+                    {loading ? (
+                        <ActivityIndicator size="small" color="#fff" />
+                    ) : (
+                        <Text style={styles.buttonText}>Log In</Text>
+                    )}
                 </TouchableOpacity>
                 <View style={styles.hasAccount}>
                     <Text style={{ marginRight: 4, color: Colors.dark.text }}>

@@ -68,7 +68,6 @@ export default function ResetPasswordScreen({ navigation }) {
                         <Text style={styles.subtitle}>Reset Your Password</Text>
                     </View>
                     <View style={styles.form}>
-                        <Text style={styles.label}>Email</Text>
                         <TextInput
                             style={styles.input}
                             placeholder="Email"
@@ -77,14 +76,14 @@ export default function ResetPasswordScreen({ navigation }) {
                             autoCapitalize="none"
                             onChangeText={setEmail}
                         />
-                    </View>
-                </View>
                 <TouchableOpacity
                     style={styles.button}
                     onPress={handlePasswordReset}
                 >
                     <Text style={styles.buttonText}>Send Reset Link</Text>
                 </TouchableOpacity>
+                    </View>
+                </View>
                 <View style={styles.hasAccount}>
                     <Text style={{ marginRight: 4, color: Colors.dark.text }}>
                         Remember your password?
@@ -134,7 +133,7 @@ const styles = StyleSheet.create({
     },
     form: {
         marginTop: 20,
-        width: "75%",
+        width: "90%",
         alignSelf: "center",
     },
     label: {
@@ -155,7 +154,7 @@ const styles = StyleSheet.create({
     button: {
         backgroundColor: "transparent",
         height: 50,
-        width: "75%",
+        width: "100%",
         justifyContent: "center",
         alignItems: "center",
         borderRadius: 10,

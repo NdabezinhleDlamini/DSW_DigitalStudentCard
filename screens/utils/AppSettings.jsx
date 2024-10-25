@@ -1,21 +1,11 @@
 import { StatusBar } from "expo-status-bar";
-import { SafeAreaView } from "react-native-safe-area-context";
-import {
-    StyleSheet,
-    Text,
-    View,
-    TouchableOpacity,
-    Image,
-    Button,
-    TextInput,
-    Switch,
-} from "react-native";
+import { SafeAreaView, Modal, StyleSheet, Text, View, TouchableOpacity, Image, Button, TextInput, Switch } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { useState, useContext } from "react";
 import * as ImagePicker from "expo-image-picker";
-
 import { ThemeContext } from "@/contexts/ThemeContext";
+import { AuthContext } from "@/contexts/AuthContext";
 
 export default function AppSettings({ navigation }) {
     const [firstName, setFirstName] = useState("John");
@@ -23,13 +13,13 @@ export default function AppSettings({ navigation }) {
     const [displayName, setDisplayName] = useState("johndoe123");
     const [profilePic, setProfilePic] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
+    const [isModalVisible, setIsModalVisible] = useState(false);  // Modal visibility state
 
-    const { isDarkMode, toggleTheme, currentColors, setTheme } =
-        useContext(ThemeContext);
+    const {logout} = useContext(AuthContext);
+
+    const { isDarkMode, toggleTheme, currentColors, setTheme } = useContext(ThemeContext);
 
     const pickProfilePicture = async () => {
-        // TODO: Implement profile picture picker with expo image picker
-
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
@@ -42,37 +32,23 @@ export default function AppSettings({ navigation }) {
         }
     };
 
+    const handleSignOut = () => {
+        logout();
+        setIsModalVisible(false);  // Close the modal
+        console.log("User signed out");  // Here you would add actual sign out logic
+    };
+
     return (
-        <SafeAreaView
-            style={[
-                styles.container,
-                { backgroundColor: currentColors.background },
-            ]}
-        >
+        <SafeAreaView style={[styles.container, { backgroundColor: currentColors.background }]}>
             <StatusBar style="auto" />
 
             {/* User Information Section */}
-            <View
-                style={[
-                    styles.settingGroupContainer,
-                    {
-                        backgroundColor: currentColors.settingGroupBackground,
-                    },
-                ]}
-            >
-                <Text style={[styles.label, { color: currentColors.text }]}>
-                    User Information
-                </Text>
+            <View style={[styles.settingGroupContainer, { backgroundColor: currentColors.settingGroupBackground }]}>
+                <Text style={[styles.label, { color: currentColors.text }]}>User Information</Text>
                 <View style={styles.userInfo}>
                     <TouchableOpacity onPress={pickProfilePicture}>
                         <Image
-                            source={
-                                profilePic
-                                    ? { uri: profilePic }
-                                    : {
-                                          uri: "https://via.placeholder.com/500x150",
-                                      }
-                            }
+                            source={profilePic ? { uri: profilePic } : { uri: "https://via.placeholder.com/500x150" }}
                             style={styles.profilePicture}
                         />
                     </TouchableOpacity>
@@ -80,55 +56,28 @@ export default function AppSettings({ navigation }) {
                     {isEditing ? (
                         <>
                             <TextInput
-                                style={[
-                                    styles.input,
-                                    {
-                                        backgroundColor:
-                                            currentColors.background,
-                                        color: currentColors.text,
-                                    },
-                                ]}
+                                style={[styles.input, { backgroundColor: currentColors.background, color: currentColors.text }]}
                                 placeholderTextColor={currentColors.text}
                                 value={firstName}
                                 onChangeText={setFirstName}
                                 placeholder="First Name"
                             />
                             <TextInput
-                                style={[
-                                    styles.input,
-                                    {
-                                        backgroundColor:
-                                            currentColors.background,
-                                        color: currentColors.text,
-                                    },
-                                ]}
+                                style={[styles.input, { backgroundColor: currentColors.background, color: currentColors.text }]}
                                 placeholderTextColor={currentColors.text}
                                 value={lastName}
                                 onChangeText={setLastName}
                                 placeholder="Last Name"
                             />
                             <TextInput
-                                style={[
-                                    styles.input,
-                                    {
-                                        backgroundColor:
-                                            currentColors.background,
-                                        color: currentColors.text,
-                                    },
-                                ]}
+                                style={[styles.input, { backgroundColor: currentColors.background, color: currentColors.text }]}
                                 placeholderTextColor={currentColors.text}
                                 value={displayName}
                                 onChangeText={setDisplayName}
                                 placeholder="Display Name"
                             />
                             <TouchableOpacity
-                                style={[
-                                    styles.saveButton,
-                                    {
-                                        backgroundColor:
-                                            currentColors.primaryButtonBackground,
-                                    },
-                                ]}
+                                style={[styles.saveButton, { backgroundColor: currentColors.primaryButtonBackground }]}
                                 onPress={() => setIsEditing(false)}
                             >
                                 <Text style={styles.buttonText}>Save</Text>
@@ -136,38 +85,11 @@ export default function AppSettings({ navigation }) {
                         </>
                     ) : (
                         <>
-                            <Text
-                                style={[
-                                    styles.infoText,
-                                    { color: currentColors.text },
-                                ]}
-                            >
-                                First Name: {firstName}
-                            </Text>
-                            <Text
-                                style={[
-                                    styles.infoText,
-                                    { color: currentColors.text },
-                                ]}
-                            >
-                                Last Name: {lastName}
-                            </Text>
-                            <Text
-                                style={[
-                                    styles.infoText,
-                                    { color: currentColors.text },
-                                ]}
-                            >
-                                Display Name: {displayName}
-                            </Text>
+                            <Text style={[styles.infoText, { color: currentColors.text }]}>First Name: {firstName}</Text>
+                            <Text style={[styles.infoText, { color: currentColors.text }]}>Last Name: {lastName}</Text>
+                            <Text style={[styles.infoText, { color: currentColors.text }]}>Display Name: {displayName}</Text>
                             <TouchableOpacity
-                                style={[
-                                    styles.editButton,
-                                    {
-                                        backgroundColor:
-                                            currentColors.primaryButtonBackground,
-                                    },
-                                ]}
+                                style={[styles.editButton, { backgroundColor: currentColors.primaryButtonBackground }]}
                                 onPress={() => setIsEditing(true)}
                             >
                                 <Text style={styles.buttonText}>Edit</Text>
@@ -178,53 +100,58 @@ export default function AppSettings({ navigation }) {
             </View>
 
             {/* Theme Settings */}
-            <View
-                style={[
-                    styles.settingGroupContainer,
-                    {
-                        backgroundColor: currentColors.settingGroupBackground,
-                    },
-                ]}
-            >
-                <Text style={[styles.label, { color: currentColors.text }]}>
-                    Theme
-                </Text>
+            <View style={[styles.settingGroupContainer, { backgroundColor: currentColors.settingGroupBackground }]}>
+                <Text style={[styles.label, { color: currentColors.text }]}>Theme</Text>
 
                 <Switch
                     trackColor={{ false: "#81b0ff", true: "#81b0ff" }}
-                    thumbColor={
-                        isDarkMode
-                            ? currentColors.primaryButtonBackground
-                            : Colors.light.primaryButtonBackground
-                    }
+                    thumbColor={isDarkMode ? currentColors.primaryButtonBackground : Colors.light.primaryButtonBackground}
                     onValueChange={toggleTheme}
                     value={isDarkMode}
                 />
             </View>
 
             {/* Danger Zone */}
-            <View
-                style={[
-                    styles.dangerZoneContainer,
-                    { backgroundColor: currentColors.dangerZoneBackground },
-                ]}
-            >
-                <Text style={[styles.label, { color: currentColors.text }]}>
-                    Danger Zone
-                </Text>
+            <View style={[styles.dangerZoneContainer, { backgroundColor: currentColors.dangerZoneBackground }]}>
+                <Text style={[styles.label, { color: currentColors.text }]}>Danger Zone</Text>
                 <TouchableOpacity
                     style={styles.dangerOption}
-                    onPress={() => console.log("Sign Out")}
+                    onPress={() => setIsModalVisible(true)}  // Show the modal when the user clicks sign out
                 >
                     <Text style={styles.dangerText}>Sign Out</Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.dangerOption}
-                    onPress={() => console.log("Delete Account")}
-                >
+                <TouchableOpacity style={styles.dangerOption} onPress={() => console.log("Delete Account")}>
                     <Text style={styles.dangerText}>Delete Account</Text>
                 </TouchableOpacity>
             </View>
+
+            {/* Sign Out Confirmation Modal */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={isModalVisible}
+                onRequestClose={() => setIsModalVisible(false)}  // Close modal when user presses back button
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalText}>Are you sure you want to sign out?</Text>
+                        <View style={styles.modalButtons}>
+                            <TouchableOpacity
+                                style={[styles.modalButton, { backgroundColor: currentColors.primaryButtonBackground }]}
+                                onPress={handleSignOut}
+                            >
+                                <Text onPress={handleSignOut} style={styles.modalButtonText}>Sign Out</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.modalButton, { backgroundColor: currentColors.dangerZoneBackground }]}
+                                onPress={() => setIsModalVisible(false)}  // Close the modal if user cancels
+                            >
+                                <Text style={styles.modalButtonText}>Cancel</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -321,5 +248,56 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontWeight: "bold",
         textAlign: "center",
+    },
+    dangerZoneContainer: {
+        width: "90%",
+        borderWidth: 1.5,
+        borderColor: "red",
+        padding: 20,
+        borderRadius: 10,
+        marginTop: 20,
+        marginBottom: 30,
+    },
+    dangerOption: {
+        paddingVertical: 10,
+    },
+    dangerText: {
+        color: "red",
+        fontWeight: "bold",
+        textAlign: "center",
+    },
+    modalOverlay: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0,0,0,0.5)",
+    },
+    modalContent: {
+        backgroundColor: "white",
+        padding: 20,
+        borderRadius: 10,
+        width: "80%",
+        alignItems: "center",
+    },
+    modalText: {
+        fontSize: 18,
+        marginBottom: 20,
+        textAlign: "center",
+    },
+    modalButtons: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        width: "100%",
+    },
+    modalButton: {
+        flex: 1,
+        paddingVertical: 10,
+        marginHorizontal: 5,
+        borderRadius: 5,
+        alignItems: "center",
+    },
+    modalButtonText: {
+        color: "#fff",
+        fontWeight: "bold",
     },
 });
