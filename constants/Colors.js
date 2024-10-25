@@ -4,7 +4,8 @@ const highlightColor = '#ee9b00'; // Amber for highlights
 
 export const Colors = {
   light: {
-    text: '#151515',          
+    text: '#151515',
+    subtitle: '#3d5a80',      
     background: '#efefef', 
     settingGroupBackground: '#dfdfdf',   
     tint: tintColorLight,
@@ -20,7 +21,8 @@ export const Colors = {
     modalBackground: '#f1faee',
   },
   dark: {
-    text: '#dddddd',          
+    text: '#dddddd',    
+    subtitle: '#a8dadc',      
     background: '#202120',
     settingGroupBackground: '#2e2e2e',    
     tint: tintColorDark,

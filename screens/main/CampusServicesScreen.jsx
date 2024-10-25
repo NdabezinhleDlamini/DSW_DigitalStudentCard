@@ -1,46 +1,52 @@
 import React, { useEffect, useState, useContext } from "react";
 import {
     View,
+    Image,
     Text,
     StyleSheet,
     TouchableOpacity,
     TextInput,
     ActivityIndicator,
     FlatList,
+    RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, Octicons, MaterialIcons } from "@expo/vector-icons";
 import { ThemeContext } from "@/contexts/ThemeContext";
 import { Layout } from "@/constants/Layout";
 import { Fonts } from "@/constants/Fonts";
 
 import { db } from "../../Firebase-config";
-import { doc, collection, getDocs, deleteDoc } from "firebase/firestore";
+import { doc, collection, getDocs, deleteDoc, query } from "firebase/firestore";
 
 export default function CampusServicesScreen({ navigation }) {
     const { currentColors } = useContext(ThemeContext);
     const [loading, setLoading] = useState(true);
     const [posts, setPosts] = useState([]);
+    const [filteredPosts, setFilteredPosts] = useState([]);
+    const [refreshing, setRefreshing] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [filter, setFilter] = useState("All");
+
+    const fetchPosts = async () => {
+        setLoading(true); // Start loading
+        try {
+            // Fetching all lost reports
+            const querySnapshot = await getDocs(collection(db, "lost-Reports"));
+            const postList = querySnapshot.docs.map((doc) => ({
+                ...doc.data(),
+                key: doc.id,
+            }));
+            setPosts(postList);
+            applyFilters(postList, searchQuery, filter);
+        } catch (error) {
+            console.error("Error fetching posts: ", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchPosts = async () => {
-            setLoading(true); // Start loading
-            try {
-                // Fetching all lost reports
-                const querySnapshot = await getDocs(
-                    collection(db, "lost-Reports")
-                );
-                const postList = querySnapshot.docs.map((doc) => ({
-                    ...doc.data(),
-                    key: doc.id,
-                }));
-                setPosts(postList);
-            } catch (error) {
-                console.error("Error fetching posts: ", error);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchPosts();
     }, []);
 
@@ -48,9 +54,47 @@ export default function CampusServicesScreen({ navigation }) {
         try {
             await deleteDoc(doc(db, "lost-Reports", id));
             setPosts(posts.filter((post) => post.key !== id));
+            applyFilters(
+                posts.filter((post) => post.key !== id),
+                searchQuery,
+                filter
+            );
         } catch (error) {
             console.error("Error deleting post: ", error);
         }
+    };
+
+    const handleRefresh = () => {
+        setRefreshing(true);
+        fetchPosts().finally(() => setRefreshing(false));
+    };
+
+    const handleSearch = (text) => {
+        setSearchQuery(text);
+        applyFilters(posts, text, filter);
+    };
+
+    const handleFilter = (type) => {
+        setFilter(type);
+        applyFilters(posts, searchQuery, type);
+    };
+
+    const applyFilters = (data, query = searchQuery, type = filter) => {
+        let filtered = data;
+
+        // Filter by search query
+        if (query) {
+            filtered = filtered.filter((post) =>
+                post.itemName?.toLowerCase().includes(query.toLowerCase())
+            );
+        }
+
+        // Filter by selected category
+        if (type !== "All") {
+            filtered = filtered.filter((post) => post.itemType === type); // Change category to itemType
+        }
+
+        setFilteredPosts(filtered);
     };
 
     return (
@@ -62,13 +106,6 @@ export default function CampusServicesScreen({ navigation }) {
         >
             <View style={styles.header}>
                 <View style={styles.iconsContainer}>
-                    {/* <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
-                        <Ionicons
-                            name="person-circle-outline"
-                            size={24}
-                            color={currentColors.text} 
-                        />
-                    </TouchableOpacity> */}
                     <TouchableOpacity
                         onPress={() => navigation.navigate("Home Alt")}
                     >
@@ -124,6 +161,8 @@ export default function CampusServicesScreen({ navigation }) {
                 ]}
                 placeholder="Search..."
                 placeholderTextColor={currentColors.text}
+                value={searchQuery}
+                onChangeText={handleSearch}
             />
             <View
                 style={[
@@ -132,18 +171,17 @@ export default function CampusServicesScreen({ navigation }) {
                 ]}
             >
                 <TouchableOpacity
-                    style={[
-                        styles.filterChipActive,
-                        {
-                            backgroundColor:
-                                currentColors.primaryButtonBackground,
-                        },
-                    ]}
+                    style={
+                        filter === "All"
+                            ? styles.filterChipActive
+                            : styles.filterChipInactive
+                    }
+                    onPress={() => handleFilter("All")} // Use handleFilter function
                 >
                     <Text
                         style={[
                             styles.filterTextActive,
-                            { color: currentColors.background },
+                            { color: currentColors.text },
                         ]}
                     >
                         All
@@ -151,9 +189,11 @@ export default function CampusServicesScreen({ navigation }) {
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={[
-                        styles.filterChipInactive,
-                        { backgroundColor: currentColors.primary },
+                        filter === "Other"
+                            ? styles.filterChipActive
+                            : styles.filterChipInactive,
                     ]}
+                    onPress={() => handleFilter("Other")} // Use handleFilter function
                 >
                     <Text
                         style={[
@@ -165,10 +205,12 @@ export default function CampusServicesScreen({ navigation }) {
                     </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                    style={[
-                        styles.filterChipInactive,
-                        { backgroundColor: currentColors.primary },
-                    ]}
+                    style={
+                        filter === "Card"
+                            ? styles.filterChipActive
+                            : styles.filterChipInactive
+                    }
+                    onPress={() => handleFilter("Card")} // Use handleFilter function
                 >
                     <Text
                         style={[
@@ -180,10 +222,12 @@ export default function CampusServicesScreen({ navigation }) {
                     </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                    style={[
-                        styles.filterChipInactive,
-                        { backgroundColor: currentColors.primary },
-                    ]}
+                    style={
+                        filter === "Clothing"
+                            ? styles.filterChipActive
+                            : styles.filterChipInactive
+                    }
+                    onPress={() => handleFilter("Clothing")} // Use handleFilter function
                 >
                     <Text
                         style={[
@@ -207,8 +251,14 @@ export default function CampusServicesScreen({ navigation }) {
                         <ActivityIndicator size="large" color="#0000ff" />
                     ) : (
                         <FlatList
-                            data={posts}
+                            data={filteredPosts}
                             keyExtractor={(item) => item.key}
+                            refreshControl={
+                                <RefreshControl
+                                    refreshing={refreshing}
+                                    onRefresh={handleRefresh}
+                                />
+                            }
                             renderItem={({ item }) => (
                                 <View
                                     style={[
@@ -226,12 +276,12 @@ export default function CampusServicesScreen({ navigation }) {
                                                 { color: currentColors.text },
                                             ]}
                                         >
-                                            {item["Item name"]}
+                                            {item["itemName"]}
                                         </Text>
                                         <View style={styles.cardControls}>
                                             <TouchableOpacity>
-                                                <Ionicons
-                                                    name="create-outline"
+                                                <MaterialIcons
+                                                    name="edit"
                                                     size={24}
                                                     color={currentColors.text}
                                                 />
@@ -241,40 +291,66 @@ export default function CampusServicesScreen({ navigation }) {
                                                     deleteData(item.key)
                                                 }
                                             >
-                                                <Ionicons
-                                                    name="trash-outline"
+                                                <Octicons
+                                                    name="trash"
                                                     size={24}
                                                     color={currentColors.text}
                                                 />
                                             </TouchableOpacity>
                                         </View>
                                     </View>
-                                    <Text
-                                        style={[
-                                            styles.details,
-                                            { color: currentColors.text },
-                                        ]}
+                                    <View style={styles.cardDetails}>
+                                        <Text
+                                            style={[
+                                                styles.subtitle,
+                                                {
+                                                    color: currentColors.subtitle,
+                                                },
+                                            ]}
+                                        >
+                                            @{item["Student Number"]}
+                                        </Text>
+                                        <Text
+                                            style={[
+                                                styles.details,
+                                                { color: currentColors.text },
+                                            ]}
+                                        >
+                                            {item["description"]}
+                                        </Text>
+                                    </View>
+                                    <View
+                                        style={{
+                                            flexDirection: "row",
+                                            justifyContent: "space-between",
+                                        }}
                                     >
-                                        Description: {item["Description"]}
-                                    </Text>
-                                    <Text
-                                        style={[
-                                            styles.description,
-                                            { color: currentColors.text },
-                                        ]}
-                                    >
-                                        Location: {item["Location"]}
-                                    </Text>
-                                    <Text
-                                        style={[
-                                            styles.details,
-                                            { color: currentColors.text },
-                                        ]}
-                                    >
-                                        Status: {item["Status"]}
-                                    </Text>
+                                        <Text
+                                            style={[
+                                                styles.details,
+                                                {
+                                                    color: currentColors.subtitle,
+                                                },
+                                            ]}
+                                        >
+                                            Last Seen: {item["Location"]}
+                                        </Text>
+                                        <Text
+                                            style={[
+                                                styles.details,
+                                                {
+                                                    color: currentColors.highlight,
+                                                },
+                                            ]}
+                                        >
+                                            {item["Status"]}
+                                        </Text>
+                                    </View>
                                     <View>
-                                        {/* <Image source={{ uri: item.imageURL }} style={styles.image} /> */}
+                                        <Image
+                                            source={{ uri: item.imageURL }}
+                                            style={styles.image}
+                                        />
                                     </View>
                                 </View>
                             )}
@@ -285,7 +361,6 @@ export default function CampusServicesScreen({ navigation }) {
         </SafeAreaView>
     );
 }
-
 const styles = StyleSheet.create({
     container: {
         padding: Layout.padding,
@@ -344,21 +419,23 @@ const styles = StyleSheet.create({
         textAlign: "center",
     },
     filterChipActive: {
-        width: "18.75%",
+        backgroundColor: "#1e90ff",
         flexDirection: "row",
         justifyContent: "center",
         alignItems: "center",
-        marginHorizontal: Layout.margin / 2,
+        marginHorizontal: 10,
+        borderColor: "#1e90ff",
         borderWidth: 1,
         paddingVertical: Layout.padding / 2,
         paddingHorizontal: Layout.padding,
         borderRadius: Layout.borderRadius,
     },
     filterChipInactive: {
+        borderColor: "#1e90ff",
         flexDirection: "row",
         justifyContent: "center",
         alignItems: "center",
-        marginRight: 10,
+        marginHorizontal: 5,
         borderWidth: 1,
         paddingVertical: Layout.padding / 2,
         paddingHorizontal: Layout.padding,
@@ -366,6 +443,8 @@ const styles = StyleSheet.create({
     },
     mainSection: {
         marginTop: Layout.margin / 2,
+        flex: 1,
+        paddingBottom: 60,
     },
     card: {
         backgroundColor: "#fff",
