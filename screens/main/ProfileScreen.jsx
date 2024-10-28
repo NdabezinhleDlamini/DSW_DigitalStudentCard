@@ -1,299 +1,542 @@
 import React, { useContext, useState, useEffect } from "react";
 import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  TouchableOpacity,
-  ScrollView,
-  Switch,
+    Alert,
+    StyleSheet,
+    Text,
+    View,
+    Image,
+    TouchableOpacity,
+    ScrollView,
+    Modal,
+    FlatList,
 } from "react-native";
+
+import CheckBox from "expo-checkbox";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
-import { ThemeContext } from "../../contexts/ThemeContext"; // Import ThemeContext
+import { ThemeContext } from "../../contexts/ThemeContext";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
 
 import { Layout } from "../../constants/Layout";
 import { Fonts } from "../../constants/Fonts";
 
-import { auth, db } from "../../Firebase-config";
-import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../Firebase-config";
+import { doc, getDoc, collection, addDoc } from "firebase/firestore";
+import { StatusBar } from "expo-status-bar";
 
 export default function UserProfileScreen({ navigation }) {
-  const { isDarkMode, toggleTheme, currentColors } = useContext(ThemeContext); // Get theme state from context
+    const { currentColors } = useContext(ThemeContext); // Get theme state from context
+    const [modalVisible, setModalVisible] = useState(false);
 
-  const [fontsLoaded] = useFonts({
-    ThedusWideLight: require("../../assets/fonts/ThedusWideLight-Bold.otf"),
-  });
+    const [lastSeen, setLastSeen] = useState("Unknown");
 
-  const [userLoginData, setUserLoginData] = useState(null);
-
-  useEffect(() => {
-    const getUserLoginData = async () => {
-        try {
-            const data = await AsyncStorage.getItem("auth");
-            if (data) {
-                setUserLoginData(JSON.parse(data));
-            }
-        } catch (error) {
-            console.error("Error getting user login data:", error);
-        }
+    const campuses = ["UJ-APB", "UJ-APK", "UJ-DFC", "UJ-SWC"];
+    const toggleModal = () => {
+        setModalVisible(!modalVisible);
     };
-    getUserLoginData();
-}, []);
 
-useEffect(() => {
-    if (userLoginData && userLoginData.uid) {
-        const fetchUserData = async () => {
+    const [fontsLoaded] = useFonts({
+        ThedusWideLight: require("../../assets/fonts/ThedusWideLight-Bold.otf"),
+    });
+
+    const [userLoginData, setUserLoginData] = useState(null);
+
+    useEffect(() => {
+        const getUserLoginData = async () => {
             try {
-                const docRef = doc(db, "Users", userLoginData.uid);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    setUserLoginData((prevData) => ({
-                        ...prevData,
-                        ...docSnap.data(),
-                    }));
-                } else {
-                    console.log("User data not found");
+                const data = await AsyncStorage.getItem("auth");
+                if (data) {
+                    setUserLoginData(JSON.parse(data));
                 }
             } catch (error) {
-                console.error("Error fetching user data:", error);
+                console.error("Error getting user login data:", error);
             }
         };
-        fetchUserData();
-    }
-}, [userLoginData?.uid]);
+        getUserLoginData();
+    }, []);
 
+    useEffect(() => {
+        if (userLoginData && userLoginData.uid) {
+            const fetchUserData = async () => {
+                try {
+                    const docRef = doc(db, "Users", userLoginData.uid);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        setUserLoginData((prevData) => ({
+                            ...prevData,
+                            ...docSnap.data(),
+                        }));
+                    } else {
+                        console.log("User data not found");
+                    }
+                } catch (error) {
+                    console.error("Error fetching user data:", error);
+                }
+            };
+            fetchUserData();
+        }
+    }, [userLoginData?.uid]);
 
-  return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: currentColors.background }]}
-    >
-      <View style={styles.header}>
-        <View style={styles.iconsContainer}>
-          <TouchableOpacity onPress={() => navigation.navigate("Home Alt")}>
-            <Text
-              style={[
-                styles.headerText,
-                { color: currentColors.text, fontFamily: "ThedusWideLight" },
-              ]}
-            >
-              VerifID
-            </Text>
-          </TouchableOpacity>
-          <View style={styles.notificationContainer}>
-            <TouchableOpacity
-              style={{ paddingHorizontal: 15 }}
-              onPress={() =>
-                navigation.navigate("Utils", { screen: "Notifications" })
-              }
-            >
-              <Ionicons
-                name="notifications-outline"
-                size={24}
-                color={currentColors.text}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{ paddingHorizontal: 5 }}
-              onPress={() =>
-                navigation.navigate("Utils", { screen: "AppSettings" })
-              }
-            >
-              <Ionicons
-                name="settings-outline"
-                size={24}
-                color={currentColors.text}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Profile Header Section */}
-        <View style={styles.headerSection}>
-          <Image
-            style={styles.headerImage}
-            source={{ uri: "https://via.placeholder.com/500x150" }} // Placeholder for header background
-          />
-          <View
-            style={[
-              styles.profileImageWrapper,
-              { borderColor: currentColors.primaryButtonBackground },
-            ]}
-          >
-            <Image
-              style={styles.profileImage}
-              source={{ uri: "https://via.placeholder.com/500x150" }} // Placeholder for Profile Picture
+    const handlePost = async () => {
+      if (!lastSeen) { // Change from location to lastSeen
+          Alert.alert("Please select a location");
+          return;
+      }
+  
+      if (!userLoginData) {
+          Alert.alert("User data not loaded yet, please wait");
+          return;
+      }
+  
+      try {
+          const newPost = {
+              itemName: "Student Card",
+              Location: lastSeen,
+              description: "Student Card",
+              itemType: "Card",
+              ["Student Number"]: userLoginData.studentNumber,
+              Status: "Lost",
+              itemType: "Card",
+          };
+  
+          const postCollection = collection(db, "lost-Reports");
+          await addDoc(postCollection, newPost);
+  
+          Alert.alert("Success", "Post added successfully"); 
+          toggleModal();
+      } catch (error) {
+          console.error("Error adding post:", error); 
+          Alert.alert("Error", "There was a problem reporting the lost card. Please try again.");
+      }
+  };
+  
+    const handleLastSeen = (location) => {
+        setLastSeen(location);
+    };
+
+    return (
+        <>
+            <StatusBar
+                style={
+                    currentColors.background === "#0b132b" ? "light" : "dark"
+                }
             />
-          </View>
-        </View>
-
-        {/* User Info Section */}
-        <View style={styles.infoSection}>
-          <Text style={[styles.nameText, { color: currentColors.text }]}>
-            {userLoginData?.firstName} {userLoginData?.lastName}
-          </Text>
-          <Text style={[styles.idText, { color: "#777" }]}>@{userLoginData?.studentNumber}</Text>
-        </View>
-
-        {/* Report Lost Card Button */}
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[
-              styles.reportButton,
-              { backgroundColor: currentColors.primaryButtonBackground },
-            ]}
-            onPress={() =>
-                    navigation.navigate("Services", {
-                      screen: "PostItemScreen",
-                    })
-                  }
-          >
-            <Text
-              style={[
-                styles.buttonText,
-                { color: currentColors.primaryButtonText },
-              ]}
+            <SafeAreaView
+                style={[
+                    styles.container,
+                    { backgroundColor: currentColors.background },
+                ]}
             >
-              Report Lost Card
-            </Text>
-          </TouchableOpacity>
-        </View>
+                <View style={styles.header}>
+                    <View style={styles.iconsContainer}>
+                        <TouchableOpacity
+                            onPress={() => navigation.navigate("Home Alt")}
+                        >
+                            <Text
+                                style={[
+                                    styles.headerText,
+                                    {
+                                        color: currentColors.text,
+                                        fontFamily: "ThedusWideLight",
+                                    },
+                                ]}
+                            >
+                                VerifID
+                            </Text>
+                        </TouchableOpacity>
+                        <View style={styles.notificationContainer}>
+                            <TouchableOpacity
+                                style={{ paddingHorizontal: 15 }}
+                                onPress={() =>
+                                    navigation.navigate("Utils", {
+                                        screen: "Notifications",
+                                    })
+                                }
+                            >
+                                <Ionicons
+                                    name="notifications-outline"
+                                    size={24}
+                                    color={currentColors.text}
+                                />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={{ paddingHorizontal: 5 }}
+                                onPress={() =>
+                                    navigation.navigate("Utils", {
+                                        screen: "AppSettings",
+                                    })
+                                }
+                            >
+                                <Ionicons
+                                    name="settings-outline"
+                                    size={24}
+                                    color={currentColors.text}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+                <ScrollView contentContainerStyle={styles.scrollContainer}>
+                    {/* Profile Header Section */}
+                    <View style={styles.headerSection}>
+                        <Image
+                            style={styles.headerImage}
+                            source={{
+                                uri: "https://via.placeholder.com/500x150",
+                            }} // Placeholder for header background
+                        />
+                        <View
+                            style={[
+                                styles.profileImageWrapper,
+                                {
+                                    borderColor:
+                                        currentColors.primaryButtonBackground,
+                                },
+                            ]}
+                        >
+                            <Image
+                                style={styles.profileImage}
+                                source={{
+                                    uri: "https://via.placeholder.com/500x150",
+                                }} // Placeholder for Profile Picture
+                            />
+                        </View>
+                    </View>
 
-        {/* Activity Timeline */}
-        <View style={styles.activitySection}>
-          <Text style={[styles.sectionTitle, { color: currentColors.text }]}>
-            Recent Activities
-          </Text>
-          <View
-            style={[
-              styles.activityItem,
-              { backgroundColor: currentColors.settingGroupBackground },
-            ]}
-          >
-            <Text style={[styles.activityText, { color: currentColors.text }]}>
-              Accessed the Library
-            </Text>
-            <Text style={[styles.timestamp, { color: "#777" }]}>
-              2 hours ago
-            </Text>
-          </View>
-          {/* Add more activities here */}
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
+                    {/* User Info Section */}
+                    <View style={styles.infoSection}>
+                        <Text
+                            style={[
+                                styles.nameText,
+                                { color: currentColors.text },
+                            ]}
+                        >
+                            {userLoginData?.firstName} {userLoginData?.lastName}
+                        </Text>
+                        <Text style={[styles.idText, { color: "#777" }]}>
+                            @{userLoginData?.studentNumber}
+                        </Text>
+                    </View>
+
+                    {/* Report Lost Card Button */}
+                    <View style={styles.buttonContainer}>
+                        <TouchableOpacity
+                            style={[
+                                styles.reportButton,
+                                {
+                                    backgroundColor:
+                                        currentColors.primaryButtonBackground,
+                                },
+                            ]}
+                            onPress={() => setModalVisible(true)}
+                        >
+                            <Text
+                                style={[
+                                    styles.buttonText,
+                                    { color: currentColors.primaryButtonText },
+                                ]}
+                            >
+                                Report Lost Card
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* Activity Timeline */}
+                    <View style={styles.activitySection}>
+                        <Text
+                            style={[
+                                styles.sectionTitle,
+                                { color: currentColors.text },
+                            ]}
+                        >
+                            Recent Activities
+                        </Text>
+                        <View
+                            style={[
+                                styles.activityItem,
+                                {
+                                    backgroundColor:
+                                        currentColors.settingGroupBackground,
+                                },
+                            ]}
+                        >
+                            <Text
+                                style={[
+                                    styles.activityText,
+                                    { color: currentColors.text },
+                                ]}
+                            >
+                                Accessed the Library
+                            </Text>
+                            <Text style={[styles.timestamp, { color: "#777" }]}>
+                                2 hours ago
+                            </Text>
+                        </View>
+                        {/* Add more activities here */}
+                    </View>
+                </ScrollView>
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisible}
+                    onRequestClose={toggleModal}
+                >
+                    <View style={styles.modalOverlay}>
+                        <View
+                            style={[
+                                styles.modalCard,
+                                { backgroundColor: currentColors.background },
+                            ]}
+                        >
+                            <Text
+                                style={[
+                                    styles.modalTitle,
+                                    { color: currentColors.text },
+                                ]}
+                            >
+                                Report Lost Card
+                            </Text>
+
+                            <View style={styles.studentDetailsContainer}>
+                                <Text
+                                    style={[
+                                        styles.modalUserName,
+                                        { color: currentColors.text },
+                                    ]}
+                                >
+                                    {userLoginData?.firstName}{" "}
+                                    {userLoginData?.lastName}
+                                </Text>
+                                <Text style={styles.modalStudentNumber}>
+                                    Student ID: {userLoginData?.studentNumber}
+                                </Text>
+                                <Text style={{ color: "#777" }}>Last Seen: {lastSeen}</Text>
+                            </View>
+                            <FlatList
+                                data={campuses}
+                                keyExtractor={(item) => item}
+                                renderItem={({ item }) => (
+                                    <TouchableOpacity
+                                        style={styles.option}
+                                        onPress={() => handleLastSeen(item)}
+                                    >
+                                        <Text style={[styles.optionText, { color: currentColors.text }]}>
+                                            {item}
+                                        </Text>
+                                    </TouchableOpacity>
+                                )}
+                            />
+                            <View style={styles.modalButtonRow}>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.reportButton,
+                                        {
+                                            backgroundColor:
+                                                currentColors.primaryButtonBackground,
+                                        },
+                                    ]}
+                                    onPress={handlePost}
+                                >
+                                    <Text
+                                        style={[
+                                            styles.buttonText,
+                                            {
+                                                color: currentColors.primaryButtonText,
+                                            },
+                                        ]}
+                                    >
+                                        Report
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.cancelButton,
+                                        {
+                                            borderColor:
+                                                currentColors.primaryButtonBackground,
+                                        },
+                                    ]}
+                                    onPress={toggleModal}
+                                >
+                                    <Text
+                                        style={[
+                                            styles.buttonText,
+                                            {
+                                                color: currentColors.primaryButtonBackground,
+                                            },
+                                        ]}
+                                    >
+                                        Cancel
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+            </SafeAreaView>
+        </>
+    );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: "column",
-    alignItems: "flex-start",
-    paddingHorizontal: Layout.padding,
-  },
-  iconsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    width: "100%",
-    marginBottom: Layout.margin,
-  },
-  notificationContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  headerText: {
-    ...Fonts.subtitle,
-    fontSize: 24,
-  },
-  scrollContainer: {
-    paddingBottom: 20,
-  },
-  headerSection: {
-    width: "100%",
-    position: "relative",
-  },
-  headerImage: {
-    width: "100%",
-    height: 150,
-    opacity: 0.8,
-  },
-  profileImageWrapper: {
-    position: "absolute",
-    bottom: -50,
-    left: 20,
-    borderWidth: 3,
-    borderRadius: 50,
-  },
-  profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-  },
-  infoSection: {
-    marginTop: 60,
-    paddingHorizontal: 20,
-  },
-  nameText: {
-    fontSize: 22,
-    fontWeight: "bold",
-  },
-  idText: {
-    fontSize: 16,
-  },
-  switchContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    marginVertical: 20,
-  },
-  switchLabel: {
-    fontSize: 18,
-  },
-  buttonContainer: {
-    paddingHorizontal: 20,
-    marginVertical: 20,
-  },
-  reportButton: {
-    paddingVertical: 15,
-    paddingHorizontal: 25,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    width: "100%",
-  },
-  buttonText: {
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  activitySection: {
-    paddingHorizontal: 20,
-    marginTop: 10,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  activityItem: {
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  activityText: {
-    fontSize: 16,
-  },
-  timestamp: {
-    fontSize: 12,
-    color: "#777",
-    marginTop: 4,
-  },
+    container: {
+        flex: 1,
+    },
+    header: {
+        flexDirection: "column",
+        alignItems: "flex-start",
+        paddingHorizontal: Layout.padding,
+    },
+    iconsContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        width: "100%",
+        marginBottom: Layout.margin,
+    },
+    notificationContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    headerText: {
+        ...Fonts.subtitle,
+        fontSize: 24,
+    },
+    scrollContainer: {
+        paddingBottom: 20,
+    },
+    headerSection: {
+        width: "100%",
+        position: "relative",
+    },
+    headerImage: {
+        width: "100%",
+        height: 150,
+        opacity: 0.8,
+    },
+    profileImageWrapper: {
+        position: "absolute",
+        bottom: -50,
+        left: 20,
+        borderWidth: 3,
+        borderRadius: 50,
+    },
+    profileImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+    },
+    infoSection: {
+        marginTop: 60,
+        paddingHorizontal: 20,
+    },
+    nameText: {
+        fontSize: 22,
+        fontWeight: "bold",
+    },
+    idText: {
+        fontSize: 16,
+    },
+    buttonContainer: {
+        paddingHorizontal: 20,
+        marginVertical: 20,
+    },
+    reportButton: {
+        borderRadius: 8,
+        width: "100%",
+        backgroundColor: "#1e90ff",
+    },
+    buttonText: {
+        fontSize: 18,
+        fontWeight: "600",
+    },
+    activitySection: {
+        paddingHorizontal: 20,
+        marginTop: 10,
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        marginBottom: 10,
+    },
+    activityItem: {
+        padding: 15,
+        borderRadius: 8,
+        marginBottom: 10,
+    },
+    activityText: {
+        fontSize: 16,
+    },
+    timestamp: {
+        fontSize: 12,
+        color: "#777",
+        marginTop: 4,
+    },
+    modalOverlay: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+    },
+    modalCard: {
+        width: "85%",
+        borderRadius: 15,
+        padding: 25,
+        alignItems: "center",
+        elevation: 5, // adds subtle shadow for Android
+        shadowColor: "#000", // shadow for iOS
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+    },
+    modalTitle: {
+        fontSize: 22,
+        fontWeight: "bold",
+        marginBottom: 15,
+    },
+    studentDetailsContainer: {
+        alignItems: "center",
+        marginBottom: 20,
+    },
+    modalUserName: {
+        fontSize: 20,
+        fontWeight: "600",
+    },
+    modalStudentNumber: {
+        fontSize: 16,
+        color: "#777",
+        marginTop: 5,
+    },
+    modalButtonRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        width: "100%",
+    },
+    reportButton: {
+        flex: 1,
+        borderRadius: 8,
+        paddingVertical: 12,
+        marginRight: 5,
+        alignItems: "center",
+    },
+    cancelButton: {
+        flex: 1,
+        borderRadius: 8,
+        borderWidth: 1.5,
+        paddingVertical: 12,
+        marginLeft: 5,
+        alignItems: "center",
+    },
+    buttonText: {
+        fontSize: 16,
+        fontWeight: "600",
+    },
+    option: {
+        padding: 15,
+    },
+    optionText: {
+        fontSize: 16,
+    },
 });

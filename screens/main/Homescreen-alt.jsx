@@ -13,7 +13,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemeContext } from "../../contexts/ThemeContext";
 
-import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { Layout } from "../../constants/Layout";
@@ -75,8 +74,6 @@ export default function HomescreenAlt({ navigation }) {
             fetchUserData();
         }
     }, [userLoginData?.uid]);
-
-
 
     const animateIn = () => {
         Animated.parallel([
@@ -281,7 +278,9 @@ export default function HomescreenAlt({ navigation }) {
                 </TouchableOpacity>
                 <Text style={[styles.idText, { color: currentColors.text }]}>
                     {/* Fetch user student number from fire base */}
-                    {userLoginData ? `${userLoginData.studentNumber}` : "Student Number..."}
+                    {userLoginData
+                        ? `${userLoginData.studentNumber}`
+                        : "Student Number..."}
                 </Text>
             </View>
 

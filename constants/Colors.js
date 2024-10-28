@@ -19,6 +19,7 @@ export const Colors = {
     primaryButtonText: '#ffffff',
     secondaryButtonBackground: '#a8dadc',
     modalBackground: '#f1faee',
+    statusbar: "light",
   },
   dark: {
     text: '#dddddd',    
@@ -37,5 +38,6 @@ export const Colors = {
     secondaryButtonBackground: '#f1faee',
     dangerButtonBackground: '#e63946',
     modalBackground: '#303030',
+    statusbar: "dark",
   },
 };

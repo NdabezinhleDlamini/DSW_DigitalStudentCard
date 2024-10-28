@@ -36,7 +36,6 @@ export default function PostItemScreen({ navigation }) {
   const itemTypes = ["Card", "Clothing", "Other"];
 
   const handleImagePicker = async () => {
-    // Ask for permission to access media library
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (permissionResult.granted === false) {
       Alert.alert("Permission to access media library is required!");
