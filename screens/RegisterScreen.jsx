@@ -7,7 +7,12 @@ import {
     TextInput,
     Alert,
     ActivityIndicator,
+    Modal,
+    Button,
 } from "react-native";
+
+import Checkbox from "expo-checkbox";
+
 import React, { useState } from "react";
 
 import { StatusBar } from "expo-status-bar";
@@ -30,6 +35,8 @@ export default function RegisterScreen({ navigation }) {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [studentNumber, setStudentNumber] = useState("");
     const [loading, setLoading] = useState(false);
+    const [isModalVisible, setModalVisible] = useState(false);
+    const [isPrivacyChecked, setPrivacyChecked] = useState(false);
 
     if (!fontsLoaded) {
         return null; // or a loading spinner
@@ -80,8 +87,16 @@ export default function RegisterScreen({ navigation }) {
         }
     };
 
-    // handle registration
     const handleRegister = () => {
+        if (!isPrivacyChecked) {
+            Alert.alert(
+                "Agreement Required",
+                "You must agree to the Privacy Policy to register."
+            );
+            return;
+        }
+
+        // Trim whitespace and validate
         const trimmedFirstName = firstName.trim();
         const trimmedLastName = lastName.trim();
         const trimmedEmail = email.trim();
@@ -89,7 +104,6 @@ export default function RegisterScreen({ navigation }) {
         const trimmedConfirmPassword = confirmPassword.trim();
         const trimmedStudentNumber = studentNumber.trim();
 
-        // Validate user input
         if (trimmedFirstName === "" || trimmedLastName === "") {
             Alert.alert("Error", "Name fields cannot be empty");
             return;
@@ -113,11 +127,7 @@ export default function RegisterScreen({ navigation }) {
             Alert.alert("Error", "Password field cannot be empty");
             return;
         }
-        if (trimmedPassword.length < 6) {
-            Alert.alert("Error", "Password must be at least 6 characters long");
-            return;
-        }
-        if (trimmedConfirmPassword.length < 6) {
+        if (trimmedPassword.length < 6 || trimmedConfirmPassword.length < 6) {
             Alert.alert("Error", "Password must be at least 6 characters long");
             return;
         }
@@ -128,16 +138,10 @@ export default function RegisterScreen({ navigation }) {
         handleSignIn();
     };
 
-    const validateEmail = (email) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    };
+    const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-    const validateStudentNumber = (studentNumber) => {
-        // Ensure student number is 9 digits long and starts with '2'
-        const studentNumberRegex = /^2\d{8}$/;
-        return studentNumberRegex.test(studentNumber);
-    };
+    const validateStudentNumber = (studentNumber) =>
+        /^2\d{8}$/.test(studentNumber);
 
     return (
         <>
@@ -151,10 +155,8 @@ export default function RegisterScreen({ navigation }) {
                 source={require("../assets/images/Onboarding_Dark.png")}
             >
                 <View>
-                    <View>
-                        <Text style={styles.title}>Verifid</Text>
-                        <Text style={styles.subtitle}>Create Your Account</Text>
-                    </View>
+                    <Text style={styles.title}>Verifid</Text>
+                    <Text style={styles.subtitle}>Create Your Account</Text>
                     <View style={styles.form}>
                         <View style={styles.namesContainer}>
                             <TextInput
@@ -203,6 +205,19 @@ export default function RegisterScreen({ navigation }) {
                         />
                     </View>
                 </View>
+                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", marginTop: 20}}>
+                    <Checkbox
+                        value={isPrivacyChecked}
+                        onValueChange={setPrivacyChecked}
+                        color={isPrivacyChecked ? "#1e90ff" : undefined}
+                    />
+                    <Text style={styles.checkboxText}>I agree to the </Text>
+                    <TouchableOpacity onPress={() => setModalVisible(true)}>
+                        <Text style={{ color: "#1e90ff" }}>
+                            Terms and Conditions
+                        </Text>
+                    </TouchableOpacity>
+                </View>
                 <TouchableOpacity
                     style={styles.button}
                     onPress={handleRegister}
@@ -230,9 +245,7 @@ export default function RegisterScreen({ navigation }) {
                         Already have an account?
                     </Text>
                     <TouchableOpacity
-                        onPress={() => {
-                            navigation.navigate("Login");
-                        }}
+                        onPress={() => navigation.navigate("Login")}
                     >
                         <Text
                             style={{
@@ -245,6 +258,32 @@ export default function RegisterScreen({ navigation }) {
                         </Text>
                     </TouchableOpacity>
                 </View>
+                <Modal
+                    visible={isModalVisible}
+                    animationType="slide"
+                    transparent={true}
+                >
+                    <View style={styles.modalContainer}>
+                        <Text style={styles.modalTitle}>
+                            Terms & Conditions
+                        </Text>
+                        <Text style={styles.modalContent}>
+                            [Your Terms & Conditions here]
+                        </Text>
+                        <View style={styles.checkboxContainer}>
+                            <Checkbox
+                                value={isPrivacyChecked}
+                                onValueChange={setPrivacyChecked}
+                                color={isPrivacyChecked ? "#1e90ff" : undefined} // Change color when checked
+                            />
+                            <Text>I agree to the Terms & Conditions</Text>
+                        </View>
+                        <Button
+                            title="Close"
+                            onPress={() => setModalVisible(false)}
+                        />
+                    </View>
+                </Modal>
             </ImageBackground>
         </>
     );
@@ -328,4 +367,54 @@ const styles = StyleSheet.create({
     loadingIndicator: {
         alignSelf: "center",
     },
+    checkboxContainer: {
+        marginTop: 20,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    checkboxText: {
+        marginLeft: 10,
+        fontSize: 16,
+        color: Colors.dark.text,
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.8)", // Dark overlay
+        padding: 20,
+        borderRadius: 10,
+        marginHorizontal: 20, // Margin for better spacing
+    },
+    modalTitle: {
+        fontSize: 24,
+        fontWeight: "bold",
+        color: "#1e90ff", // Accent color
+        marginBottom: 10,
+    },
+    modalContent: {
+        fontSize: 16,
+        color: "#fff", // Light text for readability
+        marginBottom: 20,
+        textAlign: "center",
+        paddingHorizontal: 10,
+    },
+    checkboxContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 20,
+    },
+    closeButton: {
+        backgroundColor: "#1e90ff", // Accent color
+        borderRadius: 10,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+    },
+    closeButtonText: {
+        color: "#fff",
+        fontWeight: "bold",
+        textAlign: "center",
+    },
+
 });
