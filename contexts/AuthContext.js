@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
-import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AuthContext = createContext();
 
@@ -9,7 +9,7 @@ const AuthProvider = ({ children }) => {
     useEffect(() => {
         const loadAuth = async () => {
             try {
-                const storedAuth = await ReactNativeAsyncStorage.getItem('auth');
+                const storedAuth = await AsyncStorage.getItem('auth');
                 if (storedAuth) {
                     setAuth(JSON.parse(storedAuth));
                     console.log("Auth loaded:", JSON.parse(storedAuth));
@@ -25,7 +25,7 @@ const AuthProvider = ({ children }) => {
 
     const login = async (authData) => {
         try {
-            await ReactNativeAsyncStorage.setItem('auth', JSON.stringify(authData));
+            await AsyncStorage.setItem('auth', JSON.stringify(authData));
             setAuth(authData);
             console.log("Login Auth Data:", authData);
         } catch (error) {
@@ -35,7 +35,7 @@ const AuthProvider = ({ children }) => {
 
     const logout = async () => {
         try {
-            await ReactNativeAsyncStorage.removeItem('auth');
+            await AsyncStorage.removeItem('auth');
             setAuth(null);
             console.log("Logged out, auth cleared.");
         } catch (error) {

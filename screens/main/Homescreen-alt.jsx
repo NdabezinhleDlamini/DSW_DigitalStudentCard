@@ -12,15 +12,23 @@ import * as Location from "expo-location";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemeContext } from "../../contexts/ThemeContext";
-import { Colors } from "../../constants/Colors";
+
+import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import { Layout } from "../../constants/Layout";
 import { Fonts } from "../../constants/Fonts";
+
+import { auth, db } from "../../Firebase-config";
+import { doc, getDoc } from "firebase/firestore";
 
 import { useRouter } from "expo-router";
 
 export default function HomescreenAlt({ navigation }) {
     const { currentColors } = useContext(ThemeContext);
     const router = useRouter();
+
+    const [userLoginData, setUserLoginData] = useState(null);
 
     const [location, setLocation] = useState(null);
     const [weather, setWeather] = useState({
@@ -31,6 +39,44 @@ export default function HomescreenAlt({ navigation }) {
 
     const scaleValue = useRef(new Animated.Value(1)).current;
     const opacityValue = useRef(new Animated.Value(1)).current;
+
+    useEffect(() => {
+        const getUserLoginData = async () => {
+            try {
+                const data = await AsyncStorage.getItem("auth");
+                if (data) {
+                    setUserLoginData(JSON.parse(data));
+                }
+            } catch (error) {
+                console.error("Error getting user login data:", error);
+            }
+        };
+        getUserLoginData();
+    }, []);
+
+    useEffect(() => {
+        if (userLoginData && userLoginData.uid) {
+            const fetchUserData = async () => {
+                try {
+                    const docRef = doc(db, "Users", userLoginData.uid);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        setUserLoginData((prevData) => ({
+                            ...prevData,
+                            ...docSnap.data(),
+                        }));
+                    } else {
+                        console.log("User data not found");
+                    }
+                } catch (error) {
+                    console.error("Error fetching user data:", error);
+                }
+            };
+            fetchUserData();
+        }
+    }, [userLoginData?.uid]);
+
+
 
     const animateIn = () => {
         Animated.parallel([
@@ -234,7 +280,8 @@ export default function HomescreenAlt({ navigation }) {
                     />
                 </TouchableOpacity>
                 <Text style={[styles.idText, { color: currentColors.text }]}>
-                    219110401
+                    {/* Fetch user student number from fire base */}
+                    {userLoginData ? `${userLoginData.studentNumber}` : "Student Number..."}
                 </Text>
             </View>
 

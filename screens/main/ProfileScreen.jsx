@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -13,9 +13,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
 import { ThemeContext } from "../../contexts/ThemeContext"; // Import ThemeContext
 
-import { Colors } from "../../constants/Colors";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
+
 import { Layout } from "../../constants/Layout";
 import { Fonts } from "../../constants/Fonts";
+
+import { auth, db } from "../../Firebase-config";
+import { doc, getDoc } from "firebase/firestore";
 
 export default function UserProfileScreen({ navigation }) {
   const { isDarkMode, toggleTheme, currentColors } = useContext(ThemeContext); // Get theme state from context
@@ -23,6 +28,45 @@ export default function UserProfileScreen({ navigation }) {
   const [fontsLoaded] = useFonts({
     ThedusWideLight: require("../../assets/fonts/ThedusWideLight-Bold.otf"),
   });
+
+  const [userLoginData, setUserLoginData] = useState(null);
+
+  useEffect(() => {
+    const getUserLoginData = async () => {
+        try {
+            const data = await AsyncStorage.getItem("auth");
+            if (data) {
+                setUserLoginData(JSON.parse(data));
+            }
+        } catch (error) {
+            console.error("Error getting user login data:", error);
+        }
+    };
+    getUserLoginData();
+}, []);
+
+useEffect(() => {
+    if (userLoginData && userLoginData.uid) {
+        const fetchUserData = async () => {
+            try {
+                const docRef = doc(db, "Users", userLoginData.uid);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    setUserLoginData((prevData) => ({
+                        ...prevData,
+                        ...docSnap.data(),
+                    }));
+                } else {
+                    console.log("User data not found");
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+        };
+        fetchUserData();
+    }
+}, [userLoginData?.uid]);
+
 
   return (
     <SafeAreaView
@@ -83,7 +127,7 @@ export default function UserProfileScreen({ navigation }) {
           >
             <Image
               style={styles.profileImage}
-              source={{ uri: "https://via.placeholder.com/100" }} // Placeholder for Profile Picture
+              source={{ uri: "https://via.placeholder.com/500x150" }} // Placeholder for Profile Picture
             />
           </View>
         </View>
@@ -91,9 +135,9 @@ export default function UserProfileScreen({ navigation }) {
         {/* User Info Section */}
         <View style={styles.infoSection}>
           <Text style={[styles.nameText, { color: currentColors.text }]}>
-            John Doe
+            {userLoginData?.firstName} {userLoginData?.lastName}
           </Text>
-          <Text style={[styles.idText, { color: "#777" }]}>@johndoe</Text>
+          <Text style={[styles.idText, { color: "#777" }]}>@{userLoginData?.studentNumber}</Text>
         </View>
 
         {/* Report Lost Card Button */}
