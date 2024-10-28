@@ -5,6 +5,9 @@ const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
     const [auth, setAuth] = useState(null);
+    const [attemptCount, setAttemptCount] = useState(0);
+    
+    const MAX_ATTEMPTS = 5; // Define it inside the provider
 
     useEffect(() => {
         const loadAuth = async () => {
@@ -16,8 +19,12 @@ const AuthProvider = ({ children }) => {
                 } else {
                     console.log("No auth data found.");
                 }
+                
+                // Load attempt count if it exists in AsyncStorage
+                const storedAttemptCount = await AsyncStorage.getItem('attemptCount');
+                setAttemptCount(parseInt(storedAttemptCount) || 0);
             } catch (error) {
-                console.error("Error loading auth:", error);
+                console.error("Error loading auth or attempt count:", error);
             }
         };
         loadAuth();
@@ -26,7 +33,9 @@ const AuthProvider = ({ children }) => {
     const login = async (authData) => {
         try {
             await AsyncStorage.setItem('auth', JSON.stringify(authData));
+            await AsyncStorage.setItem('attemptCount', '0'); // Reset on successful login
             setAuth(authData);
+            setAttemptCount(0);
             console.log("Login Auth Data:", authData);
         } catch (error) {
             console.error("Error saving auth data:", error);
@@ -43,8 +52,15 @@ const AuthProvider = ({ children }) => {
         }
     };
 
+    const incrementAttemptCount = async () => {
+        const newCount = attemptCount + 1;
+        setAttemptCount(newCount);
+        await AsyncStorage.setItem('attemptCount', newCount.toString());
+        return newCount;
+    };
+
     return (
-        <AuthContext.Provider value={{ auth, login, logout }}>
+        <AuthContext.Provider value={{ auth, login, logout, attemptCount, incrementAttemptCount, MAX_ATTEMPTS }}>
             {children}
         </AuthContext.Provider>
     );

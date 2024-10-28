@@ -29,11 +29,12 @@ export default function OnBoardingScreen({ navigation }) {
         return null; // or a loading spinner
     }
 
-    const { login } = useContext(AuthContext); // Use login from context
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
+    const { login, attemptCount, incrementAttemptCount, MAX_ATTEMPTS } = useContext(AuthContext);
+
 
     const getLastLoginDetails = async () => {
         const lastLoginTime = new Date().toISOString();
@@ -66,31 +67,38 @@ export default function OnBoardingScreen({ navigation }) {
 
     const handleLogin = async () => {
         setLoading(true);
+        
+        if (!MAX_ATTEMPTS) {
+            console.error("MAX_ATTEMPTS is not defined in AuthContext.");
+            Alert.alert("Configuration Error", "Please check MAX_ATTEMPTS configuration.");
+            setLoading(false);
+            return;
+        }
+
+        if (attemptCount >= MAX_ATTEMPTS) {
+            Alert.alert("Maximum login attempts reached.");
+            navigation.navigate("ForgotPassword");
+            setLoading(false);
+            return;
+        }
+    
         try {
-            const userCredential = await signInWithEmailAndPassword(
-                auth,
-                email,
-                password
-            );
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
-
-            const platform = Platform.OS;
-            const { lastLoginTime, ipAddress, lastLoginLocation } =
-                await getLastLoginDetails();
-
+    
+            const { lastLoginTime, ipAddress, lastLoginLocation } = await getLastLoginDetails();
             await updateDoc(doc(db, "Users", user.uid), {
                 LastLoginTime: lastLoginTime,
                 LastLoginIP: ipAddress,
                 LastLoginLocation: lastLoginLocation,
-                LastLoginPlatform: platform,
+                LastLoginPlatform: Platform.OS,
             });
-
-            // Save login details to context and AsyncStorage
-            login({ email, uid: user.uid }); // Use login from context to store auth data
-
+    
+            login({ email, uid: user.uid });
             navigation.navigate("main");
         } catch (error) {
-            Alert.alert("Login Error", error.message);
+            const newAttemptCount = await incrementAttemptCount();
+            Alert.alert("Login Error", `${error.message} (${newAttemptCount}/${MAX_ATTEMPTS} attempts)`);
         } finally {
             setLoading(false);
         }
