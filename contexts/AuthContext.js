@@ -59,8 +59,13 @@ const AuthProvider = ({ children }) => {
         return newCount;
     };
 
+    const resetAttemptCount = async () => {
+        setAttemptCount(0);
+        await AsyncStorage.setItem('attemptCount', '0');
+    };
+    
     return (
-        <AuthContext.Provider value={{ auth, login, logout, attemptCount, incrementAttemptCount, MAX_ATTEMPTS }}>
+        <AuthContext.Provider value={{ auth, login, logout, attemptCount, incrementAttemptCount, resetAttemptCount, MAX_ATTEMPTS }}>
             {children}
         </AuthContext.Provider>
     );

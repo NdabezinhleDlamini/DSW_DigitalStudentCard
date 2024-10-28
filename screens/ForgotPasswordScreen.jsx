@@ -7,21 +7,21 @@ import {
     TextInput,
     Alert,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
 import { Colors } from "@/constants/Colors";
 import { auth } from "../Firebase-config";
 import { sendPasswordResetEmail } from "firebase/auth";
-import { firebase } from "../Firebase-config";
+import { AuthContext } from "@/contexts/AuthContext";
 
 export default function ResetPasswordScreen({ navigation }) {
     const [fontsLoaded] = useFonts({
         ThedusWideLight: require("../assets/fonts/ThedusWideLight-Bold.otf"),
     });
 
+    const { resetAttemptCount } = useContext(AuthContext);
     const [email, setEmail] = useState("");
 
     if (!fontsLoaded) {
@@ -31,25 +31,15 @@ export default function ResetPasswordScreen({ navigation }) {
     const handlePasswordReset = async () => {
         try {
             await sendPasswordResetEmail(auth, email);
-            Alert.alert(
-                "Success",
-                "Password reset email sent! Please check your inbox."
-            );
+            Alert.alert("Success");
+
+            resetAttemptCount();
             navigation.navigate("Login");
         } catch (error) {
             Alert.alert("Error", error.message);
             console.error("Error sending password reset email: ", error);
         }
     };
-
-    // const handlePasswordReset = () => {
-    //     firebase.auth().sendPasswordResetEmail(firebase.auth().currentUser.email)
-    //     .then(()=> {
-    //         alert("passwords reset email sent")
-    //     }).catch((error) => {
-    //         alert(error)
-    //     })
-    // }
 
     return (
         <>
@@ -76,12 +66,14 @@ export default function ResetPasswordScreen({ navigation }) {
                             autoCapitalize="none"
                             onChangeText={setEmail}
                         />
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={handlePasswordReset}
-                >
-                    <Text style={styles.buttonText}>Send Reset Link</Text>
-                </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.button}
+                            onPress={handlePasswordReset}
+                        >
+                            <Text style={styles.buttonText}>
+                                Send Reset Link
+                            </Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
                 <View style={styles.hasAccount}>
