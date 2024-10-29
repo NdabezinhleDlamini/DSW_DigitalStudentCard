@@ -15,13 +15,16 @@ import { db, storage, auth } from "../../Firebase-config";
 import { collection, addDoc, getDoc, doc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import * as ImagePicker from "expo-image-picker";
-import { v4 as uuidv4 } from "uuid";
+import { registerIndieID, unregisterIndieDevice } from "native-notify";
+import axios from "axios";
 
 import { ThemeContext } from "@/contexts/ThemeContext";
 
 export default function PostItemScreen({ navigation }) {
-    const { currentColors } = useContext(ThemeContext);
+    registerIndieID(userLoginData?.uid, 24451, "9MBVb21BgXTmYIiNxD53bg");
 
+    const { currentColors } = useContext(ThemeContext);
+    const [userLoginData, setUserLoginData] = useState(null);
     const [itemName, setItemName] = useState("");
     const [image, setImage] = useState(null); // For holding the image locally
     const [imageURL, setImageURL] = useState(""); // For storing the uploaded image URL
@@ -36,43 +39,73 @@ export default function PostItemScreen({ navigation }) {
 
     const itemTypes = ["Card", "Clothing", "Other"];
 
+    useEffect(() => {
+        if (userLoginData && userLoginData.uid) {
+            const fetchUserData = async () => {
+                try {
+                    const docRef = doc(db, "Users", userLoginData.uid);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        setUserLoginData((prevData) => ({
+                            ...prevData,
+                            ...docSnap.data(),
+                        }));
+                    } else {
+                        console.log("User data not found");
+                    }
+                } catch (error) {
+                    console.error("Error fetching user data:", error);
+                }
+            };
+            fetchUserData();
+        }
+    }, [userLoginData?.uid]);
+
     const handleImagePicker = async () => {
-      try {
-          const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  
-          if (!permissionResult.granted) {
-              Alert.alert("Permission to access media library is required!");
-              return;
-          }
-  
-          const result = await ImagePicker.launchImageLibraryAsync({
-              mediaTypes: ImagePicker.MediaTypeOptions.Images,
-              allowsEditing: true,
-              quality: 1,
-          });
-  
-          // Check if selection was not canceled and assets are available
-          if (!result.canceled && result.assets && result.assets.length > 0) {
-              const asset = result.assets[0];
-              if (asset && asset.uri) {
-                  setImage(asset);
-                  setImageURL(asset.uri);
-                  console.log("Image picked:", asset.uri);
-              } else {
-                  console.error("Asset does not contain a URI.");
-                  Alert.alert("Error", "No valid image URI found. Please try again.");
-              }
-          } else {
-              console.log("Image selection was canceled or no assets found.");
-              Alert.alert("No Image Selected", "Please pick an image to upload.");
-          }
-      } catch (error) {
-          console.error("Error selecting image:", error);
-          Alert.alert("Error", "An error occurred while selecting an image. Please try again.");
-      }
-  };
-  
-  
+        try {
+            const permissionResult =
+                await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+            if (!permissionResult.granted) {
+                Alert.alert("Permission to access media library is required!");
+                return;
+            }
+
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                quality: 1,
+            });
+
+            // Check if selection was not canceled and assets are available
+            if (!result.canceled && result.assets && result.assets.length > 0) {
+                const asset = result.assets[0];
+                if (asset && asset.uri) {
+                    setImage(asset);
+                    setImageURL(asset.uri);
+                    console.log("Image picked:", asset.uri);
+                } else {
+                    console.error("Asset does not contain a URI.");
+                    Alert.alert(
+                        "Error",
+                        "No valid image URI found. Please try again."
+                    );
+                }
+            } else {
+                console.log("Image selection was canceled or no assets found.");
+                Alert.alert(
+                    "No Image Selected",
+                    "Please pick an image to upload."
+                );
+            }
+        } catch (error) {
+            console.error("Error selecting image:", error);
+            Alert.alert(
+                "Error",
+                "An error occurred while selecting an image. Please try again."
+            );
+        }
+    };
 
     //uuid was a problem so manually generating a uid was the way to go
     const generateUUID = () => {
@@ -84,40 +117,37 @@ export default function PostItemScreen({ navigation }) {
     };
 
     const uploadImage = async () => {
-      if (!imageURL) {
-          Alert.alert("No Image Selected", "Please select an image.");
-          return null;
-      }
-  
-      try {
-          const response = await fetch(imageURL);
-          
-          if (!response.ok) {
-              console.error("Failed to fetch image:", response.status);
-              throw new Error("Failed to fetch image from URI.");
-          }
-  
-          const blob = await response.blob();
-          if (!blob) {
-              console.error("Failed to create blob from response.");
-              throw new Error("Failed to create blob from response.");
-          }
-  
-          const imageRef = ref(storage, `LostItems/${generateUUID()}`);
-          await uploadBytes(imageRef, blob);
-          
-          const url = await getDownloadURL(imageRef);
-          console.log("Image uploaded successfully:", url);
-          return url;
-  
-      } catch (error) {
-          console.error("Image upload error:", error);
-          Alert.alert("Image Upload Failed", "Please try again.");
-          return null;
-      }
-  };
-  
-  
+        if (!imageURL) {
+            Alert.alert("No Image Selected", "Please select an image.");
+            return null;
+        }
+
+        try {
+            const response = await fetch(imageURL);
+
+            if (!response.ok) {
+                console.error("Failed to fetch image:", response.status);
+                throw new Error("Failed to fetch image from URI.");
+            }
+
+            const blob = await response.blob();
+            if (!blob) {
+                console.error("Failed to create blob from response.");
+                throw new Error("Failed to create blob from response.");
+            }
+
+            const imageRef = ref(storage, `LostItems/${generateUUID()}`);
+            await uploadBytes(imageRef, blob);
+
+            const url = await getDownloadURL(imageRef);
+            console.log("Image uploaded successfully:", url);
+            return url;
+        } catch (error) {
+            console.error("Image upload error:", error);
+            Alert.alert("Image Upload Failed", "Please try again.");
+            return null;
+        }
+    };
 
     // get user data
     useEffect(() => {
@@ -137,42 +167,62 @@ export default function PostItemScreen({ navigation }) {
     }, []);
 
     const handlePost = async () => {
-        if (!itemName || !date || !location || !description || !itemType) {
-            Alert.alert("Please fill in all fields");
-            return;
-        }
-
-        const finalItemType = itemType === "Other" ? otherItemType : itemType;
-
-        try {
-            const uploadedImageURL = await uploadImage();
-            if (!uploadedImageURL) return;
-
-            const newPost = {
-                itemName,
-                imageURL: uploadedImageURL,
-                date,
-                location,
-                description,
-                status,
-                studentNumber: studentNumber,
-                itemType: finalItemType,
-            };
-
-            const postCollection = collection(db, "lost-Reports");
-            await addDoc(postCollection, newPost);
-            Alert.alert("Post added");
-            navigation.goBack();
-        } catch (error) {
-            Alert.alert("Error", "There was a problem creating the post.");
-            console.log(error);
-        }
-    };
+      if (!itemName || !date || !location || !description || !itemType) {
+          Alert.alert("Please fill in all fields");
+          return;
+      }
+  
+      const finalItemType = itemType === "Other" ? otherItemType : itemType;
+  
+      try {
+          const uploadedImageURL = await uploadImage();
+          if (!uploadedImageURL) return;
+  
+          const newPost = {
+              itemName,
+              imageURL: uploadedImageURL,
+              date,
+              location,
+              description,
+              status,
+              studentNumber: userLoginData?.studentNumber || "Unable to set student number", // Ensure no undefined value
+              itemType: finalItemType,
+          };
+  
+          const postCollection = collection(db, "lost-Reports");
+          await addDoc(postCollection, newPost);
+          Alert.alert("Post added");
+          notify();
+          navigation.goBack();
+      } catch (error) {
+          Alert.alert("Error", "There was a problem creating the post.");
+          console.log(error);
+      }
+  };
+  
 
     const handleSelectItemType = (type) => {
         setItemType(type);
         setModalVisible(false);
     };
+
+    const notify = (bigPictureURL) => {
+      axios.post(`https://app.nativenotify.com/api/notification`, {
+          appId: 24451,
+          appToken: "9MBVb21BgXTmYIiNxD53bg",
+          title: "BOLO: Lost Item",
+          body: "Lost" + itemName + " Reported",
+          dateSent: new Date().toLocaleString("en-US", { timeZone: "UTC" }),
+          pushData: { itemName, location, date },
+          bigPictureURL: bigPictureURL,
+      })
+      .then(response => {
+          console.log("Push notification sent successfully:", response.data);
+      })
+      .catch(error => {
+          console.error("Error sending push notification:", error);
+      });
+  };
 
     return (
         <SafeAreaView
