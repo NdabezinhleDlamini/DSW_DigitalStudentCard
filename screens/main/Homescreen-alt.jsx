@@ -7,7 +7,9 @@ import {
     TouchableOpacity,
     ScrollView,
     Animated,
+    ImageBackground,
 } from "react-native";
+import { StatusBar } from "expo-status-bar";
 import * as Location from "expo-location";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -23,8 +25,11 @@ import { doc, getDoc } from "firebase/firestore";
 
 import { useRouter } from "expo-router";
 
+const lightBackground = require("../../assets/images/Onbaording_Light.png");
+const darkBackground = require("../../assets/images/Onboarding_Dark.png");
+
 export default function HomescreenAlt({ navigation }) {
-    const { currentColors } = useContext(ThemeContext);
+    const { currentColors, isDarkMode } = useContext(ThemeContext);
     const router = useRouter();
 
     const [userLoginData, setUserLoginData] = useState(null);
@@ -153,261 +158,269 @@ export default function HomescreenAlt({ navigation }) {
     }, [location]);
 
     return (
-        <SafeAreaView
-            style={[
-                styles.container,
-                { backgroundColor: currentColors.background },
-            ]}
+        <ImageBackground
+            source={isDarkMode ? darkBackground : lightBackground}
+            style={styles.backgroundImage}
         >
-            <View style={styles.header}>
-                <View style={styles.iconsContainer}>
-                    <TouchableOpacity
-                        onPress={() => navigation.navigate("Home Alt")}
-                    >
-                        <Text
-                            style={[
-                                styles.headerText,
-                                {
-                                    color: currentColors.text,
-                                    fontFamily: "ThedusWideLight",
-                                    shadowOffset: { width: 0, height: 10 },
-                                    shadowColor: "rgba(128, 128, 128, 0.3)",
-                                    shadowOpacity: 0.9,
-                                    shadowRadius: 5,
-                                    elevation: 6,
-                                },
-                            ]}
-                        >
-                            VerifID
-                        </Text>
-                    </TouchableOpacity>
-                    <View style={styles.notificationContainer}>
+            <SafeAreaView style={[styles.container]}>
+            <StatusBar
+                style={isDarkMode ? "light" : "dark"}
+                barStyle={isDarkMode ? "light-content" : "dark-content"}
+                translucent={true}
+                backgroundColor={currentColors.background}
+            />
+                <View style={styles.header}>
+                    <View style={styles.iconsContainer}>
                         <TouchableOpacity
-                            style={{ paddingHorizontal: 15 }}
-                            onPress={() =>
-                                navigation.navigate("Utils", {
-                                    screen: "Notifications",
-                                })
-                            }
+                            onPress={() => navigation.navigate("Home Alt")}
                         >
-                            <Ionicons
-                                name="notifications-outline"
-                                size={24}
-                                color={currentColors.text}
-                            />
+                            <Text
+                                style={[
+                                    styles.headerText,
+                                    {
+                                        color: currentColors.text,
+                                        fontFamily: "ThedusWideLight",
+                                        shadowOffset: { width: 0, height: 10 },
+                                        shadowColor: "rgba(128, 128, 128, 0.3)",
+                                        shadowOpacity: 0.9,
+                                        shadowRadius: 5,
+                                        elevation: 6,
+                                    },
+                                ]}
+                            >
+                                VerifID
+                            </Text>
                         </TouchableOpacity>
-                        <TouchableOpacity
-                            style={{ paddingHorizontal: 5 }}
-                            onPress={() =>
-                                navigation.navigate("Utils", {
-                                    screen: "AppSettings",
-                                })
-                            }
-                        >
-                            <Ionicons
-                                name="settings-outline"
-                                size={24}
-                                color={currentColors.text}
-                            />
-                        </TouchableOpacity>
+                        <View style={styles.notificationContainer}>
+                            <TouchableOpacity
+                                style={{ paddingHorizontal: 15 }}
+                                onPress={() =>
+                                    navigation.navigate("Utils", {
+                                        screen: "Notifications",
+                                    })
+                                }
+                            >
+                                <Ionicons
+                                    name="notifications-outline"
+                                    size={24}
+                                    color={currentColors.text}
+                                />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={{ paddingHorizontal: 5 }}
+                                onPress={() =>
+                                    navigation.navigate("Utils", {
+                                        screen: "AppSettings",
+                                    })
+                                }
+                            >
+                                <Ionicons
+                                    name="settings-outline"
+                                    size={24}
+                                    color={currentColors.text}
+                                />
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
-            </View>
 
-            <View style={styles.card}>
-                <View
-                    style={[
-                        styles.weatherWidget,
-                        {
-                            backgroundColor:
-                                currentColors.primaryButtonBackground,
-                        },
-                    ]}
-                >
-                    <View style={styles.weatherWidgetDetails}>
-                        <Text
-                            style={[
-                                styles.weatherWidgetTitleText,
-                                { color: "currentColors.text" },
-                            ]}
-                        >
-                            {weather.locationName
-                                ? weather.locationName
-                                : "Loading..."}
-                        </Text>
-                        <Text
-                            style={[
-                                styles.weatherWidgetSubtitleText,
-                                { color: currentColors.text },
-                            ]}
-                        >
-                            {weather.name}
-                        </Text>
-                        <Text
-                            style={[
-                                styles.weatherWidgetText,
-                                { color: currentColors.text },
-                            ]}
-                        >
-                            {weather.description}
-                        </Text>
-                    </View>
-                    <Text
+                <View style={styles.card}>
+                    <View
                         style={[
-                            styles.weatherWidgetTempText,
-                            { color: currentColors.text },
-                        ]}
-                    >
-                        {weather.temperature
-                            ? `${weather.temperature}°C`
-                            : "..."}
-                    </Text>
-                </View>
-
-                <TouchableOpacity>
-                    <Image
-                        source={{ uri: "https://placehold.co/600x400/png" }}
-                        style={[
-                            styles.studentCard,
+                            styles.weatherWidget,
                             {
-                                borderColor:
+                                backgroundColor:
                                     currentColors.primaryButtonBackground,
                             },
                         ]}
-                    />
-                </TouchableOpacity>
-                <Text style={[styles.idText, { color: currentColors.text }]}>
-                    {/* Fetch user student number from fire base */}
-                    {userLoginData
-                        ? `${userLoginData.studentNumber}`
-                        : "Student Number..."}
-                </Text>
-            </View>
-
-            <View>
-                {/* Campus Services Quick Link icons */}
-                <View>
-                    <Text
-                        style={[
-                            styles.sectionTitle,
-                            { color: currentColors.text },
-                        ]}
                     >
-                        Campus Services
-                    </Text>
-
-                    <Animated.View
-                        style={[
-                            styles.button,
-                            {
-                                transform: [{ scale: scaleValue }],
-                                opacity: opacityValue,
-                            },
-                        ]}
-                    >
-                        <View style={styles.iconRow}>
-                            <TouchableOpacity
-                                onPressIn={animateIn}
-                                onPressOut={animateOut}
+                        <View style={styles.weatherWidgetDetails}>
+                            <Text
                                 style={[
-                                    styles.campusServiceItem,
-                                    {
-                                        backgroundColor:
-                                            currentColors.primaryButtonBackground,
-                                    },
+                                    styles.weatherWidgetTitleText,
+                                    { color: "currentColors.text" },
                                 ]}
-                                onPress={() =>
-                                    navigation.navigate("PostItemScreen")
-                                }
                             >
-                                <Text
-                                    style={{
-                                        color: "white",
-                                        fontSize: 15,
-                                        fontWeight: "bold",
-                                    }}
-                                >
-                                    Lost
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPressIn={animateIn}
-                                onPressOut={animateOut}
+                                {weather.locationName
+                                    ? weather.locationName
+                                    : "Loading..."}
+                            </Text>
+                            <Text
                                 style={[
-                                    styles.campusServiceItem,
-                                    {
-                                        backgroundColor:
-                                            currentColors.primaryButtonBackground,
-                                    },
+                                    styles.weatherWidgetSubtitleText,
+                                    { color: currentColors.text },
                                 ]}
-                                onPress={() =>
-                                    navigation.navigate("AccessHistory")
-                                }
                             >
-                                <Text
-                                    style={{
-                                        color: "white",
-                                        fontSize: 15,
-                                        fontWeight: "bold",
-                                    }}
-                                >
-                                    Access History
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPressIn={animateIn}
-                                onPressOut={animateOut}
+                                {weather.name}
+                            </Text>
+                            <Text
                                 style={[
-                                    styles.campusServiceItem,
-                                    {
-                                        backgroundColor:
-                                            currentColors.primaryButtonBackground,
-                                    },
+                                    styles.weatherWidgetText,
+                                    { color: currentColors.text },
                                 ]}
-                                onPress={() =>
-                                    navigation.navigate("CardCollection")
-                                }
-                                // change the name as the stack only
                             >
-                                <Text
-                                    style={{
-                                        color: "white",
-                                        fontSize: 15,
-                                        fontWeight: "bold",
-                                    }}
-                                >
-                                    Collect
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPressIn={animateIn}
-                                onPressOut={animateOut}
-                                style={[
-                                    styles.campusServiceItem,
-                                    {
-                                        backgroundColor:
-                                            currentColors.primaryButtonBackground,
-                                    },
-                                ]}
-                                onPress={() =>
-                                    navigation.navigate("RequestNewCard")
-                                }
-                            >
-                                <Text
-                                    style={{
-                                        color: "white",
-                                        fontSize: 15,
-                                        fontWeight: "bold",
-                                    }}
-                                >
-                                    Request
-                                </Text>
-                            </TouchableOpacity>
+                                {weather.description}
+                            </Text>
                         </View>
-                    </Animated.View>
+                        <Text
+                            style={[
+                                styles.weatherWidgetTempText,
+                                { color: currentColors.text },
+                            ]}
+                        >
+                            {weather.temperature
+                                ? `${weather.temperature}°C`
+                                : "..."}
+                        </Text>
+                    </View>
+
+                    <TouchableOpacity>
+                        <Image
+                            source={{ uri: "https://placehold.co/600x400/png" }}
+                            style={[
+                                styles.studentCard,
+                                {
+                                    borderColor:
+                                        currentColors.primaryButtonBackground,
+                                },
+                            ]}
+                        />
+                    </TouchableOpacity>
+                    <Text
+                        style={[styles.idText, { color: currentColors.text }]}
+                    >
+                        {/* Fetch user student number from fire base */}
+                        {userLoginData
+                            ? `${userLoginData.studentNumber}`
+                            : "Student Number..."}
+                    </Text>
                 </View>
-            </View>
-        </SafeAreaView>
+
+                <View>
+                    {/* Campus Services Quick Link icons */}
+                    <View>
+                        <Text
+                            style={[
+                                styles.sectionTitle,
+                                { color: currentColors.text },
+                            ]}
+                        >
+                            Campus Services
+                        </Text>
+
+                        <Animated.View
+                            style={[
+                                styles.button,
+                                {
+                                    transform: [{ scale: scaleValue }],
+                                    opacity: opacityValue,
+                                },
+                            ]}
+                        >
+                            <View style={styles.iconRow}>
+                                <TouchableOpacity
+                                    onPressIn={animateIn}
+                                    onPressOut={animateOut}
+                                    style={[
+                                        styles.campusServiceItem,
+                                        {
+                                            backgroundColor:
+                                                currentColors.primaryButtonBackground,
+                                        },
+                                    ]}
+                                    onPress={() =>
+                                        navigation.navigate("PostItemScreen")
+                                    }
+                                >
+                                    <Text
+                                        style={{
+                                            color: "white",
+                                            fontSize: 15,
+                                            fontWeight: "bold",
+                                        }}
+                                    >
+                                        Lost
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    onPressIn={animateIn}
+                                    onPressOut={animateOut}
+                                    style={[
+                                        styles.campusServiceItem,
+                                        {
+                                            backgroundColor:
+                                                currentColors.primaryButtonBackground,
+                                        },
+                                    ]}
+                                    onPress={() =>
+                                        navigation.navigate("AccessHistory")
+                                    }
+                                >
+                                    <Text
+                                        style={{
+                                            color: "white",
+                                            fontSize: 15,
+                                            fontWeight: "bold",
+                                        }}
+                                    >
+                                        Access History
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    onPressIn={animateIn}
+                                    onPressOut={animateOut}
+                                    style={[
+                                        styles.campusServiceItem,
+                                        {
+                                            backgroundColor:
+                                                currentColors.primaryButtonBackground,
+                                        },
+                                    ]}
+                                    onPress={() =>
+                                        navigation.navigate("CardCollection")
+                                    }
+                                    // change the name as the stack only
+                                >
+                                    <Text
+                                        style={{
+                                            color: "white",
+                                            fontSize: 15,
+                                            fontWeight: "bold",
+                                        }}
+                                    >
+                                        Collect
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    onPressIn={animateIn}
+                                    onPressOut={animateOut}
+                                    style={[
+                                        styles.campusServiceItem,
+                                        {
+                                            backgroundColor:
+                                                currentColors.primaryButtonBackground,
+                                        },
+                                    ]}
+                                    onPress={() =>
+                                        navigation.navigate("RequestNewCard")
+                                    }
+                                >
+                                    <Text
+                                        style={{
+                                            color: "white",
+                                            fontSize: 15,
+                                            fontWeight: "bold",
+                                        }}
+                                    >
+                                        Request
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </Animated.View>
+                    </View>
+                </View>
+            </SafeAreaView>
+        </ImageBackground>
     );
 }
 
@@ -415,6 +428,11 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: Layout.padding,
+    },
+    backgroundImage: {
+        flex: 1,
+        resizeMode: "stretch",
+        justifyContent: "center",
     },
     header: {
         flexDirection: "column",

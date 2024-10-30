@@ -9,9 +9,9 @@ import {
     ScrollView,
     Modal,
     FlatList,
+    ImageBackground,
 } from "react-native";
 
-import CheckBox from "expo-checkbox";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
@@ -26,8 +26,11 @@ import { db } from "../../Firebase-config";
 import { doc, getDoc, collection, addDoc } from "firebase/firestore";
 import { StatusBar } from "expo-status-bar";
 
+const lightBackground = require("../../assets/images/Onbaording_Light.png");
+const darkBackground = require("../../assets/images/Onboarding_Dark.png");
+
 export default function UserProfileScreen({ navigation }) {
-    const { currentColors } = useContext(ThemeContext); // Get theme state from context
+    const { currentColors, isDarkMode } = useContext(ThemeContext); // Get theme state from context
     const [modalVisible, setModalVisible] = useState(false);
 
     const [lastSeen, setLastSeen] = useState("Unknown");
@@ -80,53 +83,55 @@ export default function UserProfileScreen({ navigation }) {
     }, [userLoginData?.uid]);
 
     const handlePost = async () => {
-      if (!lastSeen) { // Change from location to lastSeen
-          Alert.alert("Please select a location");
-          return;
-      }
-  
-      if (!userLoginData) {
-          Alert.alert("User data not loaded yet, please wait");
-          return;
-      }
-  
-      try {
-          const newPost = {
-              itemName: "Student Card",
-              Location: lastSeen,
-              description: "Student Card",
-              itemType: "Card",
-              ["Student Number"]: userLoginData.studentNumber,
-              Status: "Lost",
-              itemType: "Card",
-          };
-  
-          const postCollection = collection(db, "lost-Reports");
-          await addDoc(postCollection, newPost);
-  
-          Alert.alert("Success", "Post added successfully"); 
-          toggleModal();
-      } catch (error) {
-          console.error("Error adding post:", error); 
-          Alert.alert("Error", "There was a problem reporting the lost card. Please try again.");
-      }
-  };
-  
+        if (!lastSeen) {
+            // Change from location to lastSeen
+            Alert.alert("Please select a location");
+            return;
+        }
+
+        if (!userLoginData) {
+            Alert.alert("User data not loaded yet, please wait");
+            return;
+        }
+
+        try {
+            const newPost = {
+                itemName: "Student Card",
+                Location: lastSeen,
+                description: "Student Card",
+                itemType: "Card",
+                ["Student Number"]: userLoginData.studentNumber,
+                Status: "Lost",
+                itemType: "Card",
+            };
+
+            const postCollection = collection(db, "lost-Reports");
+            await addDoc(postCollection, newPost);
+
+            Alert.alert("Success", "Post added successfully");
+            toggleModal();
+        } catch (error) {
+            console.error("Error adding post:", error);
+            Alert.alert(
+                "Error",
+                "There was a problem reporting the lost card. Please try again."
+            );
+        }
+    };
+
     const handleLastSeen = (location) => {
         setLastSeen(location);
     };
 
     return (
-        <>
-            <StatusBar
-                style={
-                    currentColors.background === "#0b132b" ? "light" : "dark"
-                }
-            />
+        <ImageBackground
+            source={isDarkMode ? darkBackground : lightBackground}
+            resizeMode="cover"
+            style={styles.backgroundImage}
+        >
             <SafeAreaView
                 style={[
                     styles.container,
-                    { backgroundColor: currentColors.background },
                 ]}
             >
                 <View style={styles.header}>
@@ -258,7 +263,7 @@ export default function UserProfileScreen({ navigation }) {
                                 styles.activityItem,
                                 {
                                     backgroundColor:
-                                        currentColors.settingGroupBackground,
+                                        currentColors.background,
                                 },
                             ]}
                         >
@@ -312,7 +317,9 @@ export default function UserProfileScreen({ navigation }) {
                                 <Text style={styles.modalStudentNumber}>
                                     Student ID: {userLoginData?.studentNumber}
                                 </Text>
-                                <Text style={{ color: "#777" }}>Last Seen: {lastSeen}</Text>
+                                <Text style={{ color: "#777" }}>
+                                    Last Seen: {lastSeen}
+                                </Text>
                             </View>
                             <FlatList
                                 data={campuses}
@@ -322,7 +329,12 @@ export default function UserProfileScreen({ navigation }) {
                                         style={styles.option}
                                         onPress={() => handleLastSeen(item)}
                                     >
-                                        <Text style={[styles.optionText, { color: currentColors.text }]}>
+                                        <Text
+                                            style={[
+                                                styles.optionText,
+                                                { color: currentColors.text },
+                                            ]}
+                                        >
                                             {item}
                                         </Text>
                                     </TouchableOpacity>
@@ -376,13 +388,17 @@ export default function UserProfileScreen({ navigation }) {
                     </View>
                 </Modal>
             </SafeAreaView>
-        </>
+        </ImageBackground>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    backgroundImage: {
+        flex: 1,
+        resizeMode: "cover",
     },
     header: {
         flexDirection: "column",

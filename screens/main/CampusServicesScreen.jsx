@@ -9,6 +9,7 @@ import {
     ActivityIndicator,
     FlatList,
     RefreshControl,
+    ImageBackground,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, Octicons, MaterialIcons } from "@expo/vector-icons";
@@ -19,8 +20,11 @@ import { Fonts } from "@/constants/Fonts";
 import { db } from "../../Firebase-config";
 import { doc, collection, getDocs, deleteDoc, query } from "firebase/firestore";
 
+const lightBackground = require("../../assets/images/Onbaording_Light.png");
+const darkBackground = require("../../assets/images/Onboarding_Dark.png");
+
 export default function CampusServicesScreen({ navigation }) {
-    const { currentColors } = useContext(ThemeContext);
+    const { currentColors, isDarkMode } = useContext(ThemeContext);
     const [loading, setLoading] = useState(true);
     const [posts, setPosts] = useState([]);
     const [filteredPosts, setFilteredPosts] = useState([]);
@@ -98,270 +102,286 @@ export default function CampusServicesScreen({ navigation }) {
     };
 
     return (
-        <SafeAreaView
-            style={[
-                styles.container,
-                { backgroundColor: currentColors.background },
-            ]}
+        <ImageBackground
+            source={isDarkMode ? darkBackground : lightBackground}
+            style={styles.backgroundImage}
         >
-            <View style={styles.header}>
-                <View style={styles.iconsContainer}>
+            <SafeAreaView
+                style={[
+                    styles.container,
+                ]}
+            >
+                <View style={styles.header}>
+                    <View style={styles.iconsContainer}>
+                        <TouchableOpacity
+                            onPress={() => navigation.navigate("Home Alt")}
+                        >
+                            <Text
+                                style={[
+                                    styles.headerText,
+                                    {
+                                        color: currentColors.text,
+                                        fontFamily: "ThedusWideLight",
+                                    },
+                                ]}
+                            >
+                                VerifID
+                            </Text>
+                        </TouchableOpacity>
+                        <View style={styles.notificationContainer}>
+                            <TouchableOpacity
+                                onPress={() =>
+                                    navigation.navigate("Utils", {
+                                        screen: "Notifications",
+                                    })
+                                }
+                                style={{ paddingHorizontal: 15 }}
+                            >
+                                <Ionicons
+                                    name="notifications-outline"
+                                    size={24}
+                                    color={currentColors.text}
+                                />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() =>
+                                    navigation.navigate("Utils", {
+                                        screen: "AppSettings",
+                                    })
+                                }
+                                style={{ paddingHorizontal: 5 }}
+                            >
+                                <Ionicons
+                                    name="settings-outline"
+                                    size={24}
+                                    color={currentColors.text}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+
+                <TextInput
+                    style={[
+                        styles.input,
+                        { borderColor: currentColors.primaryButtonBackground },
+                    ]}
+                    placeholder="Search..."
+                    placeholderTextColor={currentColors.text}
+                    value={searchQuery}
+                    onChangeText={handleSearch}
+                />
+                <View
+                    style={[
+                        styles.filterContainer,
+                        { borderColor: currentColors.primaryButtonBackground },
+                    ]}
+                >
                     <TouchableOpacity
-                        onPress={() => navigation.navigate("Home Alt")}
+                        style={
+                            filter === "All"
+                                ? styles.filterChipActive
+                                : styles.filterChipInactive
+                        }
+                        onPress={() => handleFilter("All")} // Use handleFilter function
                     >
                         <Text
                             style={[
-                                styles.headerText,
-                                {
-                                    color: currentColors.text,
-                                    fontFamily: "ThedusWideLight",
-                                },
+                                styles.filterTextActive,
+                                { color: currentColors.text },
                             ]}
                         >
-                            VerifID
+                            All
                         </Text>
                     </TouchableOpacity>
-                    <View style={styles.notificationContainer}>
-                        <TouchableOpacity
-                            onPress={() =>
-                                navigation.navigate("Utils", {
-                                    screen: "Notifications",
-                                })
-                            }
-                            style={{ paddingHorizontal: 15 }}
+                    <TouchableOpacity
+                        style={[
+                            filter === "Other"
+                                ? styles.filterChipActive
+                                : styles.filterChipInactive,
+                        ]}
+                        onPress={() => handleFilter("Other")} // Use handleFilter function
+                    >
+                        <Text
+                            style={[
+                                styles.filterTextInactive,
+                                { color: currentColors.text },
+                            ]}
                         >
-                            <Ionicons
-                                name="notifications-outline"
-                                size={24}
-                                color={currentColors.text}
-                            />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            onPress={() =>
-                                navigation.navigate("Utils", {
-                                    screen: "AppSettings",
-                                })
-                            }
-                            style={{ paddingHorizontal: 5 }}
+                            Items
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={
+                            filter === "Card"
+                                ? styles.filterChipActive
+                                : styles.filterChipInactive
+                        }
+                        onPress={() => handleFilter("Card")} // Use handleFilter function
+                    >
+                        <Text
+                            style={[
+                                styles.filterTextInactive,
+                                { color: currentColors.text },
+                            ]}
                         >
-                            <Ionicons
-                                name="settings-outline"
-                                size={24}
-                                color={currentColors.text}
-                            />
-                        </TouchableOpacity>
-                    </View>
+                            Cards
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={
+                            filter === "Clothing"
+                                ? styles.filterChipActive
+                                : styles.filterChipInactive
+                        }
+                        onPress={() => handleFilter("Clothing")} // Use handleFilter function
+                    >
+                        <Text
+                            style={[
+                                styles.filterTextInactive,
+                                { color: currentColors.text },
+                            ]}
+                        >
+                            Clothes
+                        </Text>
+                    </TouchableOpacity>
                 </View>
-            </View>
 
-            <TextInput
-                style={[
-                    styles.input,
-                    { borderColor: currentColors.primaryButtonBackground },
-                ]}
-                placeholder="Search..."
-                placeholderTextColor={currentColors.text}
-                value={searchQuery}
-                onChangeText={handleSearch}
-            />
-            <View
-                style={[
-                    styles.filterContainer,
-                    { borderColor: currentColors.primaryButtonBackground },
-                ]}
-            >
-                <TouchableOpacity
-                    style={
-                        filter === "All"
-                            ? styles.filterChipActive
-                            : styles.filterChipInactive
-                    }
-                    onPress={() => handleFilter("All")} // Use handleFilter function
-                >
-                    <Text
-                        style={[
-                            styles.filterTextActive,
-                            { color: currentColors.text },
-                        ]}
-                    >
-                        All
-                    </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
+                <View
                     style={[
-                        filter === "Other"
-                            ? styles.filterChipActive
-                            : styles.filterChipInactive,
+                        styles.mainSection,
+                        { backgroundColor: currentColors.card },
                     ]}
-                    onPress={() => handleFilter("Other")} // Use handleFilter function
                 >
-                    <Text
-                        style={[
-                            styles.filterTextInactive,
-                            { color: currentColors.text },
-                        ]}
-                    >
-                        Items
-                    </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={
-                        filter === "Card"
-                            ? styles.filterChipActive
-                            : styles.filterChipInactive
-                    }
-                    onPress={() => handleFilter("Card")} // Use handleFilter function
-                >
-                    <Text
-                        style={[
-                            styles.filterTextInactive,
-                            { color: currentColors.text },
-                        ]}
-                    >
-                        Cards
-                    </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={
-                        filter === "Clothing"
-                            ? styles.filterChipActive
-                            : styles.filterChipInactive
-                    }
-                    onPress={() => handleFilter("Clothing")} // Use handleFilter function
-                >
-                    <Text
-                        style={[
-                            styles.filterTextInactive,
-                            { color: currentColors.text },
-                        ]}
-                    >
-                        Clothes
-                    </Text>
-                </TouchableOpacity>
-            </View>
-
-            <View
-                style={[
-                    styles.mainSection,
-                    { backgroundColor: currentColors.card },
-                ]}
-            >
-                <View>
-                    {loading ? (
-                        <ActivityIndicator size="large" color="#0000ff" />
-                    ) : (
-                        <FlatList
-                            data={filteredPosts}
-                            keyExtractor={(item) => item.key}
-                            refreshControl={
-                                <RefreshControl
-                                    refreshing={refreshing}
-                                    onRefresh={handleRefresh}
-                                />
-                            }
-                            renderItem={({ item }) => (
-                                <View
-                                    style={[
-                                        styles.card,
-                                        {
-                                            backgroundColor:
-                                                currentColors.settingGroupBackground,
-                                        },
-                                    ]}
-                                >
-                                    <View style={[styles.cardHeader]}>
-                                        <Text
-                                            style={[
-                                                styles.title,
-                                                { color: currentColors.text },
-                                            ]}
-                                        >
-                                            {item["itemName"]}
-                                        </Text>
-                                        <View style={styles.cardControls}>
-                                            <TouchableOpacity>
-                                                <MaterialIcons
-                                                    name="edit"
-                                                    size={24}
-                                                    color={currentColors.text}
-                                                />
-                                            </TouchableOpacity>
-                                            <TouchableOpacity
-                                                onPress={() =>
-                                                    deleteData(item.key)
-                                                }
+                    <View>
+                        {loading ? (
+                            <ActivityIndicator size="large" color="#0000ff" />
+                        ) : (
+                            <FlatList
+                                data={filteredPosts}
+                                keyExtractor={(item) => item.key}
+                                refreshControl={
+                                    <RefreshControl
+                                        refreshing={refreshing}
+                                        onRefresh={handleRefresh}
+                                    />
+                                }
+                                renderItem={({ item }) => (
+                                    <View
+                                        style={[
+                                            styles.card,
+                                            {
+                                                backgroundColor:
+                                                    currentColors.settingGroupBackground,
+                                            },
+                                        ]}
+                                    >
+                                        <View style={[styles.cardHeader]}>
+                                            <Text
+                                                style={[
+                                                    styles.title,
+                                                    {
+                                                        color: currentColors.text,
+                                                    },
+                                                ]}
                                             >
-                                                <Octicons
-                                                    name="trash"
-                                                    size={24}
-                                                    color={currentColors.text}
-                                                />
-                                            </TouchableOpacity>
+                                                {item["itemName"]}
+                                            </Text>
+                                            <View style={styles.cardControls}>
+                                                <TouchableOpacity>
+                                                    <MaterialIcons
+                                                        name="edit"
+                                                        size={24}
+                                                        color={
+                                                            currentColors.text
+                                                        }
+                                                    />
+                                                </TouchableOpacity>
+                                                <TouchableOpacity
+                                                    onPress={() =>
+                                                        deleteData(item.key)
+                                                    }
+                                                >
+                                                    <Octicons
+                                                        name="trash"
+                                                        size={24}
+                                                        color={
+                                                            currentColors.text
+                                                        }
+                                                    />
+                                                </TouchableOpacity>
+                                            </View>
+                                        </View>
+                                        <View style={styles.cardDetails}>
+                                            <Text
+                                                style={[
+                                                    styles.subtitle,
+                                                    {
+                                                        color: currentColors.subtitle,
+                                                    },
+                                                ]}
+                                            >
+                                                @{item["Student Number"]}
+                                            </Text>
+                                            <Text
+                                                style={[
+                                                    styles.details,
+                                                    {
+                                                        color: currentColors.text,
+                                                    },
+                                                ]}
+                                            >
+                                                {item["description"]}
+                                            </Text>
+                                        </View>
+                                        <View
+                                            style={{
+                                                flexDirection: "row",
+                                                justifyContent: "space-between",
+                                            }}
+                                        >
+                                            <Text
+                                                style={[
+                                                    styles.details,
+                                                    {
+                                                        color: currentColors.subtitle,
+                                                    },
+                                                ]}
+                                            >
+                                                Last Seen: {item["Location"]}
+                                            </Text>
+                                            <Text
+                                                style={[
+                                                    styles.details,
+                                                    {
+                                                        color: currentColors.highlight,
+                                                    },
+                                                ]}
+                                            >
+                                                {item["Status"]}
+                                            </Text>
+                                        </View>
+                                        <View>
+                                            <Image
+                                                source={{ uri: item.imageURL }}
+                                                style={styles.image}
+                                            />
                                         </View>
                                     </View>
-                                    <View style={styles.cardDetails}>
-                                        <Text
-                                            style={[
-                                                styles.subtitle,
-                                                {
-                                                    color: currentColors.subtitle,
-                                                },
-                                            ]}
-                                        >
-                                            @{item["Student Number"]}
-                                        </Text>
-                                        <Text
-                                            style={[
-                                                styles.details,
-                                                { color: currentColors.text },
-                                            ]}
-                                        >
-                                            {item["description"]}
-                                        </Text>
-                                    </View>
-                                    <View
-                                        style={{
-                                            flexDirection: "row",
-                                            justifyContent: "space-between",
-                                        }}
-                                    >
-                                        <Text
-                                            style={[
-                                                styles.details,
-                                                {
-                                                    color: currentColors.subtitle,
-                                                },
-                                            ]}
-                                        >
-                                            Last Seen: {item["Location"]}
-                                        </Text>
-                                        <Text
-                                            style={[
-                                                styles.details,
-                                                {
-                                                    color: currentColors.highlight,
-                                                },
-                                            ]}
-                                        >
-                                            {item["Status"]}
-                                        </Text>
-                                    </View>
-                                    <View>
-                                        <Image
-                                            source={{ uri: item.imageURL }}
-                                            style={styles.image}
-                                        />
-                                    </View>
-                                </View>
-                            )}
-                        />
-                    )}
+                                )}
+                            />
+                        )}
+                    </View>
                 </View>
-            </View>
-        </SafeAreaView>
+            </SafeAreaView>
+        </ImageBackground>
     );
 }
 const styles = StyleSheet.create({
+    backgroundImage: {
+        flex: 1,
+        resizeMode: "cover",
+    },
     container: {
         padding: Layout.padding,
         flex: 1,

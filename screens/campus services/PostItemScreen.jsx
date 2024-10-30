@@ -6,9 +6,13 @@ import {
     TouchableOpacity,
     Alert,
     Modal,
+    ActivityIndicator,
     FlatList,
     Image,
+    ImageBackground,
 } from "react-native";
+import { StatusBar } from "expo-status-bar";
+import { Ionicons } from "@expo/vector-icons";
 import React, { useState, useContext, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { db, storage, auth } from "../../Firebase-config";
@@ -20,10 +24,13 @@ import axios from "axios";
 
 import { ThemeContext } from "@/contexts/ThemeContext";
 
-export default function PostItemScreen({ navigation }) {
-    registerIndieID(userLoginData?.uid, 24451, "9MBVb21BgXTmYIiNxD53bg");
+const lightBackground = require("../../assets/images/Onbaording_Light.png");
+const darkBackground = require("../../assets/images/Onboarding_Dark.png");
 
-    const { currentColors } = useContext(ThemeContext);
+export default function PostItemScreen({ navigation }) {
+    registerIndieID(`${auth.currentUser.uid}`, 24451, "9MBVb21BgXTmYIiNxD53bg");
+
+    const { currentColors, isDarkMode } = useContext(ThemeContext);
     const [userLoginData, setUserLoginData] = useState(null);
     const [itemName, setItemName] = useState("");
     const [image, setImage] = useState(null); // For holding the image locally
@@ -36,6 +43,7 @@ export default function PostItemScreen({ navigation }) {
     const [otherItemType, setOtherItemType] = useState("");
     const [modalVisible, setModalVisible] = useState(false);
     const [studentNumber, setStudentNumber] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     const itemTypes = ["Card", "Clothing", "Other"];
 
@@ -167,39 +175,44 @@ export default function PostItemScreen({ navigation }) {
     }, []);
 
     const handlePost = async () => {
-      if (!itemName || !date || !location || !description || !itemType) {
-          Alert.alert("Please fill in all fields");
-          return;
-      }
-  
-      const finalItemType = itemType === "Other" ? otherItemType : itemType;
-  
-      try {
-          const uploadedImageURL = await uploadImage();
-          if (!uploadedImageURL) return;
-  
-          const newPost = {
-              itemName,
-              imageURL: uploadedImageURL,
-              date,
-              location,
-              description,
-              status,
-              studentNumber: userLoginData?.studentNumber || "Unable to set student number", // Ensure no undefined value
-              itemType: finalItemType,
-          };
-  
-          const postCollection = collection(db, "lost-Reports");
-          await addDoc(postCollection, newPost);
-          Alert.alert("Post added");
-          notify();
-          navigation.goBack();
-      } catch (error) {
-          Alert.alert("Error", "There was a problem creating the post.");
-          console.log(error);
-      }
-  };
-  
+        if (!itemName || !date || !location || !description || !itemType) {
+            Alert.alert("Please fill in all fields");
+            return;
+        }
+
+        setLoading(true);
+
+        const finalItemType = itemType === "Other" ? otherItemType : itemType;
+
+        try {
+            const uploadedImageURL = await uploadImage();
+            if (!uploadedImageURL) return;
+
+            const newPost = {
+                itemName,
+                imageURL: uploadedImageURL,
+                date,
+                location,
+                description,
+                status,
+                studentNumber:
+                    userLoginData?.studentNumber ||
+                    "Unable to set student number", // Ensure no undefined value
+                itemType: finalItemType,
+            };
+
+            const postCollection = collection(db, "lost-Reports");
+            await addDoc(postCollection, newPost);
+            Alert.alert("Post added");
+            notify();
+            navigation.goBack();
+        } catch (error) {
+            Alert.alert("Error", "There was a problem creating the post.");
+            console.log(error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleSelectItemType = (type) => {
         setItemType(type);
@@ -207,212 +220,312 @@ export default function PostItemScreen({ navigation }) {
     };
 
     const notify = (bigPictureURL) => {
-      axios.post(`https://app.nativenotify.com/api/notification`, {
-          appId: 24451,
-          appToken: "9MBVb21BgXTmYIiNxD53bg",
-          title: "BOLO: Lost Item",
-          body: "Lost" + itemName + " Reported",
-          dateSent: new Date().toLocaleString("en-US", { timeZone: "UTC" }),
-          pushData: { itemName, location, date },
-          bigPictureURL: bigPictureURL,
-      })
-      .then(response => {
-          console.log("Push notification sent successfully:", response.data);
-      })
-      .catch(error => {
-          console.error("Error sending push notification:", error);
-      });
-  };
+        axios
+            .post(`https://app.nativenotify.com/api/notification`, {
+                appId: 24451,
+                appToken: "9MBVb21BgXTmYIiNxD53bg",
+                title: "BOLO: Lost Item",
+                body: "Lost " + itemName + " Reported",
+                dateSent: new Date().toLocaleString("en-US", {
+                    timeZone: "UTC",
+                }),
+                pushData: { itemName, location, date },
+                bigPictureURL: bigPictureURL,
+            })
+            .then((response) => {
+                console.log(
+                    "Push notification sent successfully:",
+                    response.data
+                );
+            })
+            .catch((error) => {
+                console.error("Error sending push notification:", error);
+            });
+    };
 
     return (
-        <SafeAreaView
-            style={[
-                styles.container,
-                { backgroundColor: currentColors.background },
-            ]}
+        <ImageBackground
+            source={isDarkMode ? darkBackground : lightBackground}
+            style={styles.backgroundImage}
         >
-            <View>
-                <Text style={[styles.topic, { color: currentColors.text }]}>
-                    Add Lost Item
-                </Text>
-
-                <TextInput
-                    style={[styles.search, { color: currentColors.text }]}
-                    placeholder="Item Name:"
-                    placeholderTextColor={"grey"}
-                    value={itemName}
-                    onChangeText={(text) => setItemName(text)}
-                />
-
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={handleImagePicker}
-                >
-                    <Text
-                        style={[
-                            styles.buttonText,
-                            { color: currentColors.primaryButtonText },
-                        ]}
-                    >
-                        {image ? "Image Selected" : "Pick an Image"}
-                    </Text>
-                </TouchableOpacity>
-
-                <TextInput
-                    style={styles.search}
-                    placeholder="Date:"
-                    placeholderTextColor={"grey"}
-                    value={date}
-                    onChangeText={(text) => setDate(text)}
-                />
-
-                <TextInput
-                    style={styles.search}
-                    placeholder="Location:"
-                    placeholderTextColor={"grey"}
-                    value={location}
-                    onChangeText={(text) => setLocation(text)}
-                />
-
-                <TextInput
-                    style={styles.search}
-                    placeholder="Description:"
-                    placeholderTextColor={"grey"}
-                    value={description}
-                    onChangeText={(text) => setDescription(text)}
-                />
-
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => setModalVisible(true)}
-                >
-                    <Text style={styles.buttonText}>
-                        {itemType ? `Type: ${itemType}` : "Select Item Type"}
-                    </Text>
-                </TouchableOpacity>
-
-                {itemType === "Other" && (
-                    <TextInput
-                        style={styles.search}
-                        placeholder="Specify Other Type:"
-                        placeholderTextColor={"grey"}
-                        value={otherItemType}
-                        onChangeText={(text) => setOtherItemType(text)}
-                    />
-                )}
-
-                <TextInput
-                    style={styles.search}
-                    placeholder="Status:"
-                    placeholderTextColor={"grey"}
-                    value={status}
-                    onChangeText={(text) => setStatus(text)}
-                />
-
-                <TouchableOpacity style={styles.button} onPress={handlePost}>
-                    <Text style={styles.buttonText}>Post</Text>
-                </TouchableOpacity>
-
-                {/* Modal for Item Type selection */}
-                <Modal
-                    visible={modalVisible}
-                    animationType="slide"
-                    transparent={true}
-                    onRequestClose={() => setModalVisible(false)}
-                >
-                    <View style={styles.modalContainer}>
-                        <View style={styles.modalContent}>
-                            <FlatList
-                                data={itemTypes}
-                                keyExtractor={(item) => item}
-                                renderItem={({ item }) => (
-                                    <TouchableOpacity
-                                        style={styles.option}
-                                        onPress={() =>
-                                            handleSelectItemType(item)
-                                        }
-                                    >
-                                        <Text style={styles.optionText}>
-                                            {item}
-                                        </Text>
-                                    </TouchableOpacity>
-                                )}
-                            />
+            <SafeAreaView style={styles.container}>
+                <View>
+                    <View style={styles.topBar}>
+                        <View style={styles.backButtonContainer}>
                             <TouchableOpacity
-                                style={styles.closeButton}
-                                onPress={() => setModalVisible(false)}
+                                onPress={() => navigation.goBack()}
+                                style={styles.backButton}
                             >
-                                <Text style={styles.closeButtonText}>
-                                    Close
-                                </Text>
+                                <Ionicons
+                                    name="arrow-back"
+                                    size={30}
+                                    color={currentColors.text}
+                                />
                             </TouchableOpacity>
                         </View>
+
+                        <View style={styles.titleContainer}>
+                            <Text
+                                style={[
+                                    styles.topic,
+                                    { color: currentColors.text },
+                                ]}
+                            >
+                                Report Lost Item
+                            </Text>
+                        </View>
                     </View>
-                </Modal>
-            </View>
-        </SafeAreaView>
+
+                    {loading ? (
+                        <ActivityIndicator />
+                    ) : (
+                        <>
+                            <TextInput
+                                style={[
+                                    styles.search,
+                                    { color: currentColors.text },
+                                ]}
+                                placeholder="Item Name:"
+                                placeholderTextColor={"grey"}
+                                value={itemName}
+                                onChangeText={(text) => setItemName(text)}
+                            />
+
+                            <TouchableOpacity
+                                style={styles.button}
+                                onPress={handleImagePicker}
+                            >
+                                <Text
+                                    style={[
+                                        styles.buttonText,
+                                        {
+                                            color: currentColors.primaryButtonText,
+                                        },
+                                    ]}
+                                >
+                                    {image ? "Image Selected" : "Pick an Image"}
+                                </Text>
+                            </TouchableOpacity>
+
+                            <TextInput
+                                style={[
+                                    styles.search,
+                                    { color: currentColors.text },
+                                ]}
+                                placeholder="Date:"
+                                placeholderTextColor={"grey"}
+                                value={date}
+                                onChangeText={(text) => setDate(text)}
+                            />
+
+                            <TextInput
+                                style={[
+                                    styles.search,
+                                    { color: currentColors.text },
+                                ]}
+                                placeholder="Location:"
+                                placeholderTextColor={"grey"}
+                                value={location}
+                                onChangeText={(text) => setLocation(text)}
+                            />
+
+                            <TextInput
+                                style={[
+                                    styles.search,
+                                    { color: currentColors.text },
+                                ]}
+                                placeholder="Description:"
+                                placeholderTextColor={"grey"}
+                                value={description}
+                                onChangeText={(text) => setDescription(text)}
+                            />
+
+                            <TouchableOpacity
+                                style={styles.button}
+                                onPress={() => setModalVisible(true)}
+                            >
+                                <Text style={styles.buttonText}>
+                                    {itemType
+                                        ? `Type: ${itemType}`
+                                        : "Select Item Type"}
+                                </Text>
+                            </TouchableOpacity>
+
+                            {itemType === "Other" && (
+                                <TextInput
+                                    style={[
+                                        styles.search,
+                                        { color: currentColors.text },
+                                    ]}
+                                    placeholder="Specify Other Type:"
+                                    placeholderTextColor={"grey"}
+                                    value={otherItemType}
+                                    onChangeText={(text) =>
+                                        setOtherItemType(text)
+                                    }
+                                />
+                            )}
+
+                            <TextInput
+                                style={[
+                                    styles.search,
+                                    { color: currentColors.text },
+                                ]}
+                                placeholder="Status:"
+                                placeholderTextColor={"grey"}
+                                value={status}
+                                onChangeText={(text) => setStatus(text)}
+                            />
+
+                            <TouchableOpacity
+                                style={styles.button}
+                                onPress={handlePost}
+                            >
+                                <Text style={styles.buttonText}>Post</Text>
+                            </TouchableOpacity>
+
+                            {/* Modal for Item Type selection */}
+                            <Modal
+                                visible={modalVisible}
+                                animationType="slide"
+                                transparent={true}
+                                onRequestClose={() => setModalVisible(false)}
+                            >
+                                <View style={styles.modalContainer}>
+                                    <View style={styles.modalContent}>
+                                        <FlatList
+                                            data={itemTypes}
+                                            keyExtractor={(item) => item}
+                                            renderItem={({ item }) => (
+                                                <TouchableOpacity
+                                                    style={styles.option}
+                                                    onPress={() =>
+                                                        handleSelectItemType(
+                                                            item
+                                                        )
+                                                    }
+                                                >
+                                                    <Text
+                                                        style={
+                                                            styles.optionText
+                                                        }
+                                                    >
+                                                        {item}
+                                                    </Text>
+                                                </TouchableOpacity>
+                                            )}
+                                        />
+                                        <TouchableOpacity
+                                            style={styles.closeButton}
+                                            onPress={() =>
+                                                setModalVisible(false)
+                                            }
+                                        >
+                                            <Text
+                                                style={styles.closeButtonText}
+                                            >
+                                                Close
+                                            </Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            </Modal>
+                        </>
+                    )}
+                </View>
+
+                <StatusBar style={isDarkMode ? "dark" : "light"} translucent />
+            </SafeAreaView>
+        </ImageBackground>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: "center",
         padding: 20,
+    },
+    backgroundImage: {
+        flex: 1,
+        resizeMode: "cover",
+        justifyContent: "center",
+    },
+    topBar: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingHorizontal: 10,
+        paddingBottom: 15,
+    },
+    backButtonContainer: {
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    titleContainer: {
+        flex: 1,
+        alignItems: "center",
+    },
+    topic: {
+        fontSize: 28,
+        fontWeight: "bold",
+        justifyContent: "center",
+        alignItems: "center",
     },
     search: {
         borderWidth: 1,
-        borderRadius: 5,
-        padding: 7,
-        margin: 10,
-        width: "95%",
-    },
-    topic: {
-        textAlign: "center",
-        fontWeight: "bold",
-        fontSize: 30,
+        borderColor: "#555",
+        borderRadius: 8,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        marginVertical: 10,
     },
     button: {
-        backgroundColor: "#1e90ff",
+        backgroundColor: "#007bff",
         paddingVertical: 12,
-        borderRadius: 25,
+        borderRadius: 8,
         alignItems: "center",
         marginVertical: 10,
-        width: "100%",
     },
     buttonText: {
-        color: "white",
+        color: "#fff",
         fontWeight: "bold",
-        fontSize: 16,
     },
     modalContainer: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        opacity: 0.9,
         backgroundColor: "rgba(0, 0, 0, 0.5)",
     },
     modalContent: {
-        width: "90%",
+        width: "85%",
         backgroundColor: "#fff",
-        borderRadius: 10,
+        borderRadius: 15,
         padding: 20,
-    },
-    option: {
-        padding: 15,
-    },
-    optionText: {
-        fontSize: 16,
-    },
-    closeButton: {
-        marginTop: 20,
-        padding: 10,
-        backgroundColor: "#1e90ff",
-        borderRadius: 5,
         alignItems: "center",
     },
+    option: {
+        paddingVertical: 12,
+        width: "100%",
+        alignItems: "center",
+        borderBottomWidth: 0.5,
+        borderBottomColor: "#ccc",
+    },
+    optionText: {
+        fontSize: 18,
+        color: "#333",
+    },
+    closeButton: {
+        marginTop: 15,
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        backgroundColor: "#1e90ff",
+        borderRadius: 8,
+        alignItems: "center",
+        width: "100%",
+    },
     closeButtonText: {
-        fontWeight: "bold",
-        color: "white",
+        color: "#fff",
+        fontWeight: "600",
+        fontSize: 16,
     },
 });

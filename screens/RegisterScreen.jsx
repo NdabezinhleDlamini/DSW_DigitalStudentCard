@@ -9,6 +9,7 @@ import {
     ActivityIndicator,
     Modal,
     Button,
+    ScrollView,
 } from "react-native";
 
 import Checkbox from "expo-checkbox";
@@ -145,11 +146,6 @@ export default function RegisterScreen({ navigation }) {
 
     return (
         <>
-            <StatusBar
-                style="dark"
-                translucent={true}
-                backgroundColor="rgba(0,0,0,0)"
-            />
             <ImageBackground
                 style={styles.backgroundImage}
                 source={require("../assets/images/Onboarding_Dark.png")}
@@ -205,7 +201,14 @@ export default function RegisterScreen({ navigation }) {
                         />
                     </View>
                 </View>
-                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", marginTop: 20}}>
+                <View
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginTop: 20,
+                    }}
+                >
                     <Checkbox
                         value={isPrivacyChecked}
                         onValueChange={setPrivacyChecked}
@@ -267,16 +270,133 @@ export default function RegisterScreen({ navigation }) {
                         <Text style={styles.modalTitle}>
                             Terms & Conditions
                         </Text>
-                        <Text style={styles.modalContent}>
-                            [Your Terms & Conditions here]
-                        </Text>
+                        <ScrollView style={styles.modalContent}>
+                            <Text
+                                style={[
+                                    styles.modalText,
+                                    { color: Colors.dark.text },
+                                ]}
+                            >
+                                Terms and Conditions for VerifID App
+                                {"\n"}Last Updated:{" "}
+                                {new Date().toLocaleDateString()}
+                            </Text>
+
+                            <Text></Text>
+
+                            <Text
+                                style={[
+                                    styles.modalText,
+                                    { color: Colors.dark.text },
+                                ]}
+                            >
+                                Welcome to the VerifID app! By using our
+                                application, you agree to the following terms
+                                and conditions. Please read them carefully.
+                                {"\n\n"}1. Acceptance of Terms
+                                {"\n"}By accessing or using the VerifID app, you
+                                agree to be bound by these Terms and Conditions
+                                and our Privacy Policy. If you do not agree to
+                                these terms, you must not use the app.
+                                {"\n\n"}2. Changes to Terms
+                                {"\n"}We reserve the right to modify these Terms
+                                at any time. Any changes will be effective
+                                immediately upon posting the revised terms
+                                within the app. Your continued use of the app
+                                following any changes signifies your acceptance
+                                of the new Terms.
+                                {"\n\n"}3. Eligibility
+                                {"\n"}You must be at least 16 years old to use
+                                this app. By using the app, you represent and
+                                warrant that you meet this requirement.
+                                {"\n\n"}4. Account Registration
+                                {"\n"}To access certain features of the app, you
+                                may need to create an account. You agree to
+                                provide accurate, current, and complete
+                                information during the registration process and
+                                to update such information to keep it accurate,
+                                current, and complete. You are responsible for
+                                maintaining the confidentiality of your account
+                                credentials.
+                                {"\n\n"}5. User Responsibilities
+                                {"\n"}You agree to use the VerifID app in
+                                accordance with applicable laws and regulations.
+                                You shall not:
+                                {"\n"}- Use the app for any unlawful purpose.
+                                {"\n"}- Interfere with or disrupt the security,
+                                integrity, or performance of the app.
+                                {"\n"}- Attempt to gain unauthorized access to
+                                the app or its related systems or networks.
+                                {"\n"}- Use the app to transmit any harmful or
+                                malicious code.
+                                {"\n\n"}6. Privacy Policy
+                                {"\n"}Your use of the VerifID app is also
+                                governed by our Privacy Policy, which outlines
+                                how we collect, use, and protect your personal
+                                information. By using the app, you consent to
+                                our collection and use of your information as
+                                described in the Privacy Policy.
+                                {"\n\n"}7. Intellectual Property
+                                {"\n"}All content within the VerifID app,
+                                including but not limited to text, graphics,
+                                logos, and software, is the property of the
+                                VerifID team or its licensors and is protected
+                                by copyright, trademark, and other intellectual
+                                property laws. You may not reproduce,
+                                distribute, modify, or create derivative works
+                                without our prior written permission.
+                                {"\n\n"}8. Limitation of Liability
+                                {"\n"}To the fullest extent permitted by law,
+                                VerifID shall not be liable for any indirect,
+                                incidental, special, consequential, or punitive
+                                damages arising from or related to your use of
+                                the VerifID app. This includes, but is not
+                                limited to, damages for loss of profits,
+                                goodwill, use, data, or other intangible losses.
+                                {"\n\n"}9. Indemnification
+                                {"\n"}You agree to indemnify, defend, and hold
+                                harmless VerifID, its affiliates, and their
+                                respective officers, directors, employees, and
+                                agents from any claims, liabilities, damages,
+                                losses, or expenses arising out of your use of
+                                the app, violation of these Terms, or
+                                infringement of any rights of another party.
+                                {"\n\n"}10. Governing Law
+                                {"\n"}These Terms shall be governed by and
+                                construed in accordance with the laws of [Your
+                                Jurisdiction], without regard to its conflict of
+                                law principles. Any disputes arising from these
+                                Terms or your use of the app shall be resolved
+                                in the competent courts of [Your Jurisdiction].
+                                {"\n\n"}11. Contact Information
+                                {"\n"}If you have any questions or concerns
+                                about these Terms and Conditions, please contact
+                                us at:
+                            </Text>
+                            <Text
+                                style={[
+                                    styles.modalText,
+                                    { color: Colors.dark.text },
+                                ]}
+                            >
+                                {"\n"}Email: [codecrafters28@gmail.com]
+                            </Text>
+                        </ScrollView>
+
                         <View style={styles.checkboxContainer}>
                             <Checkbox
                                 value={isPrivacyChecked}
                                 onValueChange={setPrivacyChecked}
                                 color={isPrivacyChecked ? "#1e90ff" : undefined} // Change color when checked
                             />
-                            <Text>I agree to the Terms & Conditions</Text>
+                            <Text
+                                style={{
+                                    marginLeft: 10,
+                                    color: Colors.dark.text,
+                                }}
+                            >
+                                I agree to the Terms & Conditions
+                            </Text>
                         </View>
                         <Button
                             title="Close"
@@ -385,7 +505,7 @@ const styles = StyleSheet.create({
         backgroundColor: "rgba(0, 0, 0, 0.8)", // Dark overlay
         padding: 20,
         borderRadius: 10,
-        marginHorizontal: 20, // Margin for better spacing
+        marginHorizontal: 10,
     },
     modalTitle: {
         fontSize: 24,
@@ -416,5 +536,4 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         textAlign: "center",
     },
-
 });

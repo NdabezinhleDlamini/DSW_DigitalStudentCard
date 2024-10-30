@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { StatusBar } from 'react-native'; // Import StatusBar
 import { Colors } from '@/constants/Colors';
 
 const ThemeContext = createContext();
@@ -19,7 +19,6 @@ const ThemeProvider = ({ children }) => {
         loadTheme();
     }, []);
 
-
     const toggleTheme = () => {
         setIsDarkMode(prevMode => {
             const newMode = !prevMode;
@@ -32,6 +31,12 @@ const ThemeProvider = ({ children }) => {
 
     return (
         <ThemeContext.Provider value={{ isDarkMode, toggleTheme, currentColors }}>
+            <StatusBar
+                style={isDarkMode ? "light" : "dark"}
+                barStyle={isDarkMode ? "light-content" : "dark-content"}
+                translucent={true}
+                backgroundColor={currentColors.background}
+            />
             {children}
         </ThemeContext.Provider>
     );
