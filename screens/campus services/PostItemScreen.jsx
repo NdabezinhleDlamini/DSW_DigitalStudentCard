@@ -28,7 +28,7 @@ const lightBackground = require("../../assets/images/Onbaording_Light.png");
 const darkBackground = require("../../assets/images/Onboarding_Dark.png");
 
 export default function PostItemScreen({ navigation }) {
-    registerIndieID(`${auth.currentUser.uid}`, 24451, "9MBVb21BgXTmYIiNxD53bg");
+    registerIndieID(userLoginData?.uid, 24451, "9MBVb21BgXTmYIiNxD53bg");
 
     const { currentColors, isDarkMode } = useContext(ThemeContext);
     const [userLoginData, setUserLoginData] = useState(null);
