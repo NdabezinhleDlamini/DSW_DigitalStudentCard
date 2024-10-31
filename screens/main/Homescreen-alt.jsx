@@ -163,12 +163,12 @@ export default function HomescreenAlt({ navigation }) {
             style={styles.backgroundImage}
         >
             <SafeAreaView style={[styles.container]}>
-            <StatusBar
-                style={isDarkMode ? "light" : "dark"}
-                barStyle={isDarkMode ? "light-content" : "dark-content"}
-                translucent={true}
-                backgroundColor={currentColors.background}
-            />
+                <StatusBar
+                    style={isDarkMode ? "light" : "dark"}
+                    barStyle={isDarkMode ? "light-content" : "dark-content"}
+                    translucent={true}
+                    backgroundColor={currentColors.background}
+                />
                 <View style={styles.header}>
                     <View style={styles.iconsContainer}>
                         <TouchableOpacity
@@ -192,6 +192,19 @@ export default function HomescreenAlt({ navigation }) {
                             </Text>
                         </TouchableOpacity>
                         <View style={styles.notificationContainer}>
+                            <TouchableOpacity
+                                onPress={() =>
+                                    navigation.navigate("Utils", {
+                                        screen: "Quiz",
+                                    })
+                                }
+                            >
+                                <Ionicons
+                                    name="game-controller-outline"
+                                    size={24}
+                                    color={currentColors.text}
+                                />
+                            </TouchableOpacity>
                             <TouchableOpacity
                                 style={{ paddingHorizontal: 15 }}
                                 onPress={() =>

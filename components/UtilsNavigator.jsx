@@ -5,7 +5,7 @@ import ScanCard from "../screens/utils/ScanCard";
 import Notification from "../screens/utils/Notifications";
 
 import CampusServicesScreen from "../screens/main/CampusServicesScreen";
-
+import Quiz from "../screens/utils/Quiz";
 
 import PostItemScreen from "../screens/campus services/PostItemScreen";
 
@@ -18,6 +18,7 @@ export default function UtilsNavigator() {
             <Stack.Screen name="AppSettings" component={AppSettings} />
             <Stack.Screen name="ScanCard" component={ScanCard} />
             <Stack.Screen name="Notifications" component={Notification} />
+            <Stack.Screen name="Quiz" component={Quiz} />
         </Stack.Navigator>
     );
 }
