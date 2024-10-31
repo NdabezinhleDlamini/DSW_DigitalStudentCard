@@ -175,32 +175,30 @@ export default function PostItemScreen({ navigation }) {
     }, []);
 
     const handlePost = async () => {
-        if (!itemName || !date || !location || !description || !itemType) {
+        if (!itemName || !location || !description || !itemType) {
             Alert.alert("Please fill in all fields");
             return;
         }
-
+    
         setLoading(true);
-
+    
         const finalItemType = itemType === "Other" ? otherItemType : itemType;
-
+    
         try {
             const uploadedImageURL = await uploadImage();
             if (!uploadedImageURL) return;
-
+    
             const newPost = {
                 itemName,
                 imageURL: uploadedImageURL,
-                date,
-                location,
+                Date: new Date().toLocaleDateString(),
+                Location: location,
                 description,
-                status,
-                studentNumber:
-                    userLoginData?.studentNumber ||
-                    "Unable to set student number", // Ensure no undefined value
+                Status: "Lost",
+                "Student Number": studentNumber || "N/A", // Ensure no undefined value
                 itemType: finalItemType,
             };
-
+    
             const postCollection = collection(db, "lost-Reports");
             await addDoc(postCollection, newPost);
             Alert.alert("Post added");
@@ -213,6 +211,7 @@ export default function PostItemScreen({ navigation }) {
             setLoading(false);
         }
     };
+    
 
     const handleSelectItemType = (type) => {
         setItemType(type);
@@ -279,7 +278,7 @@ export default function PostItemScreen({ navigation }) {
                     {loading ? (
                         <ActivityIndicator />
                     ) : (
-                        <>
+                        <View style={styles.form}>
                             <TextInput
                                 style={[
                                     styles.search,
@@ -307,7 +306,7 @@ export default function PostItemScreen({ navigation }) {
                                 </Text>
                             </TouchableOpacity>
 
-                            <TextInput
+                            {/* <TextInput
                                 style={[
                                     styles.search,
                                     { color: currentColors.text },
@@ -316,7 +315,7 @@ export default function PostItemScreen({ navigation }) {
                                 placeholderTextColor={"grey"}
                                 value={date}
                                 onChangeText={(text) => setDate(text)}
-                            />
+                            /> */}
 
                             <TextInput
                                 style={[
@@ -366,7 +365,7 @@ export default function PostItemScreen({ navigation }) {
                                 />
                             )}
 
-                            <TextInput
+                            {/* <TextInput
                                 style={[
                                     styles.search,
                                     { color: currentColors.text },
@@ -375,7 +374,7 @@ export default function PostItemScreen({ navigation }) {
                                 placeholderTextColor={"grey"}
                                 value={status}
                                 onChangeText={(text) => setStatus(text)}
-                            />
+                            /> */}
 
                             <TouchableOpacity
                                 style={styles.button}
@@ -430,7 +429,7 @@ export default function PostItemScreen({ navigation }) {
                                     </View>
                                 </View>
                             </Modal>
-                        </>
+                        </View>
                     )}
                 </View>
 

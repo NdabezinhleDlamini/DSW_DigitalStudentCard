@@ -103,6 +103,7 @@ export default function UserProfileScreen({ navigation }) {
                 ["Student Number"]: userLoginData.studentNumber,
                 Status: "Lost",
                 itemType: "Card",
+                Date: new Date().toLocaleDateString(),
             };
 
             const postCollection = collection(db, "lost-Reports");
@@ -129,11 +130,7 @@ export default function UserProfileScreen({ navigation }) {
             resizeMode="cover"
             style={styles.backgroundImage}
         >
-            <SafeAreaView
-                style={[
-                    styles.container,
-                ]}
-            >
+            <SafeAreaView style={[styles.container]}>
                 <View style={styles.header}>
                     <View style={styles.iconsContainer}>
                         <TouchableOpacity
@@ -188,9 +185,9 @@ export default function UserProfileScreen({ navigation }) {
                     <View style={styles.headerSection}>
                         <Image
                             style={styles.headerImage}
-                            source={{
-                                uri: "https://via.placeholder.com/500x150",
-                            }} // Placeholder for header background
+                            source={
+                                isDarkMode ? lightBackground : darkBackground
+                            }
                         />
                         <View
                             style={[
@@ -262,8 +259,7 @@ export default function UserProfileScreen({ navigation }) {
                             style={[
                                 styles.activityItem,
                                 {
-                                    backgroundColor:
-                                        currentColors.background,
+                                    backgroundColor: currentColors.background,
                                 },
                             ]}
                         >
@@ -431,6 +427,7 @@ const styles = StyleSheet.create({
         width: "100%",
         height: 150,
         opacity: 0.8,
+        resizeMode: "stretch",
     },
     profileImageWrapper: {
         position: "absolute",
