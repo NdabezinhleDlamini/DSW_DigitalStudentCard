@@ -176,9 +176,9 @@ const UJQuiz = () => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={[styles.container,{ backgroundColor: currentColors.background }]}>
       {!questions.length ? (
-        <View style={styles.startContainer}>
+        <View style={[styles.startContainer, ]}>
           <Text style={[styles.title, { color: currentColors.text }]}>
             University of Johannesburg Quiz
           </Text>
@@ -212,7 +212,7 @@ const UJQuiz = () => {
             progress={(15 - timeLeft) / 15}
             color="#03A9F4"
           />
-          <Text style={styles.question}>{currentQuestion.description}</Text>
+          <Text style={[styles.question, { color: currentColors.text }]}>{currentQuestion.description}</Text>
           {currentQuestion.options.map((option, index) => (
             <TouchableOpacity
               key={index}

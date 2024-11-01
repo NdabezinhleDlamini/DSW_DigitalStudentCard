@@ -200,9 +200,11 @@ export default function UserProfileScreen({ navigation }) {
                         >
                             <Image
                                 style={styles.profileImage}
-                                source={{
-                                    uri: "https://via.placeholder.com/500x150",
-                                }} // Placeholder for Profile Picture
+                                source={
+                                    userLoginData?.profilePic
+                                        ? { uri: userLoginData.profilePic }
+                                        : { uri: "https://via.placeholder.com/100" } 
+                                }
                             />
                         </View>
                     </View>

@@ -1,23 +1,51 @@
 import { StatusBar } from "expo-status-bar";
-import { SafeAreaView, Modal, StyleSheet, Text, View, TouchableOpacity, Image, Button, TextInput, Switch } from "react-native";
+import { SafeAreaView, Modal, StyleSheet, Text, View, TouchableOpacity, Image, Button, TextInput, Switch, Alert, ScrollView } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import * as ImagePicker from "expo-image-picker";
 import { ThemeContext } from "@/contexts/ThemeContext";
 import { AuthContext } from "@/contexts/AuthContext";
 
+import { auth } from '../../Firebase-config';
+import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore"; 
+import { db, storage } from '../../Firebase-config'; 
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+
+
 export default function AppSettings({ navigation }) {
-    const [firstName, setFirstName] = useState("John");
-    const [lastName, setLastName] = useState("Doe");
-    const [displayName, setDisplayName] = useState("johndoe123");
+    const [firstName, setFirstName] = useState("N/A");
+    const [lastName, setLastName] = useState("N/A");
+    const [email, setEmail] = useState("N/A");
     const [profilePic, setProfilePic] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
-    const [isModalVisible, setIsModalVisible] = useState(false);  // Modal visibility state
+    // const [isModalVisible, setIsModalVisible] = useState(false);  // Modal visibility state
+    const [isSignOutModalVisible, setIsSignOutModalVisible] = useState(false);
+    const [isDeleteAccountModalVisible, setIsDeleteAccountModalVisible] = useState(false);
 
     const {logout} = useContext(AuthContext);
 
     const { isDarkMode, toggleTheme, currentColors, setTheme } = useContext(ThemeContext);
+
+        //get user data
+        useEffect(() => {
+            const fetchUserData = async () => {
+            const userId = auth.currentUser.uid;
+            const userDoc = doc(db, "Users", userId);
+            const userSnapshot = await getDoc(userDoc);
+    
+            if (userSnapshot.exists()) {
+                const userData = userSnapshot.data();
+                setFirstName(userData.firstName || "N/A"); 
+                setLastName(userData.lastName || "N/A"); 
+                setEmail(userData.email || "N/A"); 
+                setProfilePic(userData.profilePic || null); 
+            } else {
+                console.log("No such document!");
+            }
+        };
+            fetchUserData();
+        }, []);
 
     const pickProfilePicture = async () => {
         const result = await ImagePicker.launchImageLibraryAsync({
@@ -27,15 +55,109 @@ export default function AppSettings({ navigation }) {
             quality: 1,
         });
 
+        console.log("Image picker result:", result);
+
         if (!result.canceled) {
             setProfilePic(result.assets[0].uri);
+            console.log("Image picked:", result.assets.uri);
+        }
+    };
+
+    //function to upload profile pic
+    const uploadImage = async () => {
+        if (!profilePic) {
+            Alert.alert("No Image Selected", "Please select an image before uploading.");
+            return null;
+            }
+        try{
+            const imageRef = ref(storage, `UserProfilePictures/${auth.currentUser.uid}`);
+
+            const response = await fetch(profilePic);
+            if (!response.ok) {
+                throw new Error("Failed to fetch image.");
+            }
+
+            const blob = await response.blob();
+            if (!blob) {
+                throw new Error("Failed to create a blob from the response.");
+            }
+
+            await uploadBytes(imageRef, blob)
+            try {
+                const url = await getDownloadURL(imageRef);
+                return url;
+            } 
+            catch (error) {
+                console.error("Error getting download URL:", error.message);
+                throw error;
+            }
+        }
+        
+        catch (error) {
+            console.error("Image upload error:", error);
+            console.log("Image URL:", profilePic);
+            // console.error("Response Status:", response.status);
+            return null;
+        }
+    };
+
+    // update user info
+    const handleSave = async () => {
+        try {
+            const userId = auth.currentUser.uid;
+            const userDoc = doc(db, "Users", userId);
+
+            // If a new profile picture upload
+            let profilePicUrl = profilePic;
+            if (profilePic) {
+                profilePicUrl = await uploadImage(profilePic);
+            }
+            
+            await updateDoc(userDoc, {
+                firstName,
+                lastName,
+                email,
+                profilePic: profilePicUrl,
+            });
+
+            Alert.alert("Updated", "Your information has been updated!");
+            setIsEditing(false); 
+        } catch (error) {
+            Alert.alert("Error", "There was an error updating your information.");
+            console.error("Error updating document: ", error);
         }
     };
 
     const handleSignOut = () => {
         logout();
-        setIsModalVisible(false);  // Close the modal
+        setIsSignOutModalVisible(false);  // Close the modal
         console.log("User signed out");  // Here you would add actual sign out logic
+    };
+
+    // remove account
+    const handleDeleteAccount = async () => {
+        const user = auth.currentUser;
+
+        if (user) {
+            // confirmation before deleting
+            Alert.alert("Confirm Deletion", "Are you sure you want to delete your account? This cannot be undone.",
+                [{ text: "Cancel", style: "cancel" }, {text: "Delete",
+                    onPress: async () => {
+                        try {
+                            const userDoc = doc(db, "Users", user.uid);
+                            await deleteDoc(userDoc);
+
+                            await user.delete();
+                            Alert.alert("Account Deleted", "Your account has been successfully deleted.");
+                            navigation.navigate("Login");
+                        } catch (error) {
+                            Alert.alert("Error", "There was an error deleting your account.");
+                            console.error("Error deleting account: ", error);
+                        }
+                    }
+                 }]
+            );
+        }
     };
 
     return (
@@ -72,13 +194,13 @@ export default function AppSettings({ navigation }) {
                             <TextInput
                                 style={[styles.input, { backgroundColor: currentColors.background, color: currentColors.text }]}
                                 placeholderTextColor={currentColors.text}
-                                value={displayName}
-                                onChangeText={setDisplayName}
-                                placeholder="Display Name"
+                                value={email}
+                                onChangeText={setEmail}
+                                placeholder="Email"
                             />
                             <TouchableOpacity
                                 style={[styles.saveButton, { backgroundColor: currentColors.primaryButtonBackground }]}
-                                onPress={() => setIsEditing(false)}
+                                onPress={handleSave}
                             >
                                 <Text style={styles.buttonText}>Save</Text>
                             </TouchableOpacity>
@@ -87,7 +209,7 @@ export default function AppSettings({ navigation }) {
                         <>
                             <Text style={[styles.infoText, { color: currentColors.text }]}>First Name: {firstName}</Text>
                             <Text style={[styles.infoText, { color: currentColors.text }]}>Last Name: {lastName}</Text>
-                            <Text style={[styles.infoText, { color: currentColors.text }]}>Display Name: {displayName}</Text>
+                            <Text style={[styles.infoText, { color: currentColors.text }]}>Email: {email}</Text>
                             <TouchableOpacity
                                 style={[styles.editButton, { backgroundColor: currentColors.primaryButtonBackground }]}
                                 onPress={() => setIsEditing(true)}
@@ -116,11 +238,11 @@ export default function AppSettings({ navigation }) {
                 <Text style={[styles.label, { color: currentColors.text }]}>Danger Zone</Text>
                 <TouchableOpacity
                     style={styles.dangerOption}
-                    onPress={() => setIsModalVisible(true)}  // Show the modal when the user clicks sign out
+                    onPress={() => setIsSignOutModalVisible(true)}  // Show the modal when the user clicks sign out
                 >
                     <Text style={styles.dangerText}>Sign Out</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.dangerOption} onPress={() => console.log("Delete Account")}>
+                <TouchableOpacity style={styles.dangerOption} onPress={() => setIsDeleteAccountModalVisible(true)}>
                     <Text style={styles.dangerText}>Delete Account</Text>
                 </TouchableOpacity>
             </View>
@@ -129,8 +251,8 @@ export default function AppSettings({ navigation }) {
             <Modal
                 animationType="slide"
                 transparent={true}
-                visible={isModalVisible}
-                onRequestClose={() => setIsModalVisible(false)}  // Close modal when user presses back button
+                visible={isSignOutModalVisible}
+                onRequestClose={() => setIsSignOutModalVisible(false)}  // Close modal when user presses back button
             >
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContent}>
@@ -144,7 +266,35 @@ export default function AppSettings({ navigation }) {
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={[styles.modalButton, { backgroundColor: currentColors.dangerZoneBackground }]}
-                                onPress={() => setIsModalVisible(false)}  // Close the modal if user cancels
+                                onPress={() => setIsSignOutModalVisible(false)}  // Close the modal if user cancels
+                            >
+                                <Text style={styles.modalButtonText}>Cancel</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Delete account Confirmation Modal */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={isDeleteAccountModalVisible}
+                onRequestClose={() => setIsDeleteAccountModalVisible(false)}  // Close modal when user presses back button
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalText}>Are you sure you want to delete your account?</Text>
+                        <View style={styles.modalButtons}>
+                            <TouchableOpacity
+                                style={[styles.modalButton, { backgroundColor: currentColors.primaryButtonBackground }]}
+                                onPress={handleDeleteAccount}
+                            >
+                                <Text onPress={handleDeleteAccount} style={styles.modalButtonText}>Delete Account</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.modalButton, { backgroundColor: currentColors.dangerZoneBackground }]}
+                                onPress={() => setIsDeleteAccountModalVisible(false)}  // Close the modal if user cancels
                             >
                                 <Text style={styles.modalButtonText}>Cancel</Text>
                             </TouchableOpacity>

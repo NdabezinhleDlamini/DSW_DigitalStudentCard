@@ -6,14 +6,8 @@ import { useState, useContext } from "react";
 
 import { ThemeContext } from "../../contexts/ThemeContext"; 
 
-const initialNotificationsData = [
-    { id: "1", type: "like", message: "User123 liked your post.", timestamp: "5 minutes ago" },
-    { id: "2", type: "follow", message: "User456 started following you.", timestamp: "10 minutes ago" },
-    { id: "3", type: "comment", message: "User789 commented on your post.", timestamp: "15 minutes ago" },
-];
-
 export default function Notifications() {
-    const [notificationsData, setNotificationsData] = useState(initialNotificationsData);
+    const [notificationsData, setNotificationsData] = useState([]);
     const { currentColors } = useContext(ThemeContext); 
 
     const clearNotifications = () => {
