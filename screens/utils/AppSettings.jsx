@@ -1,5 +1,18 @@
 import { StatusBar } from "expo-status-bar";
-import { SafeAreaView, Modal, StyleSheet, Text, View, TouchableOpacity, Image, Button, TextInput, Switch, Alert, ScrollView } from "react-native";
+import {
+    SafeAreaView,
+    Modal,
+    StyleSheet,
+    Text,
+    View,
+    TouchableOpacity,
+    Image,
+    Button,
+    TextInput,
+    Switch,
+    Alert,
+    ScrollView,
+} from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { useState, useContext, useEffect } from "react";
@@ -7,45 +20,81 @@ import * as ImagePicker from "expo-image-picker";
 import { ThemeContext } from "@/contexts/ThemeContext";
 import { AuthContext } from "@/contexts/AuthContext";
 
-import { auth } from '../../Firebase-config';
-import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore"; 
-import { db, storage } from '../../Firebase-config'; 
+import { auth } from "../../Firebase-config";
+import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
+import { db, storage } from "../../Firebase-config";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNfc } from "../../components/nfc";
 
 export default function AppSettings({ navigation }) {
-    const [firstName, setFirstName] = useState("N/A");
-    const [lastName, setLastName] = useState("N/A");
-    const [email, setEmail] = useState("N/A");
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
+    const [email, setEmail] = useState("");
     const [profilePic, setProfilePic] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
-    // const [isModalVisible, setIsModalVisible] = useState(false);  // Modal visibility state
+    const [isCardEditing, setIsCardEditing] = useState(false);
+
     const [isSignOutModalVisible, setIsSignOutModalVisible] = useState(false);
-    const [isDeleteAccountModalVisible, setIsDeleteAccountModalVisible] = useState(false);
+    const [isDeleteAccountModalVisible, setIsDeleteAccountModalVisible] =
+        useState(false);
+    const { logout } = useContext(AuthContext);
+    const { isDarkMode, toggleTheme, currentColors, setTheme } =
+        useContext(ThemeContext);
 
-    const {logout} = useContext(AuthContext);
+    const {
+        isNfcSupported,
+        isScanning,
+        readTag,
+        writeToTag,
+        cleanUp,
+        decodeMessage,
+        invalidateSession,
+    } = useNfc();
 
-    const { isDarkMode, toggleTheme, currentColors, setTheme } = useContext(ThemeContext);
+    // _______________________________________________________________
 
-        //get user data
-        useEffect(() => {
-            const fetchUserData = async () => {
-            const userId = auth.currentUser.uid;
-            const userDoc = doc(db, "Users", userId);
-            const userSnapshot = await getDoc(userDoc);
-    
-            if (userSnapshot.exists()) {
-                const userData = userSnapshot.data();
-                setFirstName(userData.firstName || "N/A"); 
-                setLastName(userData.lastName || "N/A"); 
-                setEmail(userData.email || "N/A"); 
-                setProfilePic(userData.profilePic || null); 
-            } else {
-                console.log("No such document!");
+    const [userLoginData, setUserLoginData] = useState(null);
+
+    useEffect(() => {
+        const getUserLoginData = async () => {
+            try {
+                const data = await AsyncStorage.getItem("auth");
+                if (data) {
+                    setUserLoginData(JSON.parse(data));
+                }
+            } catch (error) {
+                console.error("Error getting user login data:", error);
             }
         };
+        getUserLoginData();
+    }, []);
+
+    useEffect(() => {
+        if (userLoginData && userLoginData.uid) {
+            const fetchUserData = async () => {
+                try {
+                    const docRef = doc(db, "Users", userLoginData.uid);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        setUserLoginData((prevData) => ({
+                            ...prevData,
+                            ...docSnap.data(),
+                        }));
+                    } else {
+                        console.log("User data not found");
+                    }
+                } catch (error) {
+                    console.error("Error fetching user data:", error);
+                }
+            };
             fetchUserData();
-        }, []);
+        }
+    }, [userLoginData?.uid]);
+
+    // _______________________________________________________________
+    //get user data
 
     const pickProfilePicture = async () => {
         const result = await ImagePicker.launchImageLibraryAsync({
@@ -66,11 +115,17 @@ export default function AppSettings({ navigation }) {
     //function to upload profile pic
     const uploadImage = async () => {
         if (!profilePic) {
-            Alert.alert("No Image Selected", "Please select an image before uploading.");
+            Alert.alert(
+                "No Image Selected",
+                "Please select an image before uploading."
+            );
             return null;
-            }
-        try{
-            const imageRef = ref(storage, `UserProfilePictures/${auth.currentUser.uid}`);
+        }
+        try {
+            const imageRef = ref(
+                storage,
+                `UserProfilePictures/${auth.currentUser.uid}`
+            );
 
             const response = await fetch(profilePic);
             if (!response.ok) {
@@ -82,18 +137,15 @@ export default function AppSettings({ navigation }) {
                 throw new Error("Failed to create a blob from the response.");
             }
 
-            await uploadBytes(imageRef, blob)
+            await uploadBytes(imageRef, blob);
             try {
                 const url = await getDownloadURL(imageRef);
                 return url;
-            } 
-            catch (error) {
+            } catch (error) {
                 console.error("Error getting download URL:", error.message);
                 throw error;
             }
-        }
-        
-        catch (error) {
+        } catch (error) {
             console.error("Image upload error:", error);
             console.log("Image URL:", profilePic);
             // console.error("Response Status:", response.status);
@@ -112,7 +164,7 @@ export default function AppSettings({ navigation }) {
             if (profilePic) {
                 profilePicUrl = await uploadImage(profilePic);
             }
-            
+
             await updateDoc(userDoc, {
                 firstName,
                 lastName,
@@ -121,17 +173,47 @@ export default function AppSettings({ navigation }) {
             });
 
             Alert.alert("Updated", "Your information has been updated!");
-            setIsEditing(false); 
+            setIsEditing(false);
         } catch (error) {
-            Alert.alert("Error", "There was an error updating your information.");
+            Alert.alert(
+                "Error",
+                "There was an error updating your information."
+            );
             console.error("Error updating document: ", error);
         }
     };
 
+    const handleReadNfcTag = async () => {
+        try {
+            console.log(`reading from nfc function`);
+            const tag = await readTag({
+                writeMessageForOS: "Ready to read NFC",
+            });
+            console.log(`tag --> ${tag}`);
+
+            if (tag && tag.ndefMessage) {
+                const firstMessage = tag.ndefMessage[0].payload;
+                const nfcContent = decodeMessage(firstMessage);
+                const parsedData = JSON.parse(nfcContent);
+                console.log("Data from NFC:", parsedData);
+            }
+            invalidateSession();
+            cleanUp();
+        } catch (e) {
+            invalidateSession(true, JSON.stringify(e));
+            cleanUp();
+            Alert.alert(`Error reading from NFC ${JSON.stringify(e)}`);
+        }
+    };
+
+    const showCard = () => {
+        setIsEditing(true);
+    };
+
     const handleSignOut = () => {
         logout();
-        setIsSignOutModalVisible(false);  // Close the modal
-        console.log("User signed out");  // Here you would add actual sign out logic
+        setIsSignOutModalVisible(false); // Close the modal
+        console.log("User signed out"); // Here you would add actual sign out logic
     };
 
     // remove account
@@ -140,78 +222,213 @@ export default function AppSettings({ navigation }) {
 
         if (user) {
             // confirmation before deleting
-            Alert.alert("Confirm Deletion", "Are you sure you want to delete your account? This cannot be undone.",
-                [{ text: "Cancel", style: "cancel" }, {text: "Delete",
-                    onPress: async () => {
-                        try {
-                            const userDoc = doc(db, "Users", user.uid);
-                            await deleteDoc(userDoc);
+            Alert.alert(
+                "Confirm Deletion",
+                "Are you sure you want to delete your account? This cannot be undone.",
+                [
+                    { text: "Cancel", style: "cancel" },
+                    {
+                        text: "Delete",
+                        onPress: async () => {
+                            try {
+                                const userDoc = doc(db, "Users", user.uid);
+                                await deleteDoc(userDoc);
 
-                            await user.delete();
-                            Alert.alert("Account Deleted", "Your account has been successfully deleted.");
-                            navigation.navigate("Login");
-                        } catch (error) {
-                            Alert.alert("Error", "There was an error deleting your account.");
-                            console.error("Error deleting account: ", error);
-                        }
-                    }
-                 }]
+                                await user.delete();
+                                Alert.alert(
+                                    "Account Deleted",
+                                    "Your account has been successfully deleted."
+                                );
+                                navigation.navigate("Login");
+                            } catch (error) {
+                                Alert.alert(
+                                    "Error",
+                                    "There was an error deleting your account."
+                                );
+                                console.error(
+                                    "Error deleting account: ",
+                                    error
+                                );
+                            }
+                        },
+                    },
+                ]
             );
         }
     };
 
     return (
-        <SafeAreaView style={[styles.container, { backgroundColor: currentColors.background }]}>
+        <SafeAreaView
+            style={[
+                styles.container,
+                { backgroundColor: currentColors.background },
+            ]}
+        >
             <StatusBar style="auto" />
 
             {/* User Information Section */}
-            <View style={[styles.settingGroupContainer, { backgroundColor: currentColors.settingGroupBackground }]}>
-                <Text style={[styles.label, { color: currentColors.text }]}>User Information</Text>
+            <View
+                style={[
+                    styles.settingGroupContainer,
+                    { backgroundColor: currentColors.settingGroupBackground },
+                ]}
+            >
+                <Text style={[styles.label, { color: currentColors.text }]}>
+                    User Information
+                </Text>
                 <View style={styles.userInfo}>
-                    <TouchableOpacity onPress={pickProfilePicture}>
-                        <Image
-                            source={profilePic ? { uri: profilePic } : { uri: "https://via.placeholder.com/500x150" }}
-                            style={styles.profilePicture}
-                        />
-                    </TouchableOpacity>
-
                     {isEditing ? (
                         <>
+                            <TouchableOpacity onPress={pickProfilePicture}>
+                                <Image
+                                    source={
+                                        profilePic
+                                            ? { uri: profilePic }
+                                            : {
+                                                  uri: "https://via.placeholder.com/500x150",
+                                              }
+                                    }
+                                    style={styles.profilePicture}
+                                />
+                            </TouchableOpacity>
                             <TextInput
-                                style={[styles.input, { backgroundColor: currentColors.background, color: currentColors.text }]}
-                                placeholderTextColor={currentColors.text}
+                                style={[
+                                    styles.input,
+                                    {
+                                        backgroundColor:
+                                            currentColors.background,
+                                        color: currentColors.text,
+                                    },
+                                ]}
+                                placeholderTextColor="#777777"
                                 value={firstName}
                                 onChangeText={setFirstName}
-                                placeholder="First Name"
+                                placeholder={userLoginData?.firstName}
                             />
                             <TextInput
-                                style={[styles.input, { backgroundColor: currentColors.background, color: currentColors.text }]}
-                                placeholderTextColor={currentColors.text}
+                                style={[
+                                    styles.input,
+                                    {
+                                        backgroundColor:
+                                            currentColors.background,
+                                        color: currentColors.text,
+                                    },
+                                ]}
+                                placeholderTextColor="#777777"
                                 value={lastName}
                                 onChangeText={setLastName}
-                                placeholder="Last Name"
+                                placeholder={userLoginData?.lastName}
                             />
                             <TextInput
-                                style={[styles.input, { backgroundColor: currentColors.background, color: currentColors.text }]}
-                                placeholderTextColor={currentColors.text}
+                                style={[
+                                    styles.input,
+                                    {
+                                        backgroundColor:
+                                            currentColors.background,
+                                        color: currentColors.text,
+                                    },
+                                ]}
+                                placeholderTextColor="#777777"
                                 value={email}
                                 onChangeText={setEmail}
-                                placeholder="Email"
+                                placeholder={userLoginData?.email}
                             />
+
                             <TouchableOpacity
-                                style={[styles.saveButton, { backgroundColor: currentColors.primaryButtonBackground }]}
+                                style={styles.addCardButton}
+                                onPress={() => {
+                                    setIsCardEditing(true);
+                                }}
+                            >
+                                <MaterialIcons
+                                    name="add-card"
+                                    size={24}
+                                    color={currentColors.text}
+                                />
+                                <Text
+                                    style={[
+                                        styles.buttonText,
+                                        { color: currentColors.text },
+                                    ]}
+                                >
+                                    Add My Card
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[
+                                    styles.saveButton,
+                                    {
+                                        backgroundColor:
+                                            currentColors.primaryButtonBackground,
+                                    },
+                                ]}
                                 onPress={handleSave}
                             >
                                 <Text style={styles.buttonText}>Save</Text>
                             </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[
+                                    styles.editButton,
+                                    { borderWidth: 1, borderColor: "red" },
+                                ]}
+                                onPress={() => setIsEditing(false)}
+                            >
+                                <Text
+                                    style={[
+                                        styles.buttonText,
+                                        { color: currentColors.text },
+                                    ]}
+                                >
+                                    Cancel
+                                </Text>
+                            </TouchableOpacity>
                         </>
                     ) : (
                         <>
-                            <Text style={[styles.infoText, { color: currentColors.text }]}>First Name: {firstName}</Text>
-                            <Text style={[styles.infoText, { color: currentColors.text }]}>Last Name: {lastName}</Text>
-                            <Text style={[styles.infoText, { color: currentColors.text }]}>Email: {email}</Text>
+                            <View>
+                                <Image
+                                    source={
+                                        userLoginData?.profilePic
+                                            ? { uri: userLoginData.profilePic }
+                                            : {
+                                                  uri: "https://via.placeholder.com/100",
+                                              }
+                                    }
+                                    style={styles.profilePicture}
+                                />
+                            </View>
+                            <Text
+                                style={[
+                                    styles.infoText,
+                                    { color: currentColors.text },
+                                ]}
+                            >
+                                First Name: {userLoginData?.firstName}
+                            </Text>
+                            <Text
+                                style={[
+                                    styles.infoText,
+                                    { color: currentColors.text },
+                                ]}
+                            >
+                                Last Name: {userLoginData?.lastName}
+                            </Text>
+                            <Text
+                                style={[
+                                    styles.infoText,
+                                    { color: currentColors.text },
+                                ]}
+                            >
+                                Email: {userLoginData?.email}
+                            </Text>
                             <TouchableOpacity
-                                style={[styles.editButton, { backgroundColor: currentColors.primaryButtonBackground }]}
+                                style={[
+                                    styles.editButton,
+                                    {
+                                        backgroundColor:
+                                            currentColors.primaryButtonBackground,
+                                    },
+                                ]}
                                 onPress={() => setIsEditing(true)}
                             >
                                 <Text style={styles.buttonText}>Edit</Text>
@@ -222,53 +439,177 @@ export default function AppSettings({ navigation }) {
             </View>
 
             {/* Theme Settings */}
-            <View style={[styles.settingGroupContainer, { backgroundColor: currentColors.settingGroupBackground }]}>
-                <Text style={[styles.label, { color: currentColors.text }]}>Theme</Text>
 
-                <Switch
-                    trackColor={{ false: "#81b0ff", true: "#81b0ff" }}
-                    thumbColor={isDarkMode ? currentColors.primaryButtonBackground : Colors.light.primaryButtonBackground}
-                    onValueChange={toggleTheme}
-                    value={isDarkMode}
-                />
+            <View
+                style={[
+                    styles.settingGroupContainer,
+                    { backgroundColor: currentColors.settingGroupBackground },
+                ]}
+            >
+                <Text style={[styles.label, { color: currentColors.text }]}>
+                    Theme
+                </Text>
+                <View style={styles.switchContainer}>
+                    <Text
+                        style={[
+                            styles.switchText,
+                            { color: currentColors.text },
+                        ]}
+                    >
+                        {!isDarkMode ? "Dark" : "Light"} Mode
+                    </Text>
+                    <Switch
+                        trackColor={{ false: "#81b0ff", true: "#81b0ff" }}
+                        thumbColor={
+                            isDarkMode
+                                ? currentColors.primaryButtonBackground
+                                : Colors.light.primaryButtonBackground
+                        }
+                        onValueChange={toggleTheme}
+                        value={isDarkMode}
+                    />
+                </View>
             </View>
 
             {/* Danger Zone */}
-            <View style={[styles.dangerZoneContainer, { backgroundColor: currentColors.dangerZoneBackground }]}>
-                <Text style={[styles.label, { color: currentColors.text }]}>Danger Zone</Text>
+            <View
+                style={[
+                    styles.dangerZoneContainer,
+                    { backgroundColor: currentColors.dangerZoneBackground },
+                ]}
+            >
+                <Text style={[styles.label, { color: currentColors.text }]}>
+                    Danger Zone
+                </Text>
                 <TouchableOpacity
                     style={styles.dangerOption}
-                    onPress={() => setIsSignOutModalVisible(true)}  // Show the modal when the user clicks sign out
+                    onPress={() => setIsSignOutModalVisible(true)} // Show the modal when the user clicks sign out
                 >
                     <Text style={styles.dangerText}>Sign Out</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.dangerOption} onPress={() => setIsDeleteAccountModalVisible(true)}>
+                <TouchableOpacity
+                    style={styles.dangerOption}
+                    onPress={() => setIsDeleteAccountModalVisible(true)}
+                >
                     <Text style={styles.dangerText}>Delete Account</Text>
                 </TouchableOpacity>
             </View>
+
+            {/* Edit Card Modal */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={isCardEditing}
+                onRequestClose={() => setIsCardEditing(false)} // Close modal when user presses back button
+            >
+                <View style={styles.modalOverlay}>
+                    <View
+                        style={[
+                            styles.modalContent,
+                            {
+                                backgroundColor:
+                                    currentColors.settingGroupBackground,
+                            },
+                        ]}
+                    >
+                        <TouchableOpacity
+                            style={[
+                                styles.scanButton,
+                                {
+                                    backgroundColor:
+                                        currentColors.primaryButtonBackground,
+                                },
+                            ]}
+                            onPress={handleReadNfcTag}
+                        >
+                            <Text style={styles.buttonText}>
+                                {isScanning ? "Scanning..." : "Read Card"}
+                            </Text>
+                        </TouchableOpacity>
+                        <View style={styles.cardDetails}></View>
+                        <TouchableOpacity
+                            style={styles.closeButton}
+                            onPress={() => setIsCardEditing(false)}
+                        >
+                            <Text style={{ color: currentColors.text }}>
+                                Cancel
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
 
             {/* Sign Out Confirmation Modal */}
             <Modal
                 animationType="slide"
                 transparent={true}
                 visible={isSignOutModalVisible}
-                onRequestClose={() => setIsSignOutModalVisible(false)}  // Close modal when user presses back button
+                onRequestClose={() => setIsSignOutModalVisible(false)} // Close modal when user presses back button
             >
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        <Text style={styles.modalText}>Are you sure you want to sign out?</Text>
+                <View style={[styles.modalOverlay]}>
+                    <View
+                        style={[
+                            styles.modalContent,
+                            {
+                                backgroundColor:
+                                    currentColors.settingGroupBackground,
+                            },
+                        ]}
+                    >
+                        <Text
+                            style={[
+                                styles.modalTitleText,
+                                { color: currentColors.text },
+                            ]}
+                        >
+                            Sign out?
+                        </Text>
+                        <View style={styles.modalDescription}>
+                            <Text
+                                style={[
+                                    styles.modalDescriptionText,
+                                    { color: currentColors.text },
+                                ]}
+                            >
+                                This will end your current session.
+                            </Text>
+                        </View>
                         <View style={styles.modalButtons}>
                             <TouchableOpacity
-                                style={[styles.modalButton, { backgroundColor: currentColors.primaryButtonBackground }]}
+                                style={[
+                                    styles.modalButton,
+                                    {
+                                        backgroundColor: "red",
+                                    },
+                                ]}
                                 onPress={handleSignOut}
                             >
-                                <Text onPress={handleSignOut} style={styles.modalButtonText}>Sign Out</Text>
+                                <Text
+                                    onPress={handleSignOut}
+                                    style={styles.modalButtonText}
+                                >
+                                    Sign Out
+                                </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
-                                style={[styles.modalButton, { backgroundColor: currentColors.dangerZoneBackground }]}
-                                onPress={() => setIsSignOutModalVisible(false)}  // Close the modal if user cancels
+                                style={[
+                                    styles.modalButton,
+                                    {
+                                        borderWidth: 1,
+                                        borderColor:
+                                            currentColors.primaryButtonBackground,
+                                    },
+                                ]}
+                                onPress={() => setIsSignOutModalVisible(false)}
                             >
-                                <Text style={styles.modalButtonText}>Cancel</Text>
+                                <Text
+                                    style={[
+                                        styles.modalButtonText,
+                                        { color: currentColors.text },
+                                    ]}
+                                >
+                                    Cancel
+                                </Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -280,23 +621,74 @@ export default function AppSettings({ navigation }) {
                 animationType="slide"
                 transparent={true}
                 visible={isDeleteAccountModalVisible}
-                onRequestClose={() => setIsDeleteAccountModalVisible(false)}  // Close modal when user presses back button
+                onRequestClose={() => setIsDeleteAccountModalVisible(false)} // Close modal when user presses back button
             >
                 <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        <Text style={styles.modalText}>Are you sure you want to delete your account?</Text>
+                    <View
+                        style={[
+                            styles.modalContent,
+                            {
+                                backgroundColor:
+                                    currentColors.settingGroupBackground,
+                            },
+                        ]}
+                    >
+                        <Text
+                            style={[
+                                styles.modalTitleText,
+                                { color: currentColors.text },
+                            ]}
+                        >
+                            Delete account?
+                        </Text>
+                        <View style={styles.modalDescription}>
+                            <Text
+                                style={[
+                                    styles.modalDescriptionText,
+                                    { color: currentColors.text },
+                                ]}
+                            >
+                                This action can't be undone
+                            </Text>
+                        </View>
                         <View style={styles.modalButtons}>
                             <TouchableOpacity
-                                style={[styles.modalButton, { backgroundColor: currentColors.primaryButtonBackground }]}
+                                style={[
+                                    styles.modalButton,
+                                    {
+                                        backgroundColor: "red",
+                                    },
+                                ]}
                                 onPress={handleDeleteAccount}
                             >
-                                <Text onPress={handleDeleteAccount} style={styles.modalButtonText}>Delete Account</Text>
+                                <Text
+                                    onPress={handleDeleteAccount}
+                                    style={styles.modalButtonText}
+                                >
+                                    Delete Account
+                                </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
-                                style={[styles.modalButton, { backgroundColor: currentColors.dangerZoneBackground }]}
-                                onPress={() => setIsDeleteAccountModalVisible(false)}  // Close the modal if user cancels
+                                style={[
+                                    styles.modalButton,
+                                    {
+                                        borderWidth: 1,
+                                        borderColor:
+                                            currentColors.primaryButtonBackground,
+                                    },
+                                ]}
+                                onPress={() =>
+                                    setIsDeleteAccountModalVisible(false)
+                                }
                             >
-                                <Text style={styles.modalButtonText}>Cancel</Text>
+                                <Text
+                                    style={[
+                                        styles.modalButtonText,
+                                        { color: currentColors.text },
+                                    ]}
+                                >
+                                    Cancel
+                                </Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -379,8 +771,16 @@ const styles = StyleSheet.create({
         marginVertical: 5,
         borderRadius: 5,
     },
+    addCardButton: {
+        flexDirection: "row",
+        justifyContent: "center",
+        borderRadius: 5,
+        padding: 10,
+        alignItems: "center",
+        marginTop: 10,
+        width: "100%",
+    },
     saveButton: {
-        backgroundColor: Colors.light.tint,
         borderRadius: 5,
         padding: 10,
         alignItems: "center",
@@ -398,6 +798,17 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontWeight: "bold",
         textAlign: "center",
+    },
+    switchContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        width: "100%",
+        paddingVertical: 10,
+    },
+    switchText: {
+        marginLeft: 10,
+        fontSize: 18,
     },
     dangerZoneContainer: {
         width: "90%",
@@ -420,7 +831,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "rgba(0,0,0,0.5)",
+        backgroundColor: "rgba(0,0,0,0.75)",
     },
     modalContent: {
         backgroundColor: "white",
@@ -428,6 +839,19 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         width: "80%",
         alignItems: "center",
+    },
+    modalTitleText: {
+        fontSize: 24,
+        fontWeight: "bold",
+        marginBottom: 20,
+        textAlign: "center",
+    },
+    modalDescription: {
+        marginBottom: 20,
+    },
+    modalDescriptionText: {
+        fontSize: 16,
+        textAlign: "center",
     },
     modalText: {
         fontSize: 18,
@@ -449,5 +873,23 @@ const styles = StyleSheet.create({
     modalButtonText: {
         color: "#fff",
         fontWeight: "bold",
+    },
+    scanButton: {
+        flexDirection: "row",
+        justifyContent: "center",
+        borderRadius: 5,
+        padding: 10,
+        alignItems: "center",
+        marginTop: 10,
+        width: "100%",
+    },
+    closeButton: {
+        flexDirection: "row",
+        justifyContent: "center",
+        borderRadius: 5,
+        padding: 10,
+        alignItems: "center",
+        marginTop: 10,
+        width: "100%",
     },
 });
