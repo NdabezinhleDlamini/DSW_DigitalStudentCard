@@ -64,9 +64,9 @@ export default function LostAndFoundScreen({ navigation }) {
                 <View style={[styles.cardHeader]}>
                   <Text style={[styles.title, { color: currentColors.text }]}>{item["Item name"]}</Text>
                   <View style={styles.cardControls}>
-                    <TouchableOpacity>
+                    {/* <TouchableOpacity>
                       <Ionicons name="create-outline" size={24} color={currentColors.text}/>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                     <TouchableOpacity onPress={() => deleteData(item.key)}>
                       <Ionicons name="trash-outline" size={24} color={currentColors.text}/>
                     </TouchableOpacity>

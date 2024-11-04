@@ -26,14 +26,20 @@ import { db } from "../../Firebase-config";
 import { doc, getDoc, collection, addDoc } from "firebase/firestore";
 import { StatusBar } from "expo-status-bar";
 
+
+import { registerIndieID, unregisterIndieDevice } from "native-notify";
+import axios from "axios";
+
 const lightBackground = require("../../assets/images/Onbaording_Light.png");
 const darkBackground = require("../../assets/images/Onboarding_Dark.png");
 
 export default function UserProfileScreen({ navigation }) {
+    registerIndieID(userLoginData?.uid, 24451, "9MBVb21BgXTmYIiNxD53bg");
+
     const { currentColors, isDarkMode } = useContext(ThemeContext); // Get theme state from context
     const [modalVisible, setModalVisible] = useState(false);
 
-    const [lastSeen, setLastSeen] = useState("Unknown");
+    const [location, setLocation] = useState("Unknown");
 
     const campuses = ["UJ-APB", "UJ-APK", "UJ-DFC", "UJ-SWC"];
     const toggleModal = () => {
@@ -83,7 +89,7 @@ export default function UserProfileScreen({ navigation }) {
     }, [userLoginData?.uid]);
 
     const handlePost = async () => {
-        if (!lastSeen) {
+        if (!location) {
             // Change from location to lastSeen
             Alert.alert("Please select a location");
             return;
@@ -97,7 +103,7 @@ export default function UserProfileScreen({ navigation }) {
         try {
             const newPost = {
                 itemName: "Student Card",
-                Location: lastSeen,
+                Location: location,
                 description: "Student Card",
                 itemType: "Card",
                 ["Student Number"]: userLoginData.studentNumber,
@@ -121,7 +127,28 @@ export default function UserProfileScreen({ navigation }) {
     };
 
     const handleLastSeen = (location) => {
-        setLastSeen(location);
+        setLocation(location);
+    };
+
+    const notify = (bigPictureURL) => {
+        axios
+            .post(`https://app.nativenotify.com/api/notification`, {
+                appId: 24451,
+                appToken: "9MBVb21BgXTmYIiNxD53bg",
+                title: "BOLO: Lost Item",
+                body: "Lost Student Card Reported. Last seen at " + location,
+                pushData: { itemName, location, date },
+                bigPictureURL: bigPictureURL,
+            })
+            .then((response) => {
+                console.log(
+                    "Push notification sent successfully:",
+                    response.data
+                );
+            })
+            .catch((error) => {
+                console.error("Error sending push notification:", error);
+            });
     };
 
     return (
@@ -316,7 +343,7 @@ export default function UserProfileScreen({ navigation }) {
                                     Student ID: {userLoginData?.studentNumber}
                                 </Text>
                                 <Text style={{ color: "#777" }}>
-                                    Last Seen: {lastSeen}
+                                    Last Seen: {location}
                                 </Text>
                             </View>
                             <FlatList

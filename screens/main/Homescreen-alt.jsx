@@ -324,24 +324,31 @@ export default function HomescreenAlt({ navigation }) {
                         </Text>
                     </View>
 
-                    <TouchableOpacity style={styles.Cardbutton} onPress={() => {
+                    <TouchableOpacity
+                        style={styles.Cardbutton}
+                        onPress={() => {
                             handleWriteNfcTag();
-                        }}>
-                            <Image
-                                        style={styles.studentCard}
-                                        source={
-                                            userLoginData?.profilePic
-                                                ? { uri: userLoginData.profilePic }
-                                                : { uri: "https://via.placeholder.com/100" } 
-                                        }
-                    />
-                    <View>
-                        <Text style={styles.cardInfor}>
-                            {userLoginData ? userLoginData.firstName : "First Name..."}
-                        </Text>
-                        <Text style={styles.cardInfor}>
-                            {userLoginData ? userLoginData.lastName : "Last Name..."}
-                        </Text>
+                        }}
+                    >
+                        <Image
+                            style={styles.studentCard}
+                            source={
+                                userLoginData?.profilePic
+                                    ? { uri: userLoginData.profilePic }
+                                    : { uri: "https://via.placeholder.com/100" }
+                            }
+                        />
+                        <View>
+                            <Text style={styles.cardInfor}>
+                                {userLoginData
+                                    ? userLoginData.firstName
+                                    : "First Name..."}
+                            </Text>
+                            <Text style={styles.cardInfor}>
+                                {userLoginData
+                                    ? userLoginData.lastName
+                                    : "Last Name..."}
+                            </Text>
                         </View>
                     </TouchableOpacity>
                     <Text
@@ -527,21 +534,6 @@ const styles = StyleSheet.create({
         resizeMode: "cover",
         borderRadius: 99,
     },
-    Cardbutton:{
-        width: "100%",
-        height:175,
-        backgroundColor: 'white',
-        padding: 20,
-        borderWidth: 1,
-        borderRadius: 12,
-        flexDirection:'row',
-    },
-    cardInfor:{
-        marginBottom: 20,
-        marginLeft:'33%',
-        fontSize: 20,
-        fontWeight: "bold",
-    },
     weatherWidget: {
         flexDirection: "row",
         alignItems: "center",
@@ -594,4 +586,37 @@ const styles = StyleSheet.create({
         shadowRadius: 5,
         elevation: 6,
     },
+    Cardbutton: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        backgroundColor: "#f1faee", // soft off-white background
+        paddingVertical: 25, // extra vertical padding
+        paddingHorizontal: 30, // extra horizontal padding
+        margin: 15,
+        borderRadius: 18,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 5 },
+        shadowOpacity: 0.35,
+        shadowRadius: 5,
+        elevation: 8, // stronger shadow for a lifted effect
+    },
+    studentCard: {
+        width: 110, // larger image width
+        height: 110, // larger image height
+        borderRadius: 55, // maintain circular shape with new size
+        borderWidth: 3,
+        borderColor: "#005f73", // matching dark teal for the border
+        marginRight: 20, // extra spacing between image and text
+    },
+    cardInfo: {
+        flex: 1,
+        justifyContent: "center",
+    },
+    cardInfor: {
+        fontSize: 22, // increased font size for better readability
+        fontWeight: "700",
+        color: "#0b132b", // dark text color
+        marginVertical: 2, // small vertical margin between text lines
+    }
 });
