@@ -264,7 +264,6 @@ export default function AppSettings({ navigation }) {
                 { backgroundColor: currentColors.background },
             ]}
         >
-            <StatusBar style="auto" />
 
             {/* User Information Section */}
             <View
@@ -285,8 +284,8 @@ export default function AppSettings({ navigation }) {
                                         profilePic
                                             ? { uri: profilePic }
                                             : {
-                                                  uri: "https://via.placeholder.com/500x150",
-                                              }
+                                                uri: "https://via.placeholder.com/500x150",
+                                            }
                                     }
                                     style={styles.profilePicture}
                                 />
@@ -335,7 +334,7 @@ export default function AppSettings({ navigation }) {
                             />
 
                             <TouchableOpacity
-                                style={styles.addCardButton}
+                                style={[styles.addCardButton, { borderWidth: 1, borderColor: currentColors.primaryButtonBackground }]}
                                 onPress={() => {
                                     setIsCardEditing(true);
                                 }}

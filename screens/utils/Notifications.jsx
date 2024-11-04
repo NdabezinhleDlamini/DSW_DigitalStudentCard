@@ -16,7 +16,6 @@ export default function Notifications() {
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: currentColors.background }]}>
-            <StatusBar style="auto" />
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <Text style={[styles.title, { color: currentColors.text }]}>Notifications</Text>
                 {notificationsData.length === 0 ? (

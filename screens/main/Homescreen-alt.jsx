@@ -6,6 +6,7 @@ import {
     Image,
     TouchableOpacity,
     ScrollView,
+    Alert,
     Animated,
     ImageBackground,
 } from "react-native";
@@ -16,6 +17,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { ThemeContext } from "../../contexts/ThemeContext";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNfc } from "../../components/nfc";
 
 import { Layout } from "../../constants/Layout";
 import { Fonts } from "../../constants/Fonts";
@@ -40,6 +42,16 @@ export default function HomescreenAlt({ navigation }) {
         description: "",
         temperature: "",
     });
+
+    const {
+        isNfcSupported,
+        isScanning,
+        readTag,
+        writeToTag,
+        cleanUp,
+        decodeMessage,
+        invalidateSession,
+    } = useNfc();
 
     const scaleValue = useRef(new Animated.Value(1)).current;
     const opacityValue = useRef(new Animated.Value(1)).current;
@@ -156,6 +168,31 @@ export default function HomescreenAlt({ navigation }) {
             getWeather();
         }
     }, [location]);
+
+    useEffect(() => {
+        // Example: check if NFC is supported when the component mounts
+        if (isNfcSupported === false || isNfcSupported === null) {
+            Alert.alert("NFC is not supported on this device");
+        } else {
+            Alert.alert("NFC is supported");
+        }
+    }, [isNfcSupported]);
+
+    const handleWriteNfcTag = async (data) => {
+        try {
+            const serializedData = JSON.stringify(data);
+            await writeToTag({
+                dataToWrite: serializedData,
+                writeMessageForOS: "Writing data to NFC",
+            });
+            invalidateSession();
+            cleanUp();
+        } catch (e) {
+            invalidateSession(true, JSON.stringify(e));
+            cleanUp();
+            Alert.alert("Error writing to NFC", JSON.stringify(e));
+        }
+    };
 
     return (
         <ImageBackground
@@ -287,7 +324,11 @@ export default function HomescreenAlt({ navigation }) {
                         </Text>
                     </View>
 
-                    <TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => {
+                            handleWriteNfcTag();
+                        }}
+                    >
                         <Image
                             source={{ uri: "https://placehold.co/600x400/png" }}
                             style={[
