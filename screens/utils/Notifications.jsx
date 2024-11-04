@@ -1,18 +1,44 @@
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, FlatList } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 
-import { ThemeContext } from "../../contexts/ThemeContext"; 
+import { ThemeContext } from "../../contexts/ThemeContext";
 
 export default function Notifications() {
     const [notificationsData, setNotificationsData] = useState([]);
-    const { currentColors } = useContext(ThemeContext); 
+    const { currentColors } = useContext(ThemeContext);
 
     const clearNotifications = () => {
         setNotificationsData([]);
     };
+
+    useEffect(() => {
+        const fetchNotifications = async () => {
+            let notifications = await getNotificationInbox(
+                24451,
+                "9MBVb21BgXTmYIiNxD53bg"
+            );
+            console.log("notifications: ", notifications);
+            setNotificationsData(notifications); // Update with the fetched notifications
+        };
+
+        fetchNotifications();
+    }, []);
+
+    const renderItem = ({ item }) => (
+        <View style={styles.notificationItem}>
+            <View style={styles.notificationContent}>
+                <Text style={[styles.notificationText, { color: currentColors.text }]}>
+                    {item.message}
+                </Text>
+                <Text style={[styles.timestampText, { color: currentColors.secondaryText }]}>
+                    {item.timestamp}
+                </Text>
+            </View>
+        </View>
+    );
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: currentColors.background }]}>
@@ -27,32 +53,11 @@ export default function Notifications() {
                         </Text>
                     </View>
                 ) : (
-                    notificationsData.map((notification) => (
-                        <View key={notification.id} style={styles.notificationItem}>
-                            <View style={styles.iconContainer}>
-                                {notification.type === "like" && (
-                                    <MaterialIcons name="favorite" size={30} color="red" />
-                                )}
-                                {notification.type === "follow" && (
-                                    <MaterialIcons name="person-add" size={30} color={currentColors.text} />
-                                )}
-                                {notification.type === "comment" && (
-                                    <MaterialIcons name="comment" size={30} color={currentColors.text} />
-                                )}
-                                {notification.type === "message" && (
-                                    <MaterialIcons name="message" size={30} color={currentColors.text} />
-                                )}
-                            </View>
-                            <View style={styles.notificationContent}>
-                                <Text style={[styles.notificationText, { color: currentColors.text }]}>
-                                    {notification.message}
-                                </Text>
-                                <Text style={[styles.timestampText, { color: currentColors.secondaryText }]}>
-                                    {notification.timestamp}
-                                </Text>
-                            </View>
-                        </View>
-                    ))
+                    <FlatList
+                        data={notificationsData}
+                        renderItem={renderItem}
+                        keyExtractor={(item) => item.id.toString()}
+                    />
                 )}
                 {notificationsData.length > 0 && (
                     <TouchableOpacity style={[styles.clearButton, { backgroundColor: currentColors.danger }]} onPress={clearNotifications}>

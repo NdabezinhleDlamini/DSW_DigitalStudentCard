@@ -6,9 +6,9 @@ import {
     Image,
     TouchableOpacity,
     ScrollView,
-    Alert,
     Animated,
     ImageBackground,
+    Alert,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import * as Location from "expo-location";
@@ -324,21 +324,25 @@ export default function HomescreenAlt({ navigation }) {
                         </Text>
                     </View>
 
-                    <TouchableOpacity
-                        onPress={() => {
+                    <TouchableOpacity style={styles.Cardbutton} onPress={() => {
                             handleWriteNfcTag();
-                        }}
-                    >
-                        <Image
-                            source={{ uri: "https://placehold.co/600x400/png" }}
-                            style={[
-                                styles.studentCard,
-                                {
-                                    borderColor:
-                                        currentColors.primaryButtonBackground,
-                                },
-                            ]}
-                        />
+                        }}>
+                            <Image
+                                        style={styles.studentCard}
+                                        source={
+                                            userLoginData?.profilePic
+                                                ? { uri: userLoginData.profilePic }
+                                                : { uri: "https://via.placeholder.com/100" } 
+                                        }
+                    />
+                    <View>
+                        <Text style={styles.cardInfor}>
+                            {userLoginData ? userLoginData.firstName : "First Name..."}
+                        </Text>
+                        <Text style={styles.cardInfor}>
+                            {userLoginData ? userLoginData.lastName : "Last Name..."}
+                        </Text>
+                        </View>
                     </TouchableOpacity>
                     <Text
                         style={[styles.idText, { color: currentColors.text }]}
@@ -420,7 +424,7 @@ export default function HomescreenAlt({ navigation }) {
                                         Access History
                                     </Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity
+                                {/* <TouchableOpacity
                                     onPressIn={animateIn}
                                     onPressOut={animateOut}
                                     style={[
@@ -434,7 +438,7 @@ export default function HomescreenAlt({ navigation }) {
                                         navigation.navigate("CardCollection")
                                     }
                                     // change the name as the stack only
-                                >
+                                > 
                                     <Text
                                         style={{
                                             color: "white",
@@ -444,7 +448,7 @@ export default function HomescreenAlt({ navigation }) {
                                     >
                                         Collect
                                     </Text>
-                                </TouchableOpacity>
+                                </TouchableOpacity> */}
                                 <TouchableOpacity
                                     onPressIn={animateIn}
                                     onPressOut={animateOut}
@@ -518,9 +522,25 @@ const styles = StyleSheet.create({
     studentCard: {
         borderWidth: Layout.borderWidth,
         borderRadius: Layout.borderRadius,
-        width: "100%",
-        height: 200,
+        width: 120,
+        height: 120,
         resizeMode: "cover",
+        borderRadius: 99,
+    },
+    Cardbutton:{
+        width: "100%",
+        height:175,
+        backgroundColor: 'white',
+        padding: 20,
+        borderWidth: 1,
+        borderRadius: 12,
+        flexDirection:'row',
+    },
+    cardInfor:{
+        marginBottom: 20,
+        marginLeft:'33%',
+        fontSize: 20,
+        fontWeight: "bold",
     },
     weatherWidget: {
         flexDirection: "row",
@@ -563,7 +583,7 @@ const styles = StyleSheet.create({
         padding: Layout.padding / 2,
     },
     campusServiceItem: {
-        width: 75,
+        width: 90,
         height: 75,
         borderRadius: Layout.borderRadius,
         alignItems: "center",

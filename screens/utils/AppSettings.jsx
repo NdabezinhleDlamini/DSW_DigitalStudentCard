@@ -239,7 +239,7 @@ export default function AppSettings({ navigation }) {
                                     "Account Deleted",
                                     "Your account has been successfully deleted."
                                 );
-                                navigation.navigate("Login");
+                                logout();
                             } catch (error) {
                                 Alert.alert(
                                     "Error",

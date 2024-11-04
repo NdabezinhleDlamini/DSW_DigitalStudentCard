@@ -5,12 +5,25 @@ import {
     TextInput,
     TouchableOpacity,
     ImageBackground,
+    Alert,
+    Modal,
+    FlatList,
+    Pressable,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState, useContext } from "react";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import React, { useState, useContext, useEffect } from "react";
 import { db } from "../../Firebase-config";
-import { addDoc, collection } from "firebase/firestore";
+import {
+    addDoc,
+    collection,
+    query,
+    where,
+    getDocs,
+    doc,
+    getDoc,
+} from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { useNavigation } from "@react-navigation/native";
 import { ThemeContext } from "@/contexts/ThemeContext";
@@ -18,51 +31,118 @@ import { ThemeContext } from "@/contexts/ThemeContext";
 const lightBackground = require("../../assets/images/Onbaording_Light.png");
 const darkBackground = require("../../assets/images/Onboarding_Dark.png");
 
+const generateTransactionId = () => {
+    return `txn_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+};
+
 export default function RequestNewCard() {
     const { currentColors, isDarkMode } = useContext(ThemeContext);
     const navigation = useNavigation();
     const [name, setName] = useState("");
     const [surname, setSurname] = useState("");
     const [student, setStudent] = useState("");
+    const [cardNumber, setCardNumber] = useState("");
+    const [expiration, setExpiration] = useState("");
+    const [cvv, setCvv] = useState("");
     const [errors, setErrors] = useState({});
+    const [isCardPending, setIsCardPending] = useState(false);
+    const [isCardReady, setIsCardReady] = useState(false);
+    const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [paymentOption, setPaymentOption] = useState("in-app");
+    const [campusModalVisible, setCampusModalVisible] = useState(false);
+    const [selectedCampus, setSelectedCampus] = useState("");
+    const [modalVisible, setModalVisible] = useState(false);
 
-    const validateStudentNumber = (input) => /^2\d{8}$/.test(input);
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    const campuses = [
+        { label: "University of Johannesburg APK", value: "uj_apk" },
+        { label: "University of Johannesburg APB", value: "uj_apb" },
+        { label: "University of Johannesburg DFC", value: "uj_dfc" },
+        { label: "University of Johannesburg SWC", value: "uj_swc" },
+    ];
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            if (user) {
+                const userDocRef = doc(db, "Users", user.uid);
+                const userDoc = await getDoc(userDocRef);
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    setName(userData.firstName);
+                    setSurname(userData.lastName);
+                    setStudent(userData.studentNumber);
+                    checkExistingRequest(userData.studentNumber);
+                } else {
+                    console.log("No such user document!");
+                }
+            }
+        };
+        fetchUserData();
+    }, [user]);
+
+    const checkExistingRequest = async (studentNumber) => {
+        const q = query(
+            collection(db, "cardRequests"),
+            where("Student_No", "==", studentNumber)
+        );
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+            setIsButtonDisabled(true);
+            const cardData = querySnapshot.docs[0].data();
+            setIsCardPending(cardData.Status === "Pending");
+            setIsCardReady(cardData.Status === "Ready to Collect");
+        }
+    };
 
     const validateForm = () => {
         const newErrors = {};
-
-        if (!name) newErrors.name = "Name is required";
-        if (!surname) newErrors.surname = "Surname is required";
-        if (!student) {
-            newErrors.student = "Student number is required";
-        } else if (!validateStudentNumber(student)) {
-            newErrors.student =
-                "Student number must start with '2' and be 9 digits long";
-        }
-
+        if (!cardNumber || !/^\d{16}$/.test(cardNumber))
+            newErrors.cardNumber = "Invalid card number";
+        if (!expiration || !/^\d{2}\/\d{2}$/.test(expiration))
+            newErrors.expiration = "Invalid expiration date (MM/YY)";
+        if (!cvv || !/^\d{3}$/.test(cvv)) newErrors.cvv = "Invalid CVV";
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = async () => {
-        if (!validateForm()) return;
+        if (!selectedCampus) {
+            Alert.alert("Error", "Please select a campus.");
+            return;
+        }
+
+        if (paymentOption === "in-app" && !validateForm()) return;
 
         try {
-            const auth = getAuth();
-            const user = auth.currentUser;
+            const transactionId = generateTransactionId();
+            const paymentInfo =
+                paymentOption === "in-app"
+                    ? {
+                          Last_Four: cardNumber.slice(-4),
+                          Expiration: expiration,
+                      }
+                    : null;
 
             await addDoc(collection(db, "cardRequests"), {
                 Name: name,
                 Surname: surname,
                 Student_No: student,
+                Transaction_ID: transactionId,
+                Payment_Info: paymentInfo,
+                Status: "Pending",
+                Campus: selectedCampus,
+                Payment_Option: paymentOption,
             });
 
-            // Reset form on successful submission
-            setName("");
-            setSurname("");
-            setStudent("");
+            setCardNumber("");
+            setExpiration("");
+            setCvv("");
             setErrors({});
-            navigation.navigate("Homescreen");
+            Alert.alert("Thank You.", "Request Submitted");
+            navigation.goBack();
         } catch (error) {
             console.log(error);
             setErrors((prevErrors) => ({
@@ -70,6 +150,11 @@ export default function RequestNewCard() {
                 general: "Error: Could not save the data.",
             }));
         }
+    };
+
+    const handleSelectCampus = (item) => {
+        setSelectedCampus(item.label);
+        setModalVisible(false);
     };
 
     return (
@@ -87,7 +172,7 @@ export default function RequestNewCard() {
             <View style={[styles.container]}>
                 <View style={styles.topBar}>
                     <TouchableOpacity
-                        onPress={() => navigation.navigate("Homescreen")}
+                        onPress={() => navigation.goBack()}
                         style={styles.backButtonContainer}
                     >
                         <Ionicons
@@ -102,63 +187,48 @@ export default function RequestNewCard() {
                 </View>
 
                 <View style={styles.formContainer}>
+                    <Text
+                        style={[
+                            styles.sectionHeading,
+                            { color: currentColors.text },
+                        ]}
+                    >
+                        Student Details
+                    </Text>
                     <TextInput
                         style={[
                             styles.input,
                             {
-                                borderColor: errors.name
-                                    ? "red"
-                                    : currentColors.primaryButtonBackground,
+                                borderColor:
+                                    currentColors.primaryButtonBackground,
                                 backgroundColor: currentColors.inputBackground,
                             },
                         ]}
                         placeholder="Name"
                         placeholderTextColor="#777"
                         value={name}
-                        onChangeText={(text) => {
-                            setName(text);
-                            setErrors((prevErrors) => ({
-                                ...prevErrors,
-                                name: "",
-                            }));
-                        }}
+                        editable={false}
                     />
-                    {errors.name && (
-                        <Text style={styles.errorText}>{errors.name}</Text>
-                    )}
-
                     <TextInput
                         style={[
                             styles.input,
                             {
-                                borderColor: errors.surname
-                                    ? "red"
-                                    : currentColors.primaryButtonBackground,
+                                borderColor:
+                                    currentColors.primaryButtonBackground,
                                 backgroundColor: currentColors.inputBackground,
                             },
                         ]}
                         placeholder="Surname"
                         placeholderTextColor="#777"
                         value={surname}
-                        onChangeText={(text) => {
-                            setSurname(text);
-                            setErrors((prevErrors) => ({
-                                ...prevErrors,
-                                surname: "",
-                            }));
-                        }}
+                        editable={false}
                     />
-                    {errors.surname && (
-                        <Text style={styles.errorText}>{errors.surname}</Text>
-                    )}
-
                     <TextInput
                         style={[
                             styles.input,
                             {
-                                borderColor: errors.student
-                                    ? "red"
-                                    : currentColors.primaryButtonBackground,
+                                borderColor:
+                                    currentColors.primaryButtonBackground,
                                 backgroundColor: currentColors.inputBackground,
                             },
                         ]}
@@ -166,40 +236,262 @@ export default function RequestNewCard() {
                         placeholderTextColor="#777"
                         keyboardType="numeric"
                         value={student}
-                        onChangeText={(text) => {
-                            setStudent(text);
-                            setErrors((prevErrors) => ({
-                                ...prevErrors,
-                                student: "",
-                            }));
-                        }}
+                        editable={false}
                     />
-                    {errors.student && (
-                        <Text style={styles.errorText}>{errors.student}</Text>
-                    )}
 
-                    {errors.general && (
-                        <Text style={styles.errorText}>{errors.general}</Text>
-                    )}
+                    <View style={styles.statusContainer}>
+                        {isCardPending && (
+                            <View
+                                style={[styles.statusMessage, styles.pending]}
+                            >
+                                <MaterialIcons
+                                    name="hourglass-empty"
+                                    size={24}
+                                    color="#FFA500"
+                                />
+                                <Text style={styles.statusText}>
+                                    Status: Card Request Pending
+                                </Text>
+                            </View>
+                        )}
+                        {isCardReady && (
+                            <View style={[styles.statusMessage, styles.ready]}>
+                                <MaterialIcons
+                                    name="check-circle"
+                                    size={24}
+                                    color="#32CD32"
+                                />
+                                <Text style={styles.statusText}>
+                                    Status: Card Ready to Collect
+                                </Text>
+                            </View>
+                        )}
+                    </View>
 
-                    <TouchableOpacity
+                    <Text
                         style={[
-                            styles.button,
-                            {
-                                backgroundColor:
-                                    currentColors.primaryButtonBackground,
-                            },
+                            styles.sectionHeading,
+                            { color: currentColors.text },
                         ]}
-                        onPress={handleSubmit}
                     >
-                        <Text
+                        Payment Option
+                    </Text>
+                    <View style={styles.segmentedControl}>
+                        <Pressable
                             style={[
-                                styles.buttonText,
-                                { color: currentColors.primaryButtonText },
+                                styles.segment,
+                                paymentOption === "in-app" &&
+                                    styles.selectedSegment,
                             ]}
+                            onPress={() => setPaymentOption("in-app")}
                         >
-                            Submit Request
+                            <Text style={styles.segmentText}>
+                                In-App Payment
+                            </Text>
+                        </Pressable>
+                        <Pressable
+                            style={[
+                                styles.segment,
+                                paymentOption === "at campus" &&
+                                    styles.selectedSegment,
+                            ]}
+                            onPress={() => setPaymentOption("at campus")}
+                        >
+                            <Text style={styles.segmentText}>
+                                Pay at Campus
+                            </Text>
+                        </Pressable>
+                    </View>
+
+                    {/* Campus Selection */}
+                    <TouchableOpacity
+                        style={styles.button}
+                        onPress={() => setModalVisible(true)}
+                    >
+                        <Text style={styles.buttonText}>
+                            {selectedCampus || "Select your campus"}
                         </Text>
+                    </TouchableOpacity>
+
+                    {/* Modal for Campus Selection */}
+                    <Modal
+                        visible={modalVisible}
+                        animationType="slide"
+                        transparent={true}
+                        onRequestClose={() => setModalVisible(false)}
+                    >
+                        <View style={styles.modalContainer}>
+                            <View style={styles.modalContent}>
+                                <Text style={styles.optionText}>
+                                    Select Campus
+                                </Text>
+                                <FlatList
+                                    style={styles.modalList}
+                                    data={campuses}
+                                    keyExtractor={(item) => item.value}
+                                    renderItem={({ item }) => (
+                                        <TouchableOpacity
+                                            style={styles.option}
+                                            onPress={() =>
+                                                handleSelectCampus(item)
+                                            }
+                                        >
+                                            <Text style={styles.optionText}>
+                                                {item.label}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    )}
+                                />
+                                <TouchableOpacity
+                                    style={styles.closeButton}
+                                    onPress={() => setModalVisible(false)}
+                                >
+                                    <Text style={styles.closeButtonText}>
+                                        Close
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </Modal>
+
+                    {/* Conditionally render payment details button */}
+                    {paymentOption === "in-app" && (
+                        <TouchableOpacity
+                            style={styles.button}
+                            onPress={() => setIsModalVisible(true)}
+                        >
+                            <Text style={styles.buttonText}>
+                                Add Payment Details
+                            </Text>
+                        </TouchableOpacity>
+                    )}
+
+                    {/* Modal for Payment Form */}
+                    <Modal
+                        visible={isModalVisible}
+                        transparent={true}
+                        animationType="slide"
+                    >
+                        <View style={styles.modalContainer}>
+                            <View style={styles.modalContent}>
+                                <Text style={styles.optionText}>
+                                    Payment Details
+                                </Text>
+                                <TextInput
+                                    style={[
+                                        styles.input,
+                                        {
+                                            borderColor:
+                                                currentColors.primaryButtonBackground,
+                                            backgroundColor:
+                                                currentColors.inputBackground,
+                                        },
+                                    ]}
+                                    placeholder="Card Number"
+                                    placeholderTextColor="#777"
+                                    keyboardType="numeric"
+                                    value={cardNumber}
+                                    onChangeText={(text) => {
+                                        setCardNumber(text);
+                                        setErrors((prevErrors) => ({
+                                            ...prevErrors,
+                                            cardNumber: "",
+                                        }));
+                                    }}
+                                />
+                                {errors.cardNumber && (
+                                    <Text style={styles.errorText}>
+                                        {errors.cardNumber}
+                                    </Text>
+                                )}
+
+                                <TextInput
+                                    style={[
+                                        styles.input,
+                                        {
+                                            borderColor:
+                                                currentColors.primaryButtonBackground,
+                                            backgroundColor:
+                                                currentColors.inputBackground,
+                                        },
+                                    ]}
+                                    placeholder="Expiration (MM/YY)"
+                                    placeholderTextColor="#777"
+                                    value={expiration}
+                                    onChangeText={(text) => {
+                                        setExpiration(text);
+                                        setErrors((prevErrors) => ({
+                                            ...prevErrors,
+                                            expiration: "",
+                                        }));
+                                    }}
+                                />
+                                {errors.expiration && (
+                                    <Text style={styles.errorText}>
+                                        {errors.expiration}
+                                    </Text>
+                                )}
+
+                                <TextInput
+                                    style={[
+                                        styles.input,
+                                        {
+                                            borderColor:
+                                                currentColors.primaryButtonBackground,
+                                            backgroundColor:
+                                                currentColors.inputBackground,
+                                        },
+                                    ]}
+                                    placeholder="CVV"
+                                    placeholderTextColor="#777"
+                                    keyboardType="numeric"
+                                    secureTextEntry
+                                    value={cvv}
+                                    onChangeText={(text) => {
+                                        setCvv(text);
+                                        setErrors((prevErrors) => ({
+                                            ...prevErrors,
+                                            cvv: "",
+                                        }));
+                                    }}
+                                />
+                                {errors.cvv && (
+                                    <Text style={styles.errorText}>
+                                        {errors.cvv}
+                                    </Text>
+                                )}
+
+                                <TouchableOpacity
+                                    style={styles.closeButton}
+                                    onPress={() => {
+                                        handleSubmit();
+                                        setIsModalVisible(false);
+                                    }}
+                                >
+                                    <Text style={styles.closeButtonText}>
+                                        Submit Payment
+                                    </Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    style={styles.closeButton}
+                                    onPress={() => setIsModalVisible(false)} // Close modal
+                                >
+                                    <Text style={styles.closeButtonText}>
+                                        Close
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </Modal>
+
+                    {/* Submit Button */}
+                    <TouchableOpacity
+                        style={styles.button}
+                        onPress={handleSubmit}
+                        disabled={isButtonDisabled}
+                    >
+                        <Text style={styles.buttonText}>Submit Request</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -236,6 +528,11 @@ const styles = StyleSheet.create({
         alignItems: "center",
         width: "100%",
     },
+    sectionHeading: {
+        fontSize: 20,
+        fontWeight: "bold",
+        marginBottom: 10,
+    },
     input: {
         height: 50,
         width: "90%",
@@ -246,15 +543,15 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     button: {
+        backgroundColor: "#007bff",
+        paddingVertical: 12,
+        borderRadius: 8,
         alignItems: "center",
-        justifyContent: "center",
-        borderRadius: 10,
-        marginTop: 30,
+        marginVertical: 10,
         width: "90%",
-        height: 50,
     },
     buttonText: {
-        fontSize: 18,
+        color: "#fff",
         fontWeight: "bold",
     },
     errorText: {
@@ -263,5 +560,95 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         alignSelf: "flex-start",
         marginLeft: "5%",
+    },
+    statusContainer: {
+        marginBottom: 10,
+        width: "90%",
+        alignItems: "flex-start",
+    },
+
+    statusMessage: {
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 10,
+        borderRadius: 8,
+        marginBottom: 10,
+        width: "100%",
+    },
+
+    pending: {
+        backgroundColor: "#FFF3CD",
+        borderColor: "#FFC107",
+        borderWidth: 1,
+    },
+
+    ready: {
+        backgroundColor: "#DFF2BF",
+        borderColor: "#4BB543",
+        borderWidth: 1,
+    },
+
+    statusText: {
+        fontSize: 16,
+        marginLeft: 10,
+        color: "#333",
+        fontWeight: "500",
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+    },
+    modalContent: {
+        width: "85%",
+        backgroundColor: "#fff",
+        borderRadius: 15,
+        padding: 20,
+        alignItems: "center",
+    },
+    option: {
+        paddingVertical: 12,
+        width: "100%",
+        alignItems: "center",
+        borderBottomWidth: 0.5,
+        borderBottomColor: "#ccc",
+    },
+    optionText: {
+        fontSize: 18,
+        color: "#333",
+    },
+    closeButton: {
+        marginTop: 15,
+        paddingVertical: 12,
+        paddingHorizontal: 15,
+        backgroundColor: "#1e90ff",
+        borderRadius: 8,
+        alignItems: "center",
+        width: "100%",
+    },
+    closeButtonText: {
+        color: "#fff",
+        fontWeight: "600",
+        fontSize: 16,
+    },
+    segmentedControl: {
+        flexDirection: "row",
+        justifyContent: "space-around",
+        width: "90%",
+        marginBottom: 20,
+    },
+    segment: {
+        flex: 1,
+        padding: 12,
+        borderRadius: 8,
+        backgroundColor: "#b0b0b0",
+        alignItems: "center",
+    },
+    selectedSegment: {
+        backgroundColor: "#007bff",
+    },
+    segmentText: {
+        color: "#fff",
     },
 });
