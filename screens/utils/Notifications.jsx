@@ -1,13 +1,23 @@
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, FlatList } from "react-native";
+import {
+    StyleSheet,
+    Text,
+    View,
+    ScrollView,
+    TouchableOpacity,
+    FlatList,
+    ActivityIndicator,
+} from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useState, useContext, useEffect } from "react";
+import { getNotificationInbox } from "native-notify";
 
 import { ThemeContext } from "../../contexts/ThemeContext";
 
 export default function Notifications() {
     const [notificationsData, setNotificationsData] = useState([]);
+    const [loading, setLoading] = useState(true);
     const { currentColors } = useContext(ThemeContext);
 
     const clearNotifications = () => {
@@ -16,59 +26,137 @@ export default function Notifications() {
 
     useEffect(() => {
         const fetchNotifications = async () => {
+            setLoading(true);
             let notifications = await getNotificationInbox(
                 24451,
                 "9MBVb21BgXTmYIiNxD53bg"
             );
-            console.log("notifications: ", notifications);
-            setNotificationsData(notifications); // Update with the fetched notifications
+            console.log("notifications: ", notifications); // Check the structure here
+            if (notifications) {
+                setNotificationsData(notifications);
+            }
+            setLoading(false);
         };
 
         fetchNotifications();
     }, []);
 
     const renderItem = ({ item }) => (
-        <View style={styles.notificationItem}>
+        <View
+            style={[
+                styles.notificationItem,
+                { backgroundColor: currentColors.settingGroupBackground },
+            ]}
+        >
+            <View style={styles.iconContainer}>
+                <MaterialIcons
+                    name="account-circle"
+                    size={40}
+                    color={currentColors.secondaryText}
+                />
+            </View>
             <View style={styles.notificationContent}>
-                <Text style={[styles.notificationText, { color: currentColors.text }]}>
-                    {item.message}
+                <Text
+                    style={[styles.usernameText, { color: currentColors.text }]}
+                >
+                    {item.title}
                 </Text>
-                <Text style={[styles.timestampText, { color: currentColors.secondaryText }]}>
-                    {item.timestamp}
+                <Text
+                    style={[
+                        styles.notificationText,
+                        { color: currentColors.text },
+                    ]}
+                >
+                    {item.message} {/* Use existing message field */}
+                </Text>
+                <Text style={[styles.timestampText, { color: "#888" }]}>
+                    {item.date}
                 </Text>
             </View>
         </View>
     );
 
     return (
-        <SafeAreaView style={[styles.container, { backgroundColor: currentColors.background }]}>
+        <SafeAreaView
+            style={[
+                styles.container,
+                { backgroundColor: currentColors.background },
+            ]}
+        >
             <ScrollView contentContainerStyle={styles.scrollContainer}>
-                <Text style={[styles.title, { color: currentColors.text }]}>Notifications</Text>
-                {notificationsData.length === 0 ? (
+                <Text style={[styles.title, { color: currentColors.text }]}>
+                    Notifications
+                </Text>
+                {loading ? ( // Show ActivityIndicator when loading
+                    <ActivityIndicator
+                        size="large"
+                        color={currentColors.text}
+                    />
+                ) : notificationsData.length === 0 ? (
                     <View style={styles.emptyContainer}>
-                        <MaterialIcons name="notifications-off" size={50} color={currentColors.text} />
-                        <Text style={[styles.emptyText, { color: currentColors.text }]}>No notifications yet!</Text>
-                        <Text style={[styles.emptyDescription, { color: currentColors.text }]}>
+                        <MaterialIcons
+                            name="notifications-off"
+                            size={50}
+                            color={currentColors.text}
+                        />
+                        <Text
+                            style={[
+                                styles.emptyText,
+                                { color: currentColors.text },
+                            ]}
+                        >
+                            No notifications yet!
+                        </Text>
+                        <Text
+                            style={[
+                                styles.emptyDescription,
+                                { color: currentColors.text },
+                            ]}
+                        >
                             You will see notifications here when you have any.
                         </Text>
                     </View>
                 ) : (
-                    <FlatList
-                        data={notificationsData}
-                        renderItem={renderItem}
-                        keyExtractor={(item) => item.id.toString()}
-                    />
+                    <>
+                        <FlatList
+                            data={notificationsData}
+                            renderItem={renderItem}
+                            keyExtractor={(item) =>
+                                item.id
+                                    ? item.id.toString()
+                                    : Math.random().toString()
+                            }
+                        />
+                        {/* <TouchableOpacity
+                            style={[
+                                styles.clearButton,
+                                { backgroundColor: currentColors.danger },
+                            ]}
+                            onPress={clearNotifications}
+                        >
+                            <Text style={styles.clearButtonText}>
+                                Clear All Notifications
+                            </Text>
+                        </TouchableOpacity> */}
+                    </>
                 )}
                 {notificationsData.length > 0 && (
-                    <TouchableOpacity style={[styles.clearButton, { backgroundColor: currentColors.danger }]} onPress={clearNotifications}>
-                        <Text style={styles.clearButtonText}>Clear All Notifications</Text>
+                    <TouchableOpacity
+                        style={[
+                            styles.clearButton,
+                            { backgroundColor: currentColors.danger },
+                        ]}
+                        onPress={clearNotifications}
+                    >
+                        <Text style={styles.clearButtonText}>
+                            Clear All Notifications
+                        </Text>
                     </TouchableOpacity>
                 )}
             </ScrollView>
         </SafeAreaView>
     );
 }
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -131,5 +219,39 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontSize: 16,
         fontWeight: "bold",
+    },
+    notificationItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: "#ddd", // Light border for separation
+        backgroundColor: "#fff", // Background color for each notification
+        borderRadius: 8, // Rounded corners
+        marginVertical: 5, // Space between notifications
+        shadowColor: "#000", // Shadow for elevation
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 1,
+    },
+    iconContainer: {
+        marginRight: 10, // Space between icon and text
+    },
+    notificationContent: {
+        flex: 1,
+        justifyContent: "center",
+    },
+    usernameText: {
+        fontSize: 16,
+        fontWeight: "bold",
+    },
+    notificationText: {
+        fontSize: 14,
+        marginVertical: 2, // Space between notification text and timestamp
+    },
+    timestampText: {
+        fontSize: 12,
+        color: "#888", // Color for timestamp
     },
 });

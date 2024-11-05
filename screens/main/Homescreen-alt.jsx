@@ -5,7 +5,7 @@ import {
     View,
     Image,
     TouchableOpacity,
-    ScrollView,
+    Modal,
     Animated,
     ImageBackground,
     Alert,
@@ -16,6 +16,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemeContext } from "../../contexts/ThemeContext";
 
+import QRCode from "react-native-qrcode-svg";
+import CryptoJS from 'crypto-js';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNfc } from "../../components/nfc";
 
@@ -42,6 +44,23 @@ export default function HomescreenAlt({ navigation }) {
         description: "",
         temperature: "",
     });
+
+    const [modalVisible, setModalVisible] = useState(false);
+    const [qrData, setQrData] = useState("");
+
+    
+    const showQRCodeModal = () => {
+        // Create QR data string (you can format it as needed)
+        const data = JSON.stringify({
+            firstName: userLoginData?.firstName,
+            lastName: userLoginData?.lastName,
+            studentNumber: userLoginData?.studentNumber,
+            // add other fields as needed
+        });
+
+        setQrData(data); // Set QR data
+        setModalVisible(true); // Show the modal
+    };
 
     const {
         isNfcSupported,
@@ -328,6 +347,7 @@ export default function HomescreenAlt({ navigation }) {
                         style={styles.Cardbutton}
                         onPress={() => {
                             handleWriteNfcTag();
+                            showQRCodeModal();
                         }}
                     >
                         <Image
@@ -484,6 +504,46 @@ export default function HomescreenAlt({ navigation }) {
                         </Animated.View>
                     </View>
                 </View>
+
+                {/* QR Code Modal */}
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisible}
+                    onRequestClose={() => setModalVisible(false)}
+                >
+                    <View style={styles.modalView}>
+                        <View
+                            style={[
+                                styles.qrCodeContainer,
+                                { backgroundColor: currentColors.settingGroupBackground },
+                            ]}
+                        >
+                            <QRCode value={qrData} size={200} />
+                            <TouchableOpacity
+                                style={[
+                                    styles.closeButton,
+                                    {
+                                        backgroundColor:
+                                            currentColors.primaryButtonBackground,
+                                    },
+                                ]}
+                                onPress={() => setModalVisible(false)}
+                            >
+                                <Text
+                                    style={{
+                                        fontSize: 18,
+                                        fontWeight: "bold",
+                                        textAlign: "center",
+                                        color: currentColors.primaryButtonText,
+                                    }}
+                                >
+                                    Close
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
             </SafeAreaView>
         </ImageBackground>
     );
@@ -618,5 +678,23 @@ const styles = StyleSheet.create({
         fontWeight: "700",
         color: "#0b132b", // dark text color
         marginVertical: 2, // small vertical margin between text lines
-    }
+    },
+    modalView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba( 255, 255, 255, 0.5)", // semi-transparent background
+    },
+    qrCodeContainer: {
+        padding: 20,
+        borderRadius: 10,
+    },
+    closeButton: {
+        marginTop: 20,
+        padding: 10,
+        borderRadius: 5,
+    },
+    closeButtonText: {
+        color: "white", // button text color
+    },
 });
