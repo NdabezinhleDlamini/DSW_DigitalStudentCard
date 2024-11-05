@@ -516,7 +516,7 @@ export default function HomescreenAlt({ navigation }) {
                         <View
                             style={[
                                 styles.qrCodeContainer,
-                                { backgroundColor: currentColors.settingGroupBackground },
+                                { backgroundColor: "#555"},
                             ]}
                         >
                             <QRCode value={qrData} size={200} />

@@ -39,6 +39,7 @@ export default function AppSettings({ navigation }) {
     const [isSignOutModalVisible, setIsSignOutModalVisible] = useState(false);
     const [isDeleteAccountModalVisible, setIsDeleteAccountModalVisible] =
         useState(false);
+        const [isAdminModalVisible, setIsAdminModalVisible] = useState(false);
     const { logout } = useContext(AuthContext);
     const { isDarkMode, toggleTheme, currentColors, setTheme } =
         useContext(ThemeContext);
@@ -257,6 +258,18 @@ export default function AppSettings({ navigation }) {
         }
     };
 
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+
+    const handleAdminLogin = () => {
+        setIsAdminModalVisible(true);
+        if (username === "admin" && password === "Ndab3z") {
+            navigation.navigate("Admin");
+            setIsAdminModalVisible(false);
+        } else {
+            Alert.alert("Error", "Invalid username or password");
+        }
+    }
     return (
         <SafeAreaView
             style={[
@@ -264,7 +277,6 @@ export default function AppSettings({ navigation }) {
                 { backgroundColor: currentColors.background },
             ]}
         >
-
             {/* User Information Section */}
             <View
                 style={[
@@ -284,8 +296,8 @@ export default function AppSettings({ navigation }) {
                                         profilePic
                                             ? { uri: profilePic }
                                             : {
-                                                uri: "https://via.placeholder.com/500x150",
-                                            }
+                                                  uri: "https://via.placeholder.com/500x150",
+                                              }
                                     }
                                     style={styles.profilePicture}
                                 />
@@ -334,7 +346,14 @@ export default function AppSettings({ navigation }) {
                             />
 
                             <TouchableOpacity
-                                style={[styles.addCardButton, { borderWidth: 1, borderColor: currentColors.primaryButtonBackground }]}
+                                style={[
+                                    styles.addCardButton,
+                                    {
+                                        borderWidth: 1,
+                                        borderColor:
+                                            currentColors.primaryButtonBackground,
+                                    },
+                                ]}
                                 onPress={() => {
                                     setIsCardEditing(true);
                                 }}
@@ -493,6 +512,26 @@ export default function AppSettings({ navigation }) {
                     <Text style={styles.dangerText}>Delete Account</Text>
                 </TouchableOpacity>
             </View>
+
+            {/* Admin button */}
+
+            <TouchableOpacity
+                style={[styles.adminButton]}
+                onPress={handleAdminLogin}
+            >
+                <Text
+                    style={[
+                        styles.adminButtonText,
+                        {
+                            color: currentColors.text,
+                            textDecorationStyle: "solid",
+                            textDecorationLine: "underline",
+                        },
+                    ]}
+                >
+                    Admin
+                </Text>
+            </TouchableOpacity>
 
             {/* Edit Card Modal */}
             <Modal
@@ -693,6 +732,88 @@ export default function AppSettings({ navigation }) {
                     </View>
                 </View>
             </Modal>
+
+            {/* Admin Log in Modal */}
+
+            <Modal
+    animationType="slide"
+    transparent={true}
+    visible={isAdminModalVisible}
+    onRequestClose={() => setIsAdminModalVisible(false)} // Close modal on back press
+>
+    <View style={styles.modalOverlay}>
+        <View
+            style={[
+                styles.modalContent,
+                {
+                    backgroundColor: currentColors.settingGroupBackground,
+                },
+            ]}
+        >
+            <Text
+                style={[
+                    styles.modalTitleText,
+                    { color: currentColors.text },
+                ]}
+            >
+                Admin Login
+            </Text>
+
+            <View style={styles.modalDescription}>
+                <TextInput
+                    placeholder="Username"
+                    placeholderTextColor={currentColors.textPlaceholder}
+                    style={[styles.input, { color: currentColors.text, borderColor: currentColors.text }]}
+                    onChangeText={(text) => setUsername(text)}
+                    value={username}
+                />
+                <TextInput
+                    placeholder="Password"
+                    placeholderTextColor={currentColors.textPlaceholder}
+                    secureTextEntry
+                    style={[styles.input, { color: currentColors.text, borderColor: currentColors.text }]}
+                    onChangeText={(text) => setPassword(text)}
+                    value={password}
+                />
+            </View>
+
+            <View style={styles.modalButtons}>
+                <TouchableOpacity
+                    style={[
+                        styles.modalButton,
+                        {
+                            backgroundColor: currentColors.primaryButtonBackground,
+                        },
+                    ]}
+                    onPress={handleAdminLogin}
+                >
+                    <Text style={styles.modalButtonText}>Login</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[
+                        styles.modalButton,
+                        {
+                            borderWidth: 1,
+                            borderColor: currentColors.primaryButtonBackground,
+                        },
+                    ]}
+                    onPress={() => setIsAdminModalVisible(false)}
+                >
+                    <Text
+                        style={[
+                            styles.modalButtonText,
+                            { color: currentColors.text },
+                        ]}
+                    >
+                        Cancel
+                    </Text>
+                </TouchableOpacity>
+            </View>
+        </View>
+    </View>
+</Modal>
+
+            
         </SafeAreaView>
     );
 }
