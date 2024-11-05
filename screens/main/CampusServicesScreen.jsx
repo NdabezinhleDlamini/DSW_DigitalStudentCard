@@ -288,7 +288,7 @@ export default function CampusServicesScreen({ navigation }) {
                                                 {item["itemName"]}
                                             </Text>
                                             <View style={styles.cardControls}>
-                                                <TouchableOpacity>
+                                                {/* <TouchableOpacity>
                                                     <MaterialIcons
                                                         name="edit"
                                                         size={24}
@@ -309,7 +309,7 @@ export default function CampusServicesScreen({ navigation }) {
                                                             currentColors.text
                                                         }
                                                     />
-                                                </TouchableOpacity>
+                                                </TouchableOpacity> */}
                                             </View>
                                         </View>
                                         <View style={styles.cardDetails}>
