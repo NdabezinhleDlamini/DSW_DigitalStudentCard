@@ -9,13 +9,13 @@ import {
     FlatList,
     ActivityIndicator,
 } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useState, useContext, useEffect } from "react";
 import { getNotificationInbox } from "native-notify";
 
 import { ThemeContext } from "../../contexts/ThemeContext";
 
-export default function Notifications() {
+export default function Notifications({ navigation }) {
     const [notificationsData, setNotificationsData] = useState([]);
     const [loading, setLoading] = useState(true);
     const { currentColors } = useContext(ThemeContext);
@@ -31,7 +31,7 @@ export default function Notifications() {
                 24451,
                 "9MBVb21BgXTmYIiNxD53bg"
             );
-            console.log("notifications: ", notifications); // Check the structure here
+            console.log("notifications: ", notifications);
             if (notifications) {
                 setNotificationsData(notifications);
             }
@@ -83,10 +83,22 @@ export default function Notifications() {
                 { backgroundColor: currentColors.background },
             ]}
         >
-            <ScrollView contentContainerStyle={styles.scrollContainer}>
-                <Text style={[styles.title, { color: currentColors.text }]}>
-                    Notifications
-                </Text>
+            <View style={styles.scrollContainer}>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <TouchableOpacity
+                        style={styles.backButton}
+                        onPress={() => navigation.goBack()}
+                    >
+                        <Ionicons
+                            name="arrow-back"
+                            size={30}
+                            color={currentColors.text}
+                        />
+                    </TouchableOpacity>
+                    <Text style={[styles.title, { color: currentColors.text }]}>
+                        Notifications
+                    </Text>
+                </View>
                 {loading ? ( // Show ActivityIndicator when loading
                     <ActivityIndicator
                         size="large"
@@ -153,7 +165,7 @@ export default function Notifications() {
                         </Text>
                     </TouchableOpacity>
                 )}
-            </ScrollView>
+            </View>
         </SafeAreaView>
     );
 }
@@ -163,6 +175,7 @@ const styles = StyleSheet.create({
     },
     scrollContainer: {
         padding: 10,
+        marginBottom: 100,
     },
     title: {
         fontSize: 24,

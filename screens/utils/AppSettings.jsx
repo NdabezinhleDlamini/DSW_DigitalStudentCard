@@ -28,6 +28,8 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNfc } from "../../components/nfc";
 
+import { Ionicons } from "@expo/vector-icons";
+
 export default function AppSettings({ navigation }) {
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
@@ -277,6 +279,22 @@ export default function AppSettings({ navigation }) {
                 { backgroundColor: currentColors.background },
             ]}
         >
+
+            <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => navigation.goBack()}
+                >
+                    <Ionicons
+                        name="arrow-back"
+                        size={24}
+                        color={currentColors.text}
+                    />
+                </TouchableOpacity>
+                <Text style={[styles.headerText, { color: currentColors.text }]}>
+                    Settings
+                </Text>
+            </View>
             {/* User Information Section */}
             <View
                 style={[
@@ -822,12 +840,13 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#fff",
-        alignItems: "center",
+        // alignItems: "center",
         justifyContent: "flex-start",
         paddingVertical: 20,
+        paddingHorizontal: 20,
     },
     settingGroupContainer: {
-        width: "90%",
+        width: "100%",
         padding: 20,
         borderRadius: 10,
         flexDirection: "column",
@@ -1011,5 +1030,11 @@ const styles = StyleSheet.create({
         alignItems: "center",
         marginTop: 10,
         width: "100%",
+    },
+    headerText: {
+        fontSize: 24,
+        fontWeight: "bold",
+        marginBottom: 20,
+        textAlign: "center",
     },
 });

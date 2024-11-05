@@ -23,9 +23,16 @@ import { Layout } from "../../constants/Layout";
 import { Fonts } from "../../constants/Fonts";
 
 import { db } from "../../Firebase-config";
-import { doc, getDoc, collection, addDoc } from "firebase/firestore";
+import {
+    doc,
+    getDoc,
+    collection,
+    addDoc,
+    query,
+    where,
+    onSnapshot,
+} from "firebase/firestore";
 import { StatusBar } from "expo-status-bar";
-
 
 import { registerIndieID, unregisterIndieDevice } from "native-notify";
 import axios from "axios";
@@ -38,6 +45,8 @@ export default function UserProfileScreen({ navigation }) {
 
     const { currentColors, isDarkMode } = useContext(ThemeContext); // Get theme state from context
     const [modalVisible, setModalVisible] = useState(false);
+
+    const [activityLogs, setActivityLogs] = useState([]);
 
     const [location, setLocation] = useState("Unknown");
 
@@ -117,6 +126,7 @@ export default function UserProfileScreen({ navigation }) {
 
             Alert.alert("Success", "Post added successfully");
             toggleModal();
+            notify();
         } catch (error) {
             console.error("Error adding post:", error);
             Alert.alert(
@@ -137,7 +147,7 @@ export default function UserProfileScreen({ navigation }) {
                 appToken: "9MBVb21BgXTmYIiNxD53bg",
                 title: "BOLO: Lost Item",
                 body: "Lost Student Card Reported. Last seen at " + location,
-                pushData: { itemName, location, date },
+                // pushData: { itemName, location, date },
                 bigPictureURL: bigPictureURL,
             })
             .then((response) => {
@@ -150,6 +160,60 @@ export default function UserProfileScreen({ navigation }) {
                 console.error("Error sending push notification:", error);
             });
     };
+
+    useEffect(() => {
+        if (!userLoginData?.studentNumber) return;
+
+        const logsQuery = query(
+            collection(db, "ActivityLogs"),
+            where("studentNumber", "==", userLoginData.studentNumber)
+        );
+
+        const unsubscribe = onSnapshot(logsQuery, (querySnapshot) => {
+            const logs = [];
+            querySnapshot.forEach((doc) => {
+                logs.push({ id: doc.id, ...doc.data() });
+            });
+            setActivityLogs(logs);
+        });
+
+        return () => unsubscribe();
+    }, [userLoginData?.studentNumber]);
+
+    const renderItem = ({ item }) => (
+        <View
+            style={[
+                styles.notificationItem,
+                { backgroundColor: currentColors.settingGroupBackground },
+            ]}
+        >
+            <View style={styles.iconContainer}>
+                <MaterialIcons
+                    name="account-circle"
+                    size={40}
+                    color={currentColors.secondaryText}
+                />
+            </View>
+            <View style={styles.notificationContent}>
+                <Text
+                    style={[styles.usernameText, { color: currentColors.text }]}
+                >
+                    {item.title}
+                </Text>
+                <Text
+                    style={[
+                        styles.notificationText,
+                        { color: currentColors.text },
+                    ]}
+                >
+                    {item.message} {/* Use existing message field */}
+                </Text>
+                <Text style={[styles.timestampText, { color: "#888" }]}>
+                    {item.date}
+                </Text>
+            </View>
+        </View>
+    );
 
     return (
         <ImageBackground
@@ -230,7 +294,9 @@ export default function UserProfileScreen({ navigation }) {
                                 source={
                                     userLoginData?.profilePic
                                         ? { uri: userLoginData.profilePic }
-                                        : { uri: "https://via.placeholder.com/100" } 
+                                        : {
+                                              uri: "https://via.placeholder.com/100",
+                                          }
                                 }
                             />
                         </View>
@@ -284,26 +350,34 @@ export default function UserProfileScreen({ navigation }) {
                         >
                             Recent Activities
                         </Text>
-                        <View
-                            style={[
-                                styles.activityItem,
-                                {
-                                    backgroundColor: currentColors.background,
-                                },
-                            ]}
-                        >
-                            <Text
-                                style={[
-                                    styles.activityText,
-                                    { color: currentColors.text },
-                                ]}
-                            >
-                                Accessed the Library
-                            </Text>
-                            <Text style={[styles.timestamp, { color: "#777" }]}>
-                                2 hours ago
-                            </Text>
-                        </View>
+                        <ScrollView contentContainerStyle={styles.historyContainer}>
+                            <View>
+                                {activityLogs.slice(0, 5).map((log) => (
+                                    <View
+                                        key={log.id}
+                                        style={[styles.historyItem, { backgroundColor: currentColors.settingGroupBackground }]}
+                                    >
+                                        <Text style={[styles.historyItemAction, { color: currentColors.text }]}>
+                                            {log.action}
+                                        </Text>
+                                        <Text style={[styles.historyItemDetails, { color: currentColors.text }]}>
+                                            Details: {log.details}
+                                        </Text>
+                                        <Text style={[styles.historyItemResult, { color: currentColors.text }]}>
+                                            Result: {log.result}
+                                        </Text>
+                                        <Text
+                                            style={[styles.historyItemTimestamp, { color: "#888" }]}
+                                        >
+                                            Timestamp:{" "}
+                                            {log.timestamp
+                                                .toDate()
+                                                .toLocaleString()}
+                                        </Text>
+                                    </View>
+                                ))}
+                            </View>
+                        </ScrollView>
                         {/* Add more activities here */}
                     </View>
                 </ScrollView>
@@ -580,5 +654,37 @@ const styles = StyleSheet.create({
     },
     optionText: {
         fontSize: 16,
+    },
+    historyContainer: {
+        // paddingHorizontal: 20,
+        marginBottom: 20,
+    },
+    historyItem: {
+        padding: 15,
+        marginVertical: 10,
+        borderRadius: 8,
+        shadowColor: "#000",
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+        elevation: 2,
+    },
+    historyItemAction: {
+        fontSize: 16,
+        fontWeight: "bold",
+        marginBottom: 4,
+        fontWeight: "900",
+    },
+    historyItemDetails: {
+        fontSize: 14,
+        marginBottom: 4,
+    },
+    historyItemResult: {
+        fontSize: 14,
+        fontStyle: "italic",
+        marginBottom: 4,
+    },
+    historyItemTimestamp: {
+        fontSize: 12,
+        marginTop: 6,
     },
 });

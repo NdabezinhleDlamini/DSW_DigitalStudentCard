@@ -1,20 +1,86 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
     View,
     Text,
     StyleSheet,
     TouchableOpacity,
     ScrollView,
-    Button,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { ThemeContext } from "../../contexts/ThemeContext"; // Access ThemeContext
+import { ThemeContext } from "../../contexts/ThemeContext";
 import { Layout } from "@/constants/Layout";
 import { Fonts } from "@/constants/Fonts";
+import {
+    collection,
+    query,
+    where,
+    onSnapshot,
+    doc,
+    getDoc,
+} from "firebase/firestore";
+import { db } from "../../Firebase-config";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function AccessHistoryScreen({ navigation }) {
-    const { currentColors } = useContext(ThemeContext); // Get currentColors from ThemeContext
+    const { currentColors } = useContext(ThemeContext);
+    const [userLoginData, setUserLoginData] = useState(null);
+    const [activityLogs, setActivityLogs] = useState([]);
+
+    useEffect(() => {
+        const getUserLoginData = async () => {
+            try {
+                const data = await AsyncStorage.getItem("auth");
+                if (data) {
+                    setUserLoginData(JSON.parse(data));
+                }
+            } catch (error) {
+                console.error("Error getting user login data:", error);
+            }
+        };
+        getUserLoginData();
+    }, []);
+
+    useEffect(() => {
+        if (userLoginData?.uid) {
+            const fetchUserData = async () => {
+                try {
+                    const docRef = doc(db, "Users", userLoginData.uid);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        setUserLoginData((prevData) => ({
+                            ...prevData,
+                            ...docSnap.data(),
+                        }));
+                    } else {
+                        console.log("User data not found");
+                    }
+                } catch (error) {
+                    console.error("Error fetching user data:", error);
+                }
+            };
+            fetchUserData();
+        }
+    }, [userLoginData?.uid]);
+
+    useEffect(() => {
+        if (!userLoginData?.studentNumber) return;
+
+        const logsQuery = query(
+            collection(db, "ActivityLogs"),
+            where("studentNumber", "==", userLoginData.studentNumber)
+        );
+
+        const unsubscribe = onSnapshot(logsQuery, (querySnapshot) => {
+            const logs = [];
+            querySnapshot.forEach((doc) => {
+                logs.push({ id: doc.id, ...doc.data() });
+            });
+            setActivityLogs(logs);
+        });
+
+        return () => unsubscribe();
+    }, [userLoginData?.studentNumber]);
 
     return (
         <SafeAreaView
@@ -23,44 +89,32 @@ export default function AccessHistoryScreen({ navigation }) {
                 { backgroundColor: currentColors.background },
             ]}
         >
-            <View style={styles.header}>
-                <View style={styles.iconsContainer}>
-                    <Text
-                        style={[
-                            styles.headerText,
-                            {
-                                fontSize: 20,
-                                alignItems: "center",
-                                justifyContent: "center",
-                                color: currentColors.text,
-                                fontFamily: "ThedusWideLight",
-                            },
-                        ]}
-                    >
-                        VerifID
-                    </Text>
-                </View>
-
-                <Text
-                    style={[styles.headerText, { color: currentColors.text }]}
-                >
-                    Current Campus
-                </Text>
+            <View style={[styles.header,{ marginRight: 10, flexDirection: "row", alignItems: "center", }]}>
                 <TouchableOpacity
+                    onPress={() => navigation.goBack()}
+                    style={[styles.backButton, ]}
+                >
+                    <Ionicons
+                        name="arrow-back"
+                        size={24}
+                        color={currentColors.text}
+                    />
+                </TouchableOpacity>
+                <Text
                     style={[
-                        styles.syncButton,
-                        { backgroundColor: currentColors.primary },
+                        styles.headerText,
+                        {
+                            fontSize: 20,
+                            alignItems: "center",
+                            justifyContent: "center",
+                            color: currentColors.text,
+                            fontFamily: "ThedusWideLight",
+                        },
                     ]}
                 >
-                    <Text
-                        style={[
-                            styles.syncButtonText,
-                            { color: currentColors.text },
-                        ]}
-                    >
-                        Sync Data
-                    </Text>
-                </TouchableOpacity>
+                    VerifID
+                </Text>
+                
             </View>
             <View style={styles.section}>
                 <Text
@@ -68,119 +122,27 @@ export default function AccessHistoryScreen({ navigation }) {
                 >
                     Access History
                 </Text>
-                <View style={styles.filterSection}>
-                    <TouchableOpacity
-                        style={[
-                            styles.filterChipActive,
-                            {
-                                backgroundColor: currentColors.background,
-                                borderColor: currentColors.text,
-                            },
-                        ]}
-                    >
-                        <Text
-                            style={[
-                                styles.filterTextActive,
-                                { color: currentColors.text },
-                            ]}
-                        >
-                            All
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[
-                            styles.filterChipInactive,
-                            {
-                                backgroundColor: currentColors.background,
-                                borderColor: currentColors.text,
-                            },
-                        ]}
-                    >
-                        <Text
-                            style={[
-                                styles.filterTextInactive,
-                                { color: currentColors.text },
-                            ]}
-                        >
-                            APB
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[
-                            styles.filterChipInactive,
-                            {
-                                backgroundColor: currentColors.background,
-                                borderColor: currentColors.text,
-                            },
-                        ]}
-                    >
-                        <Text
-                            style={[
-                                styles.filterTextInactive,
-                                { color: currentColors.text },
-                            ]}
-                        >
-                            APK
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[
-                            styles.filterChipInactive,
-                            {
-                                backgroundColor: currentColors.background,
-                                borderColor: currentColors.text,
-                            },
-                        ]}
-                    >
-                        <Text
-                            style={[
-                                styles.filterTextInactive,
-                                { color: currentColors.text },
-                            ]}
-                        >
-                            DFC
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[
-                            styles.filterChipInactive,
-                            {
-                                backgroundColor: currentColors.background,
-                                borderColor: currentColors.text,
-                            },
-                        ]}
-                    >
-                        <Text
-                            style={[
-                                styles.filterTextInactive,
-                                { color: currentColors.text },
-                            ]}
-                        >
-                            SWC
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-
                 <ScrollView>
-                    <View style={styles.historyContainer}>
-                        <View style={styles.historyItem}></View>
+                    <View>
+                        {activityLogs.map((log) => (
+                            <View key={log.id} style={[styles.historyItem, { backgroundColor: currentColors.settingGroupBackground, color: currentColors.text }]}>
+                                <Text style={[styles.historyItemAction, { color: currentColors.text, fontWeight: "bold" }]}>
+                                    Action: {log.action}
+                                </Text>
+                                <Text style={[styles.historyItemDetails, { color: currentColors.text }]}>
+                                    Details: {log.details}
+                                </Text>
+                                <Text style={[styles.historyItemResult, { color: currentColors.text }]}>
+                                    Result: {log.result}
+                                </Text>
+                                <Text style={[styles.historyItemTimestamp, { color: "#888" }]}>
+                                    Timestamp:
+                                    {log.timestamp.toDate().toLocaleString()}
+                                </Text>
+                            </View>
+                        ))}
                     </View>
                 </ScrollView>
-                <TouchableOpacity
-                    style={[
-                        styles.viewAllButton,
-                        { backgroundColor: currentColors.primary },
-                    ]}
-                >
-                    <Text
-                        style={[
-                            styles.viewAllButtonText,
-                            { color: currentColors.text },
-                        ]}
-                    >
-                        View All
-                    </Text>
-                </TouchableOpacity>
             </View>
         </SafeAreaView>
     );
@@ -194,17 +156,6 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: "column",
         alignItems: "flex-start",
-    },
-    iconsContainer: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        width: "100%",
-        marginBottom: Layout.margin,
-    },
-    notificationContainer: {
-        flexDirection: "row",
-        alignItems: "center",
     },
     headerText: {
         ...Fonts.subtitle,
@@ -228,63 +179,32 @@ const styles = StyleSheet.create({
         ...Fonts.title,
         marginBottom: Layout.margin / 2,
     },
-    filterSection: {
-        flexDirection: "row",
-        width: "100%",
-    },
-    filterChipActive: {
-        width: "15%",
-        padding: 10,
-        borderRadius: 10,
-        alignItems: "center",
-        justifyContent: "center",
-        marginRight: 5,
-        borderWidth: 1,
-    },
-    filterChipInactive: {
-        padding: 10,
-        width: "20%",
-        borderRadius: 10,
-        alignItems: "center",
-        justifyContent: "center",
-        marginRight: 5,
-        borderWidth: 1,
-    },
-    filterTextActive: {
-        ...Fonts.body,
-    },
-    filterTextInactive: {
-        ...Fonts.body,
-    },
-    historyContainer: {
-        marginTop: 30,
-    },
     historyItem: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginBottom: 10,
+        padding: 15,
+        marginVertical: 10,
+        borderRadius: 8,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+        elevation: 2,
+    },
+    historyItemAction: {
+        fontSize: 16,
+        fontWeight: "bold",
+        marginBottom: 4,
     },
     historyItemDetails: {
-        flexDirection: "column",
-        marginLeft: 0,
+        fontSize: 14,
+        marginBottom: 4,
     },
-    historyItemName: {
-        ...Fonts.body,
-        fontWeight: "bold",
+    historyItemResult: {
+        fontSize: 14,
+        fontStyle: "italic",
+        marginBottom: 4,
     },
-    historyItemTime: {
-        ...Fonts.body,
-    },
-    viewAllButton: {
-        padding: 10,
-        borderRadius: 10,
-        alignItems: "center",
-        justifyContent: "center",
-        width: "100%",
-        borderWidth: 1,
-        marginTop: Layout.margin,
-    },
-    viewAllButtonText: {
-        ...Fonts.body,
+    historyItemTimestamp: {
+        fontSize: 12,
+        marginTop: 6,
     },
 });
